@@ -37,13 +37,13 @@
             <div class="peer-edit-components">
                 {% for component in components %}
                     <div class="peer-edit-component">
-                        {% if peer_details.marks_assigned is defined and
-                            peer_details.marks_assigned[component.id] is defined and
-                            peer_details.marks_assigned[component.id][peer] is defined %}
-                            <div class="box-badge">
+                        <div class="box-badge" data-component-id="{{component.id}}" data-peer-id="{{peer}}">
+                            {% if peer_details.marks_assigned is defined and
+                                peer_details.marks_assigned[component.id] is defined and
+                                peer_details.marks_assigned[component.id][peer] is defined %}
                                 {{ Badge.render(component_scores[component.id][peer], component.max, component.extra_credit, true) }}
-                            </div>
-                        {% endif %}
+                            {% endif %}
+                        </div>
                         <span class="component-title col-no-gutters">
                             <b>{{ component.title|escape }}</b>
                         </span>
