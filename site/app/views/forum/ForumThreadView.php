@@ -990,7 +990,6 @@ class ForumThreadView extends AbstractView {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
-        $this->core->getOutput()->addInternalJs('stat-page.js');
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
         $this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
 
@@ -1024,27 +1023,29 @@ class ForumThreadView extends AbstractView {
         foreach ($users as $user => $details) {
             $given_name = $details["given_name"];
             $family_name = $details["family_name"];
-            $post_count = isset($details["posts"]) ? count($details["posts"]) : 0;
-            $posts = isset($details["posts"]) ? json_encode($details["posts"]) : null;
-            $ids = isset($details["id"]) ? json_encode($details["id"]) : null;
-            $timestamps = isset($details["timestamp"]) ? json_encode($details["timestamps"]) : null;
-            $thread_ids = isset($details["thread_id"]) ? json_encode($details["thread_id"]) : null;
-            $thread_titles = isset($details["thread_title"]) ? json_encode($details["thread_title"]) : null;
-            $num_deleted = $details["num_deleted_posts"];
-            $total_upducks = $details["total_upducks"];
+
+            $post_details = [];
+            if (isset($details["posts"])) {
+                foreach ($details["posts"] as $i => $content) {
+                    $post_details[] = [
+                        "id" => $details["id"][$i],
+                        "timestamp" => $details["timestamps"][$i],
+                        "threadId" => $details["thread_id"][$i],
+                        "threadTitle" => $details["thread_title"][$i],
+                        "content" => $content,
+                    ];
+                }
+            }
 
             $userData[] = [
-                "family_name" => $family_name,
-                "given_name" => $given_name,
-                "post_count" => $post_count,
-                "details_total_threads" => $details["total_threads"],
-                "num_deleted" => $num_deleted,
-                "posts" => $posts,
-                "ids" => $ids,
-                "timestamps" => $timestamps,
-                "thread_ids" => $thread_ids,
-                "thread_titles" => $thread_titles,
-                "total_upducks" => $total_upducks
+                "userId" => $user,
+                "familyName" => $family_name,
+                "givenName" => $given_name,
+                "postCount" => count($post_details),
+                "totalThreads" => $details["total_threads"],
+                "numDeleted" => $details["num_deleted_posts"],
+                "totalUpducks" => $details["total_upducks"],
+                "posts" => $post_details,
             ];
         }
 
