@@ -3,9 +3,11 @@
 $(document).ready(() => {
     const inputAreas = $('input,textarea,select');
 
-    inputAreas.each(function(){createSaveIndicator(this.id);});
-    createSaveIndicator("vcs-legend");
-    const sharedSaveIndicators = setSharedSaveIndicators();;
+    inputAreas.each(function () {
+        createSaveIndicator(this.id);
+    });
+    createSaveIndicator('vcs-legend');
+    const sharedSaveIndicators = setSharedSaveIndicators(); ;
 
     inputAreas.on('change', function () {
         // Skip elements with the no-autosave class
@@ -14,16 +16,16 @@ $(document).ready(() => {
         }
 
         let idForSaveIndicator = this.id;
-        if(sharedSaveIndicators.has(idForSaveIndicator)){
+        if (sharedSaveIndicators.has(idForSaveIndicator)) {
             idForSaveIndicator = sharedSaveIndicators.get(idForSaveIndicator);
         }
         const saveDiv = $(`#${idForSaveIndicator}-save-div`).get(0);
         const saveText = $(`#${idForSaveIndicator}-save-text`).get(0);
         const saveIcon = $(`#${idForSaveIndicator}-save-icon`).get(0);
         const hasSaveIndicator = saveDiv && saveText && saveIcon;
-        if(hasSaveIndicator){
+        if (hasSaveIndicator) {
             saveDiv.classList.remove('save-indicator-unchanged', 'save-indicator-saved', 'save-indicator-fail');
-            saveDiv.classList.add('save-indicator-unsaved')
+            saveDiv.classList.add('save-indicator-unsaved');
             saveText.textContent = 'Saving...';
             saveIcon.classList.add('fas', 'fa-circle-notch', 'fa-spin');
             saveIcon.classList.remove('fa-solid', 'fa-check', 'fa-x');
@@ -74,13 +76,14 @@ $(document).ready(() => {
                     }
                 }
 
-                if(hasSaveIndicator){
+                if (hasSaveIndicator) {
                     saveDiv.classList.remove('save-indicator-unsaved');
                     saveIcon.classList.remove('fas', 'fa-circle-notch', 'fa-spin');
-                    if(!failed){
+                    if (!failed) {
                         saveDiv.classList.add('save-indicator-saved');
                         saveIcon.classList.add('fa-solid', 'fa-check');
-                    }else{
+                    }
+                    else {
                         saveDiv.classList.add('save-indicator-fail');
                         saveIcon.classList.add('fa-solid', 'fa-x');
                     }
@@ -144,12 +147,14 @@ function confirmSelfRegistration(element, needs_reg_sections) {
     return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
 }
 
-function createSaveIndicator(elementId){
+function createSaveIndicator(elementId) {
     let title = $(`label[for='${elementId}'] .option-title`);
-    if(title.length == 0 && elementId){
+    if (title.length === 0 && elementId) {
         title = $(`#${elementId} .option-title`);
     }
-    if(title.length == 0){return;}
+    if (title.length === 0) {
+        return;
+    }
     title = title.get(0);
 
     const titleRow = document.createElement('span');
@@ -158,19 +163,19 @@ function createSaveIndicator(elementId){
     titleRow.appendChild(title);
 
     const saveDiv = document.createElement('div');
-    saveDiv.id = elementId + '-save-div';
+    saveDiv.id = `${elementId}-save-div`;
     saveDiv.classList.add('save-indicator', 'save-indicator-saved');
     const saveIcon = document.createElement('i');
-    saveIcon.id = elementId + '-save-icon';
+    saveIcon.id = `${elementId}-save-icon`;
     const saveText = document.createElement('span');
-    saveText.id = elementId + '-save-text';
+    saveText.id = `${elementId}-save-text`;
     saveText.classList.add('subtitle');
     saveDiv.appendChild(saveIcon);
     saveDiv.appendChild(saveText);
     titleRow.appendChild(saveDiv);
 }
 
-function setSharedSaveIndicators(){
+function setSharedSaveIndicators() {
     const sharedSaveIndicators = new Map();
     sharedSaveIndicators.set('seating-only-for-instructor', 'room-seating-gradeable-id');
     sharedSaveIndicators.set('default-section-id', 'all-self-registration');
