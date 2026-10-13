@@ -19,7 +19,9 @@ def up(config, database, semester, course):
         SET eg_max_team_size = 1
         WHERE eg_max_team_size <= 0;
     """)
-    
+    database.execute("""
+        ADD CONSTRAINT eg_max_team_size_check CHECK (eg_max_team_size > 0);
+    """)
     pass
 
 
