@@ -1,6 +1,4 @@
-"""The route, doctrine and twig caches moved from the read-only '/usr'
-directory to the data directory. The access control cache was never
-used. Remove the old cache directories from '/usr'."""
+"""Migration for the Submitty system."""
 
 from pathlib import Path
 import shutil
