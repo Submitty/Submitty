@@ -342,13 +342,17 @@ class UsersController extends AbstractController {
             $error_message .= User::validateUserData('user_password', $_POST['user_password']) ? "" : "Error must enter password for user<br>";
         }
 
+        if ($_POST['edit_user'] === 'true' && ($_POST['user_password'] ?? '') !== '' && !$this->core->getUser()->isSuperUser()) {
+            $error_message .= "Only a superuser can change an existing user's password<br>";
+        }
+
         if (!empty($error_message)) {
             $this->core->addErrorMessage($error_message . " Contact your sysadmin if this should not cause an error.");
             $this->core->redirect($return_url);
         }
 
         if ($_POST['edit_user'] == "true") {
-            if ($user === null) {
+            if ($user === null || !$this->core->getQueries()->wasStudentEverInCourse($user->getId(), $course, $semester)) {
                 $this->core->addErrorMessage("No user found with that user id");
                 $this->core->redirect($return_url);
             }
@@ -434,8 +438,6 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
-                $user->setEmailBoth($submitty_user->getEmailBoth());
-                $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
                 if (
                     $user->getGroup() === User::GROUP_STUDENT
