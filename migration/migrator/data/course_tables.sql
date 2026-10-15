@@ -3252,6 +3252,13 @@ CREATE TRIGGER electronic_gradeable_change AFTER INSERT OR UPDATE OF eg_submissi
 
 
 --
+-- Name: grade_override grade_override_late_day_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER grade_override_late_day_change AFTER INSERT OR DELETE ON public.grade_override FOR EACH ROW EXECUTE PROCEDURE public.grade_override_late_day_change();
+
+
+--
 -- Name: gradeable gradeable_delete; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -3277,13 +3284,6 @@ CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON pub
 --
 
 CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
-
-
---
--- Name: grade_override grade_override_late_day_change; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER grade_override_late_day_change AFTER INSERT OR DELETE ON public.grade_override FOR EACH ROW EXECUTE PROCEDURE public.grade_override_late_day_change();
 
 
 --

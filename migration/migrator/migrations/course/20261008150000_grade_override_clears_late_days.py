@@ -30,8 +30,8 @@ CREATE OR REPLACE FUNCTION public.calculate_remaining_cache_for_user(user_id tex
     BEGIN
         -- Grab latest row of data available
         FOR var_row IN (
-            SELECT *
-            FROM late_day_cache ldc
+            SELECT * 
+            FROM late_day_cache ldc 
             WHERE ldc.user_id = user_id
             ORDER BY ldc.late_day_date DESC, ldc.g_id DESC NULLS LAST
             LIMIT 1
@@ -39,22 +39,22 @@ CREATE OR REPLACE FUNCTION public.calculate_remaining_cache_for_user(user_id tex
             late_days_remaining = var_row.late_days_remaining;
             latestDate = var_row.late_day_date;
         END LOOP;
-
+        
         -- Get the number of late days charged up to this point
         late_days_used = (SELECT COALESCE(SUM(-ldc.late_days_change), 0)
             FROM late_day_cache ldc
             WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
                 AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
         );
-
+        
         -- if there is no cache in the table, the starting point
         -- should be the course default late days
         IF late_days_remaining IS NULL THEN
             late_days_remaining = default_late_days;
             late_days_used = 0;
         END IF;
-
-        -- For every event after the cache's latest entry, calculate the
+        
+        -- For every event after the cache's latest entry, calculate the 
         -- late days remaining and the late day change (increase or decrease)
         FOR var_row IN (
             SELECT * FROM (
@@ -87,7 +87,7 @@ CREATE OR REPLACE FUNCTION public.calculate_remaining_cache_for_user(user_id tex
                 ELSE
                     returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
                     late_days_used = late_days_used - returnedrow.late_days_change;
-                    late_days_remaining = late_days_remaining + returnedrow.late_days_change;
+				late_days_remaining = late_days_remaining + returnedrow.late_days_change;
                     return_cache = var_row;
                     return_cache.late_days_change = returnedrow.late_days_change;
                     return_cache.late_days_remaining = returnedrow.late_days_remaining;
@@ -170,9 +170,10 @@ CREATE OR REPLACE FUNCTION public.calculate_remaining_cache_for_user(user_id tex
         late_days_used integer;
         returnedrow late_day_cache%rowtype;
     BEGIN
+        -- Grab latest row of data available
         FOR var_row IN (
-            SELECT *
-            FROM late_day_cache ldc
+            SELECT * 
+            FROM late_day_cache ldc 
             WHERE ldc.user_id = user_id
             ORDER BY ldc.late_day_date DESC, ldc.g_id DESC NULLS LAST
             LIMIT 1
@@ -180,18 +181,23 @@ CREATE OR REPLACE FUNCTION public.calculate_remaining_cache_for_user(user_id tex
             late_days_remaining = var_row.late_days_remaining;
             latestDate = var_row.late_day_date;
         END LOOP;
-
+        
+        -- Get the number of late days charged up to this point
         late_days_used = (SELECT COALESCE(SUM(-ldc.late_days_change), 0)
             FROM late_day_cache ldc
             WHERE (latestDate is NULL OR ldc.late_day_date <= latestDate)
                 AND ldc.user_id = user_id AND ldc.g_id IS NOT NULL
         );
-
+        
+        -- if there is no cache in the table, the starting point
+        -- should be the course default late days
         IF late_days_remaining IS NULL THEN
             late_days_remaining = default_late_days;
             late_days_used = 0;
         END IF;
-
+        
+        -- For every event after the cache's latest entry, calculate the 
+        -- late days remaining and the late day change (increase or decrease)
         FOR var_row IN (
             SELECT * FROM (
                 SELECT * FROM grab_late_day_gradeables_for_user (user_id := user_id)
@@ -201,16 +207,18 @@ CREATE OR REPLACE FUNCTION public.calculate_remaining_cache_for_user(user_id tex
             WHERE latestDate is NULL OR late_day_date > latestDate
             ORDER BY late_day_date NULLS LAST, g_id NULLS FIRST
         ) LOOP
+            --is late day update
             IF var_row.g_id IS NULL THEN
                 late_days_change = var_row.late_days_allowed - (late_days_remaining + late_days_used);
                 late_days_remaining = GREATEST(0, late_days_remaining + late_days_change);
                 return_cache = var_row;
                 return_cache.late_days_change = late_days_change;
                 return_cache.late_days_remaining = late_days_remaining;
+            --is gradeable event
             ELSE
                 returnedrow = get_late_day_info_from_previous(var_row.submission_days_late, var_row.late_days_allowed, var_row.late_day_exceptions, late_days_remaining);
                 late_days_used = late_days_used - returnedrow.late_days_change;
-                late_days_remaining = late_days_remaining + returnedrow.late_days_change;
+				late_days_remaining = late_days_remaining + returnedrow.late_days_change;
                 return_cache = var_row;
                 return_cache.late_days_change = returnedrow.late_days_change;
                 return_cache.late_days_remaining = returnedrow.late_days_remaining;

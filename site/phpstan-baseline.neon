@@ -13126,18 +13126,6 @@ parameters:
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between int and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between int<min, 0>|int<2, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/models/gradeable/LateDayInfo.php
-
-		-
 			rawMessage: 'Method app\models\gradeable\LateDayInfo::__construct() has parameter $event_info with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
