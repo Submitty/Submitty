@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
+use app\entities\grading_cluster\GradingCluster;
 use app\entities\grading_cluster\GradingClusterConfig;
 use app\entities\grading_cluster\GradingClusterAlgorithm;
 use app\libraries\response\JsonResponse;
@@ -13,6 +14,56 @@ use app\libraries\routers\AccessControl;
 use app\libraries\FileUtils;
 
 class GradingClusterController extends AbstractController {
+    /**
+     * Renames an existing cluster for a gradeable.
+     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/clustering/{cluster_id}/rename", methods: ["POST"], requirements: ["cluster_id" => "\d+"])]
+    public function renameCluster(string $gradeable_id, int $cluster_id): JsonResponse {
+        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
+            return JsonResponse::getErrorResponse("Invalid CSRF token.");
+        }
+
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            return JsonResponse::getErrorResponse("Invalid gradeable_id parameter.");
+        }
+
+        if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
+            return JsonResponse::getErrorResponse("Clustering is not enabled for this gradeable.");
+        }
+
+        $cluster_name = trim($_POST['cluster_name'] ?? '');
+        if ($cluster_name === '') {
+            return JsonResponse::getErrorResponse("Cluster name cannot be empty.");
+        }
+        if (mb_strlen($cluster_name) > 255) {
+            return JsonResponse::getErrorResponse("Cluster name cannot exceed 255 characters.");
+        }
+
+        $entity_manager = $this->core->getCourseEntityManager();
+        $cluster = $entity_manager->getRepository(GradingCluster::class)->find($cluster_id);
+        if ($cluster === null || $cluster->getConfig()->getGradeableId() !== $gradeable->getId()) {
+            return JsonResponse::getErrorResponse("Invalid cluster.");
+        }
+        if ($cluster_name === 'Unclustered') {
+            return JsonResponse::getErrorResponse("This cluster name is reserved.");
+        }
+        foreach ($cluster->getConfig()->getClusters() as $other_cluster) {
+            if ($other_cluster->getId() !== $cluster->getId() && $other_cluster->getClusterName() === $cluster_name) {
+                return JsonResponse::getErrorResponse("Another cluster already uses this name.");
+            }
+        }
+
+        $cluster->setClusterName($cluster_name);
+        $entity_manager->flush();
+
+        return JsonResponse::getSuccessResponse([
+            'cluster_id' => $cluster->getId(),
+            'cluster_name' => $cluster->getClusterName(),
+        ]);
+    }
+
     /**
      * Generates clusters for a given gradeable using the specified algorithm.
      */

@@ -529,9 +529,10 @@ HTML;
      * @param array<string, string> $algorithms
      * @param ?string $current_algorithm
      * @param array<string, string> $cluster_map
+     * @param array<string, int> $cluster_id_map
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = [], array $cluster_id_map = []) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
@@ -674,12 +675,14 @@ HTML;
                 "graded_gradeable" => $row,
                 "on_time_submission" => $on_time_submission
             ];
+            $section_cluster_id = null;
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
             }
             elseif ($is_group_by_clusters) {
                 $submitter_id = $row->getSubmitter()->getId();
                 $section_title = $cluster_map[$submitter_id] ?? "Unclustered";
+                $section_cluster_id = $cluster_id_map[$submitter_id] ?? null;
             }
             elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $row->getSubmitter()->getRegistrationSection();
@@ -810,7 +813,7 @@ HTML;
             }
             //Not found? Create it
             if (!$found) {
-                $sections[] = ["title" => $section_title, "rows" => [$info], "graders" => $section_graders];
+                $sections[] = ["title" => $section_title, "cluster_id" => $section_cluster_id, "rows" => [$info], "graders" => $section_graders];
             }
         }
 
@@ -821,11 +824,13 @@ HTML;
                 "user" => $teamless_user
             ];
 
+            $section_cluster_id = null;
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
             }
             elseif ($is_group_by_clusters) {
                 $section_title = $cluster_map[$teamless_user->getId()] ?? "Unclustered";
+                $section_cluster_id = $cluster_id_map[$teamless_user->getId()] ?? null;
             }
             elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $teamless_user->getRegistrationSection();
@@ -868,7 +873,7 @@ HTML;
             }
             //Not found? Create it
             if (!$found) {
-                $sections[] = ["title" => $section_title, "teamless_users" => [$info], "graders" => $section_graders];
+                $sections[] = ["title" => $section_title, "cluster_id" => $section_cluster_id, "teamless_users" => [$info], "graders" => $section_graders];
             }
         }
 
