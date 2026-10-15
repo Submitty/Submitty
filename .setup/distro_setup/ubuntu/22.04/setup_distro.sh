@@ -80,6 +80,10 @@ apt-get install -qqy clang autoconf automake autotools-dev diffstat finger gdb \
 p7zip-full patchutils libpq-dev unzip valgrind zip libboost-all-dev gcc g++ \
 jq libseccomp-dev libseccomp2 seccomp junit flex bison poppler-utils
 
+# HWE kernel headers pull in gcc-12, and clang always selects the newest GCC install it finds,
+# so it needs gcc-12's libstdc++ or it can't link C++ (cannot find -lstdc++)
+apt-get install -qqy libstdc++-12-dev
+
 apt-get install -qqy ninja-build
 
 if [ ${WORKER} == 0 ]; then
