@@ -165,12 +165,12 @@ function createSaveIndicator(elementId) {
     const saveDiv = document.createElement('div');
     saveDiv.id = `${elementId}-save-div`;
     saveDiv.classList.add('save-indicator', 'save-indicator-unchanged');
-    saveDiv.testId = `${elementId}-save-indicator`;
+    saveDiv.setAttribute('data-testid', `${elementId}-save-indicator`);
     const saveIcon = document.createElement('i');
     saveIcon.id = `${elementId}-save-icon`;
     const saveText = document.createElement('span');
     saveText.id = `${elementId}-save-text`;
-    saveText.testId = `${elementId}-save-text`;
+    saveText.setAttribute('data-testid', `${elementId}-save-text`);
     saveText.classList.add('subtitle');
     saveDiv.appendChild(saveIcon);
     saveDiv.appendChild(saveText);
