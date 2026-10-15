@@ -26,6 +26,7 @@
 }
 .save-indicator {
     margin: 0 0 0 1em;
+    pointer-events: none;
 }
 .save-indicator-unchanged {
     visibility: hidden;
