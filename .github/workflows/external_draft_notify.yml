@@ -10,9 +10,9 @@ permissions:
 jobs:
   tooManyPRs:
     if: >-
-      github.repository == 'IDzyre/Submitty' &&
+      github.repository == 'Submitty/Submitty' &&
       github.event.pull_request.user.type != 'Bot' &&
-      !contains(fromJSON('["MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
+      !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
     name: Limit External PRs
     runs-on: ubuntu-latest
     permissions:
