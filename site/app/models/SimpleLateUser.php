@@ -45,10 +45,10 @@ class SimpleLateUser extends AbstractModel {
      * @var date The day late days are put into effect */
     protected $since_timestamp;
     /** @prop
-     * @var string The extensions of a user (allowed late days for a specific homework) */
+     * @var string The extensions of a user (allowed late days for a specific gradeable) */
     protected $late_day_exceptions;
     /** @prop
-     * @var string The reason for an extension given on a homework assignment */
+     * @var string The reason for an extension given on a gradeable */
     protected $reason_for_exception;
 
     /**
