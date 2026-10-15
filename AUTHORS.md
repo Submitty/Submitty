@@ -197,4 +197,5 @@ Chris Reed
 Zachary Wimer  
 Fu Chai  
 Asher Gottlieb  
+Richard Sun  
 For their bug reports of specific security vulnerabilities :)  
