@@ -1,0 +1,42 @@
+name: Limit External PRs
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  tooManyPRs:
+    if: >-
+      github.repository == 'IDzyre/Submitty' &&
+      github.event.pull_request.user.type != 'Bot' &&
+      !contains(fromJSON('["MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
+    name: Limit External PRs
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    # Two PRs opened together would otherwise both comment on the same extras.
+    concurrency:
+      group: limit-external-prs-${{ github.event.pull_request.user.login }}
+
+    steps:
+      - name: Comment on PRs over the limit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          USERNAME: ${{ github.event.pull_request.user.login }}
+          MAX_OPEN_PRS: 2
+          # Hidden in the comment so a PR that was already warned isn't warned again.
+          MARKER: '<!-- too-many-open-prs -->'
+        run: |
+          # The oldest MAX_OPEN_PRS open PRs (drafts included) are fine; warn on the newer ones.
+          EXTRA=$(gh pr list --repo "$REPO" --author "$USERNAME" --state open --limit 100 --json number,createdAt \
+            --jq 'sort_by(.createdAt) | .[].number' | tail -n +$((MAX_OPEN_PRS + 1)))
+          for PR in $EXTRA; do
+            if gh pr view "$PR" --repo "$REPO" --json comments --jq '.comments[].body' | grep -qF "$MARKER"; then
+              continue
+            fi
+            gh pr comment "$PR" --repo "$REPO" --body "$MARKER"$'\n'"Hi @$USERNAME,"$'\n\n'"Because you already have 2 open PRs, this PR is marked as a draft and will not be reviewed until your number of open PRs is reduced.   We welcome your help reviewing open PRs. https://submitty.org/developer/getting_started/review_a_pull_request.  This PR may be closed."
+          done
