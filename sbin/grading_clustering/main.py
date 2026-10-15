@@ -15,8 +15,11 @@ def main():
     parser.add_argument("semester", help="The semester of the course")
     parser.add_argument("course", help="The course name")
     parser.add_argument("gradeable_id", help="The gradeable ID")
-    parser.add_argument("algorithm", choices=["dummy_split", "single_cluster"],
-                        help="The clustering algorithm to run")
+    parser.add_argument(
+        "algorithm",
+        choices=["dummy_split", "single_cluster"],
+        help="The clustering algorithm to run",
+    )
 
     args = parser.parse_args()
 
@@ -36,10 +39,10 @@ def main():
             course_conn, args.gradeable_id
         )
 
-        if args.algorithm == 'dummy_split':
+        if args.algorithm == "dummy_split":
             algo = DummySplit()
             cluster_groups = algo.run(submitters)
-        elif args.algorithm == 'single_cluster':
+        elif args.algorithm == "single_cluster":
             algo = SingleCluster()
             cluster_groups = algo.run(submitters)
         else:

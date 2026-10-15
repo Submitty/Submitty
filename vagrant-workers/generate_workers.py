@@ -39,7 +39,7 @@ def add_args(parser):
 
 def get_args():
     parser = argparse.ArgumentParser(
-        description="Script to generate configuration for " "development worker machines",
+        description="Script to generate configuration for development worker machines",
         prog="vagrant workers generate",
     )
     add_args(parser)
@@ -106,7 +106,7 @@ def run(args):
         if "version" in existing_config and isinstance(existing_config["version"], int):
             version = existing_config["version"]
 
-        for worker_name in (existing_config if version == 1 else existing_config["workers"]):
+        for worker_name in existing_config if version == 1 else existing_config["workers"]:
             if (
                 len(
                     glob.glob(
@@ -156,7 +156,7 @@ def run(args):
         data = OrderedDict()
         data["ip_addr"] = str(ip)
         if provider == "qemu":
-            octets = ':'.join(f'{random.randint(0, 255):02x}' for _ in range(3))
+            octets = ":".join(f"{random.randint(0, 255):02x}" for _ in range(3))
             data["mac_addr"] = f"{args.mac_prefix}:{octets}"
         else:
             data["ssh_port"] = args.base_port + i
