@@ -14,6 +14,7 @@ declare global {
         quickDownload(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
         generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<string | null>;
         popupAnnotatedImage(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
+        zoomImage(delta: number): boolean;
     }
 }
 
@@ -250,33 +251,7 @@ function clearAnnotations(): void {
         // Hide any open annotation editor instead of removing it
         hideEditorWrapper();
 
-        // Restore original image if it was replaced with MarkerView
-        const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
-        if (markerView && 'targetImage' in markerView && markerView.targetImage) {
-            const originalImgElement: HTMLImageElement = markerView.targetImage;
-
-            // Restore original properties
-            if (originalImgElement.dataset.originalId) {
-                originalImgElement.id = originalImgElement.dataset.originalId;
-                originalImgElement.className = originalImgElement.dataset.originalClass || '';
-
-                // Restore original size properties
-                if (originalImgElement.dataset.originalWidth) {
-                    originalImgElement.style.width = originalImgElement.dataset.originalWidth;
-                }
-                if (originalImgElement.dataset.originalHeight) {
-                    originalImgElement.style.height = originalImgElement.dataset.originalHeight;
-                }
-            }
-
-            // Replace MarkerView back with original image
-            if (markerView.parentElement) {
-                markerView.parentElement.replaceChild(originalImgElement, markerView);
-            }
-
-            // Update manager reference
-            annotationManager.originalImg = originalImgElement;
-        }
+        restoreOriginalImage();
 
         $('#annotation-status').text('Annotations cleared (not saved)').css('color', 'red');
     }
@@ -308,7 +283,11 @@ function cleanupAnnotationEditor(): void {
     // Hide and remove any existing annotation editor wrapper to ensure fresh start
     hideEditorWrapper(true);
 
-    // Restore original image if it was replaced with MarkerView
+    restoreOriginalImage();
+}
+
+// Swaps the MarkerView back out for the original image, keeping the current zoom
+function restoreOriginalImage(): void {
     const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
     if (markerView && 'targetImage' in markerView && markerView.targetImage) {
         const originalImgElement: HTMLImageElement = markerView.targetImage;
@@ -334,7 +313,76 @@ function cleanupAnnotationEditor(): void {
 
         // Update manager reference
         annotationManager.originalImg = originalImgElement;
+        applyImageZoom();
     }
+}
+
+// Matches minScale/maxScale for PDFs in PDFEmbedded.js, which shares the zoom controls
+const MIN_IMAGE_ZOOM = 1;
+const MAX_IMAGE_ZOOM = 5;
+
+// The original <img> holds the zoom state because it survives swaps with the MarkerView.
+// Loading a new file creates a new <img>, which resets zoom to 100%.
+// Only the submission panel has zoom controls, so lookups are scoped to its #file-content.
+function getZoomableImage(): { img: HTMLImageElement | null; markerView: MarkerView | null } {
+    const markerView = document.querySelector<MarkerView>('#file-content #annotation-marker-view');
+    const img = markerView?.targetImage ?? document.querySelector<HTMLImageElement>('#file-content #annotatable-image');
+    return { img, markerView };
+}
+
+// Returns false when no image is open, so the caller can zoom a PDF instead.
+function zoomImage(delta: number): boolean {
+    const { img, markerView } = getZoomableImage();
+    if (!img) {
+        return false;
+    }
+    // The fit size can't be measured until the image loads
+    if (!img.naturalWidth) {
+        return true;
+    }
+
+    // Record the size the image fits the panel at before the first zoom
+    if (!img.dataset.fitWidth) {
+        const computedStyle = getComputedStyle(markerView ?? img);
+        img.dataset.fitWidth = computedStyle.width;
+        img.dataset.fitHeight = computedStyle.height;
+    }
+
+    const zoom = Math.round((parseFloat(img.dataset.zoom ?? '1') + delta) * 100) / 100;
+    img.dataset.zoom = `${Math.min(MAX_IMAGE_ZOOM, Math.max(MIN_IMAGE_ZOOM, zoom))}`;
+    applyImageZoom();
+    return true;
+}
+
+function applyImageZoom(): void {
+    const { img, markerView } = getZoomableImage();
+    if (!img?.dataset.fitWidth) {
+        return;
+    }
+
+    const zoom = parseFloat(img.dataset.zoom!);
+    const width = parseFloat(img.dataset.fitWidth) * zoom;
+    const height = parseFloat(img.dataset.fitHeight!) * zoom;
+
+    // At 100% the stylesheet fits the image to the panel
+    const zoomed = zoom !== 1;
+    img.style.maxWidth = img.style.maxHeight = zoomed ? 'none' : '';
+    img.style.flex = zoomed ? 'none' : '';
+    img.style.width = zoomed ? `${width}px` : '';
+    img.style.height = zoomed ? `${height}px` : '';
+
+    if (markerView) {
+        markerView.style.width = `${width}px`;
+        markerView.style.height = `${height}px`;
+        markerView.targetWidth = width;
+        markerView.targetHeight = height;
+        // Markers keep their old positions until the view is shown again
+        if (annotationManager.currentAnnotations) {
+            markerView.show(annotationManager.currentAnnotations);
+        }
+    }
+
+    $('#file-zoom-display').text(`${Math.round(zoom * 100)}%`);
 }
 
 function renderAnnotationsOnImage(): void {
@@ -710,3 +758,4 @@ window.cleanupAnnotationEditor = cleanupAnnotationEditor;
 window.quickDownload = quickDownload;
 window.generateDataURL = generateDataURL;
 window.popupAnnotatedImage = popupAnnotatedImage;
+window.zoomImage = zoomImage;
