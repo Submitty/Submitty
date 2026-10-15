@@ -7,15 +7,32 @@
             {% else %}
                 {% for graded_user_id, data in participation %}
                     <div data-testid="peer-participation-entry" style="margin-top:15px;">
-                        <strong>Student graded:</strong> {{ graded_user_id }}<br>
-                        {% for component in data.components %}
-                            <div data-testid="peer-participation-component" style="margin-left:15px;">
-                                <strong>{{ component.title }}:</strong> {{ component.score }} &mdash; {{ component.comment }}
+                        <strong>Student graded:</strong> {{ graded_user_id }}
+                        <div style="margin-left:15px;">
+                            <div><strong>Peer Component Grading</strong></div>
+                            {% if data.components is empty %}
+                                <div data-testid="peer-participation-no-components"><em>No components graded</em></div>
+                            {% endif %}
+                            {% for component in data.components %}
+                                <div data-testid="peer-participation-component">
+                                    <strong>{{ component.title }}:</strong>
+                                    {% if component.score is null %}
+                                        <em>No score</em>
+                                    {% else %}
+                                        {{ component.score }} / {{ component.max }}
+                                    {% endif %}
+                                    {% if component.comment %}&mdash; {{ component.comment }}{% endif %}
+                                </div>
+                            {% endfor %}
+                            <div data-testid="peer-participation-overall">
+                                <strong>Overall comment:</strong>
+                                {% if data.overall_comment %}
+                                    {{ data.overall_comment }}
+                                {% else %}
+                                    <em>No overall comment</em>
+                                {% endif %}
                             </div>
-                        {% endfor %}
-                        {% if data.overall_comment %}
-                            <strong>Overall comment:</strong> {{ data.overall_comment }}
-                        {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
             {% endif %}
