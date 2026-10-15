@@ -6,7 +6,7 @@
 #       or
 #   NO_SUBMISSIONS=1 vagrant up
 #       or
-#   EXTRA=rpi vagrant up
+#   EXTRA=rpi vagrant upTEST
 #       or
 #   VM_MEMORY=4096 VM_CPUS=4 vagrant up
 #
