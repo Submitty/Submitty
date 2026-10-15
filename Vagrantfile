@@ -90,10 +90,17 @@ base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
 base_boxes.default         = "SubmittyBot/ubuntu22-dev"
-base_boxes[:base]          = "bento/ubuntu-22.04"
+base_boxes[:base]          = "SubmittyBot/ubuntu22-base"
 base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
+
+# SubmittyBot boxes are hosted on R2; each box name has its own metadata.json catalog (see push-to-r2.sh)
+BOX_HOST = "https://pub-94c17b86ab5f476dada8358ae6d22279.r2.dev"
+
+def box_url(box)
+  box.start_with?("SubmittyBot/") ? "#{BOX_HOST}/#{box}/metadata.json" : nil
+end
 
 def mount_folders(config, mount_options, type = nil, host = '10.0.2.2')
  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -200,9 +207,11 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
+    vb_box = config.vm.box
     unless custom_box
       if base_box || ON_CI
-        override.vm.box = base_boxes[:base]
+        vb_box = base_boxes[:base]
+        override.vm.box = vb_box
       else
         config.ssh.username = 'root'
         if use_prebuilt_version
@@ -210,6 +219,7 @@ Vagrant.configure(2) do |config|
         end
       end
     end
+    override.vm.box_url = box_url(vb_box) unless box_url(vb_box).nil?
 
     # We limit resources when running on CI to avoid resource exhaustion and it isn't used for grading stuff or
     # other things we do in dev.

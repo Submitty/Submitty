@@ -8,48 +8,58 @@ on:
 permissions:
   contents: read
 
+env:
+  VAGRANT_HOME: /mnt/vms/.vagrant.d
+  REPOSITORY: ${{ github.repository }}
+  RUN_ID: ${{ github.run_id }}
+  RUN_ATTEMPT: ${{ github.run_attempt }}
+
 jobs:
   vagrant-up:
-    runs-on: macos-15-intel
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Install vagrant
-        run: |
-          brew tap hashicorp/tap
-          brew trust --formula hashicorp/tap/vagrant
-          brew install hashicorp/tap/hashicorp-vagrant
 
-      - name: install virtual box 7.0.20
+      - name: Install vagrant and VirtualBox
         run: |
-          curl -LO https://download.virtualbox.org/virtualbox/7.0.20/VirtualBox-7.0.20-163906-OSX.dmg
-          hdiutil mount VirtualBox-7.0.20-163906-OSX.dmg
-          sudo installer -pkg /Volumes/VirtualBox/VirtualBox.pkg -target /
-          hdiutil unmount /Volumes/VirtualBox
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor -o /usr/share/keyrings/oracle-virtualbox.gpg
+          echo "deb [signed-by=/usr/share/keyrings/oracle-virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" \
+            | sudo tee /etc/apt/sources.list.d/virtualbox.list
+          sudo apt-get update
+          sudo apt-get install -y vagrant "linux-headers-$(uname -r)" virtualbox-7.1
 
-      - name: Install HCP CLI
+      - name: Unload KVM
+        run: sudo modprobe -r kvm_intel kvm_amd kvm || true
+
+      # The root disk is small; keep the VM and the packaged box on the larger /mnt disk.
+      - name: Use /mnt for VMs
         run: |
-          brew tap hashicorp/tap
-          brew install hashicorp/tap/hcp
-          brew upgrade hashicorp/tap/hcp
+          sudo mkdir -p /mnt/vms
+          sudo chown "$USER" /mnt/vms
+          VBoxManage setproperty machinefolder /mnt/vms
 
       - name: Get latest version
         id: get-version
         run: |
           TAG=$(git describe --tags --abbrev=0)
-          if ! [[ $TAG =~ ^v[0-9]{2}\.[0-9]{2}\.[0-9]{2}$ ]]; then
-            echo "Invalid tag name: '$TAG'"
-            exit 1
-          fi
           echo "version=${TAG:1}" >> $GITHUB_OUTPUT
 
+      # Keep the VM on failure so the diagnostics step below can inspect it. A step timeout counts as a
+      # failure (a job timeout counts as cancelled), so the diagnostics still run if this hangs.
+      # --debug goes to stderr, so the normal output stays readable in the log.
       - name: Vagrant Up
-        run: CI=1 vagrant up
+        timeout-minutes: 150
+        run: CI=1 vagrant up --no-destroy-on-error --debug 2> "$RUNNER_TEMP/vagrant-debug.log"
 
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
 
+<<<<<<< Updated upstream
       - name: Save image
         run: vagrant package --output submitty.box
 
@@ -72,15 +82,47 @@ jobs:
           vagrant cloud auth login
           vagrant cloud publish SubmittyBot/ubuntu22-dev "${IMAGE_VERSION}.$(date +"%y%m%d%H%M")" virtualbox submitty.box --release --force
           vagrant cloud auth logout
+=======
+      - name: Show screenshot of VM 
+        if: failure()
+        run: |
+          mkdir -p "$RUNNER_TEMP/diagnostics"
+          VM=$(VBoxManage list vms | grep -o '"Submitty_[^"]*"' | tr -d '"' | head -n1)
+          if [ -n "$VM" ]; then
+            VBoxManage controlvm "$VM" screenshotpng "$RUNNER_TEMP/diagnostics/screen.png" || true
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: vm-diagnostics
+          path: ${{ runner.temp }}/diagnostics
+
+      - name: Save image
+        run: vagrant package --output /mnt/vms/submitty.box
+
+      - name: Publish image
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
+        run: |
+          bash push-to-r2.sh -f /mnt/vms/submitty.box -v "${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M")"
+>>>>>>> Stashed changes
 
       - name: Acquire Job ID
         if: failure()
         id: get-job-id
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+<<<<<<< Updated upstream
           REPOSITORY: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
+=======
+>>>>>>> Stashed changes
           RUNNER_NAME: ${{ runner.name }}
         run: |
           jobs=$(gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}/jobs")
@@ -91,7 +133,10 @@ jobs:
         if: failure()
         env:
           ZULIP_AUTHENTICATION: ${{ secrets.ZULIP_AUTHENTICATION }}
+<<<<<<< Updated upstream
           RUN_ID: ${{ github.run_id }}
+=======
+>>>>>>> Stashed changes
           JOB_ID: ${{ steps.get-job-id.outputs.job_id }}
         run: |
           curl -X POST https://submitty.zulipchat.com/api/v1/messages -u "$ZULIP_AUTHENTICATION" \
