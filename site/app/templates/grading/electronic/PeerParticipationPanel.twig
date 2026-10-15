@@ -18,8 +18,10 @@
                                     <strong>{{ component.title }}:</strong>
                                     {% if component.score is null %}
                                         <em>No score</em>
-                                    {% else %}
+                                    {% elseif component.max > 0 %}
                                         {{ component.score }} / {{ component.max }}
+                                    {% else %}
+                                        {{ component.score }}
                                     {% endif %}
                                     {% if component.comment %}&mdash; {{ component.comment }}{% endif %}
                                 </div>
