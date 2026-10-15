@@ -211,19 +211,15 @@ function updateDueDate() {
     const cont = $('#due_date_container');
     const cont1 = $('#late_days_options_container');
     const cont2 = $('#manual_grading_container');
-    const cont3 = $('#release_container');
     if ($('#has_due_date_no').is(':checked')) {
         cont.hide();
         cont1.hide();
         cont2.hide();
-        cont3.hide();
-        $('#has_release_date_no').prop('checked', true);
     }
     else {
         cont.show();
         cont1.show();
         cont2.show();
-        cont3.show();
     }
     onHasDueDate();
 }
