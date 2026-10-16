@@ -7,7 +7,7 @@ has conditionals based on the course boolean to determine functionality.
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
-import { buildCourseUrl } from '../../../ts/utils/server';
+import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
 import MarkSeenPopup from './MarkSeenPopup.vue';
 
 const props = defineProps<{
@@ -18,7 +18,10 @@ const props = defineProps<{
 
 const showPopup = ref(false);
 const showUnseenOnly = ref(true);
-const localUnseenCount = ref(props.unseenCount);
+const initialUnseenCount = props.unseenCount >= 0
+    ? props.unseenCount
+    : props.notifications.filter((n) => !n.seen).length;
+const localUnseenCount = ref(initialUnseenCount);
 
 // Preference is the same between course and home pages
 onMounted(() => {
@@ -28,6 +31,9 @@ onMounted(() => {
     }
     else if (pref === 'all') {
         showUnseenOnly.value = false;
+    }
+    if (props.course) {
+        updateBadgeDOM(localUnseenCount.value);
     }
 });
 
@@ -56,6 +62,20 @@ const visibleNotifications = computed(() =>
         : filteredNotifications.value.slice(0, 10),
 );
 
+function updateBadgeDOM(count: number) {
+    const badges = document.querySelectorAll(
+        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
+    );
+    if (count <= 0) {
+        badges.forEach((el) => el.remove());
+    }
+    else {
+        badges.forEach((el) => {
+            el.textContent = `${count}`;
+        });
+    }
+}
+
 function markSeen() {
     // Course Page
     if (props.course) {
@@ -63,7 +83,7 @@ function markSeen() {
             url: buildCourseUrl(['notifications', 'seen']),
             type: 'POST',
             data: {
-                csrf_token: window.csrfToken,
+                csrf_token: window.csrfToken || getCsrfToken(),
             },
             success: function () {
                 for (const n of localNotifications.value) {
@@ -71,6 +91,8 @@ function markSeen() {
                         n.seen = true;
                     }
                 }
+                localUnseenCount.value = 0;
+                updateBadgeDOM(0);
             },
             error: function (err) {
                 console.error(err);
@@ -92,7 +114,8 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
     for (const n of localNotifications.value) {
         if (n.id === id && n.course === course) {
             n.seen = true;
-            localUnseenCount.value--;
+            localUnseenCount.value = Math.max(0, localUnseenCount.value - 1);
+            updateBadgeDOM(localUnseenCount.value);
             break;
         }
     }
@@ -101,13 +124,14 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
 // mark specified course notifications as seen without reloading
 function markAllSeen(courses: Record<string, unknown>[]) {
     for (const { term, course, count } of courses) {
-        localUnseenCount.value = localUnseenCount.value - Number(count);
+        localUnseenCount.value = Math.max(0, localUnseenCount.value - Number(count));
         for (const n of localNotifications.value) {
             if (n.term === term && n.course === course) {
                 n.seen = true;
             }
         }
     }
+    updateBadgeDOM(localUnseenCount.value);
 }
 
 </script>
