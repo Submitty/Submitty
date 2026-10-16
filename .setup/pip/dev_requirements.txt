@@ -4,4 +4,4 @@
 ruff==0.16.8
 
 # For cleanup_active_graders.py
-sqlalchemy==2.0.52
+sqlalchemy==2.1.0
