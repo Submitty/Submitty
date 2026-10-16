@@ -18,7 +18,7 @@ const props = defineProps<{
 
 const showPopup = ref(false);
 const showUnseenOnly = ref(true);
-const localUnseenCount = ref(props.unseenCount);
+const unseenCount = ref(props.unseenCount);
 
 // Preference is the same between course and home pages
 onMounted(() => {
@@ -49,7 +49,7 @@ const filteredNotifications = computed(() =>
         : localNotifications.value,
 );
 
-// Manage maxumum number of displayed notifications based on course or home page
+// Manage maximum number of displayed notifications based on course or home page
 const visibleNotifications = computed(() =>
     props.course
         ? filteredNotifications.value
@@ -92,7 +92,7 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
     for (const n of localNotifications.value) {
         if (n.id === id && n.course === course) {
             n.seen = true;
-            localUnseenCount.value--;
+            unseenCount.value--;
             break;
         }
     }
@@ -101,7 +101,7 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
 // mark specified course notifications as seen without reloading
 function markAllSeen(courses: Record<string, unknown>[]) {
     for (const { term, course, count } of courses) {
-        localUnseenCount.value = localUnseenCount.value - Number(count);
+        unseenCount.value = unseenCount.value - Number(count);
         for (const n of localNotifications.value) {
             if (n.term === term && n.course === course) {
                 n.seen = true;
@@ -121,6 +121,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         <button
           v-if="notifications.length !== 0"
           class="btn btn-default"
+          data-testid="toggle-unseen-only"
           @click="toggleUnseenOnly"
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
@@ -128,6 +129,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         <button
           v-if="notifications.length !== 0 && props.course"
           class="btn btn-primary"
+          data-testid="mark-seen-btn"
           @click="markSeen"
         >
           Mark as seen
@@ -154,16 +156,16 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       No notifications to view.
     </p>
     <p
-      v-if="visibleNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount <= 0"
+      v-if="visibleNotifications.length === 0 && localNotifications.length > 0 && unseenCount <= 0"
       id="no-recent-notifications"
       class="no-recent"
+      data-testid="no-unseen-message"
     >
       No unseen notifications.
     </p>
     <div
       v-for="n in visibleNotifications"
       :key="n.id"
-      class="notification"
       :class="{ unseen: !n.seen }"
     >
       <SingleNotification
@@ -173,21 +175,23 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       />
     </div>
     <div
-      v-if="!props.course && showUnseenOnly || (visibleNotifications.length === 0 && localNotifications.length > 0) && localUnseenCount > 0"
+      v-if="!props.course && showUnseenOnly || (visibleNotifications.length === 0 && localNotifications.length > 0) && unseenCount > 0"
     >
       <!-- Additional notifications in the front-end -->
       <p
-        v-if="visibleNotifications.length >= 10 && localUnseenCount >= 11"
+        v-if="visibleNotifications.length >= 10 && unseenCount >= 11"
         class="unseen-count-p"
+        data-testid="not-displayed-message"
       >
-        You have <span class="unseen-count">{{ localUnseenCount - 10 }}</span> additional unseen notification<span v-if="localUnseenCount > 11">s</span>.
+        You have <span class="unseen-count">{{ unseenCount - 10 }}</span> additional unseen notification<span v-if="unseenCount > 11">s</span>.
       </p>
       <!-- Unseen notifications that will not reach the front-end -->
       <p
-        v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && localNotifications.length > 10 && (localUnseenCount - visibleNotifications.length) > 0"
+        v-if="visibleNotifications.length < 10 && unseenCount > 0 && localNotifications.length > 10 && (unseenCount - visibleNotifications.length) > 0"
         class="unseen-count-p"
+        data-testid="never-displayed-message"
       >
-        You have <span class="unseen-count">{{ localUnseenCount - visibleNotifications.length }}</span> older unseen notification<span v-if="localUnseenCount > 1">s</span> in your course notifications not displayed here.
+        You have <span class="unseen-count">{{ unseenCount - visibleNotifications.length }}</span> older unseen notification<span v-if="unseenCount - visibleNotifications.length > 1">s</span> in your course notifications not displayed here.
       </p>
     </div>
   </div>
