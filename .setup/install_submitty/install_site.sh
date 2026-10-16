@@ -161,25 +161,18 @@ fi
 mkdir -p ${SUBMITTY_DATA_DIR}/cache/twig
 
 # clear old routes cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/routes" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/routes"
+if [ -d "${SUBMITTY_DATA_DIR}/cache/routes" ]; then
+    rm -rf "${SUBMITTY_DATA_DIR}/cache/routes"
 fi
 # create routes cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/routes
+mkdir -p ${SUBMITTY_DATA_DIR}/cache/routes
 
 # clear old doctrine cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine"
+if [ -d "${SUBMITTY_DATA_DIR}/cache/doctrine" ]; then
+    rm -rf "${SUBMITTY_DATA_DIR}/cache/doctrine"
 fi
 # create doctrine cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine
-
-# clear old access control cache
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/access_control" ]; then
-    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/access_control"
-fi
-# create access control cache directory
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/access_control
+mkdir -p ${SUBMITTY_DATA_DIR}/cache/doctrine
 
 # clear old doctrine proxy classes
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy" ]; then
@@ -448,9 +441,6 @@ chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-
-# cache needs to be writable
-find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
 # reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
 # as expected (Travis for example will fail here otherwise).
