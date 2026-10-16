@@ -5097,7 +5097,7 @@ SQL;
                     ELSE LEAST(GREATEST(
                     gc.gc_default + COALESCE(SUM(gcm.gcm_points), 0) + gcd.gcd_score,
                     gc.gc_lower_clamp), gc.gc_upper_clamp)
-                END AS total_score,
+                END AS total_score
             FROM gradeable_component_data gcd
             JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
             JOIN gradeable_component gc ON gc.gc_id = gcd.gd_id
