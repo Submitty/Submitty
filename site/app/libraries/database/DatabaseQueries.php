@@ -5085,7 +5085,7 @@ SQL;
      *
      * @param string $grader_id
      * @param string $gradeable_id
-     *  @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: ?float, max: float, comment: string}>}>
+     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: ?float, max: float, comment: string}>}>
      */
     public function getPeerParticipationForGrader(string $grader_id, string $gradeable_id): array {
         $result = [];
