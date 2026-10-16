@@ -169,6 +169,9 @@
                             {% if active_student_columns[0] %}
                                 <td class="td-registration-section" data-testid="registration-section">
                                     {{ registration }}
+                                    {% if  student.getRegistrationSubsection is not empty %}
+                                        -  {{ student.getRegistrationSubsection }}
+                                    {% endif %}
                                     {% if student.isManualRegistration() %}
                                         <i class="fas fa-hammer" title="Manually Registered"></i>
                                     {% endif %}
@@ -177,8 +180,8 @@
                                     {% endif %}
                                 </td>
                             {% endif %}
-                             {% if active_student_columns[1] %}
-                                <td class="td-registration-subsection" data-testid="registration-subsection">{{ student.getRegistrationSubsection() }}</td>
+                            {% if active_student_columns[1] %}
+                                <td class="td-registration-subsection" data-testid="registration-subsection-td">{{ student.getRegistrationSubsection() }}</td>
                             {% endif %}
                             <td class="align-left td-student-id" data-testid="student-id-td">{{ student.getId() }}</td>
                             {% if active_student_columns[2] %}
@@ -217,7 +220,7 @@
                             {% if active_student_columns[9] %}
                                 <td class="td-registration-type">{{ student.getRegistrationType() }}</td>
                             {% endif %}
-                            <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}" data-testid="edit-student-{{ student.getId() }}-button" ><i class="fas fa-pencil-alt"></i></a></td>
+                            <td class="td-edit-student" data-testid="edit-student-td"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}" data-testid="edit-student-{{ student.getId() }}-button" ><i class="fas fa-pencil-alt"></i></a></td>
                             {% if active_student_columns[10] %}
                                 <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}" data-testid="delete-student-{{ student.getId() }}-button"><i class="fas fa-trash"></i></a></td>
                             {% endif %}
