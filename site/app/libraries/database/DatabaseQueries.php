@@ -5100,7 +5100,7 @@ SQL;
                 END AS total_score
             FROM gradeable_component_data gcd
             JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
-            JOIN gradeable_component gc ON gc.gc_id = gcd.gd_id
+            JOIN gradeable_component gc ON gc.gc_id = gcd.gc_id
             LEFT JOIN gradeable_component_mark_data gcmd
                 ON gcmd.gc_id = gcd.gc_id AND gcmd.gd_id = gcd.gd_id
                 AND gcmd.gcd_grader_id = gcd.gcd_grader_id
