@@ -193,12 +193,6 @@ parameters:
 			path: app/controllers/AutogradingStatusController.php
 
 		-
-			rawMessage: 'Parameter #1 $msg_array of method app\controllers\ChatroomController::sendSocketMessage() expects array{type: string, message_id?: int, chatroom_id?: int, title?: string, description?: string, allow_anon?: bool, host_name?: string, base_url?: string, ...}, array{type: ''chat_close'', chatroom_id: int, title: string, description: string, allow_anon: bool, host_name: string, base_url: string, socket: ''chatrooms'', ...}|array{type: ''chat_open'', chatroom_id: int, title: string, description: string, allow_anon: bool, host_name: string, base_url: string, socket: ''chatrooms''} given.'
-			identifier: argument.type
-			count: 1
-			path: app/controllers/ChatroomController.php
-
-		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
