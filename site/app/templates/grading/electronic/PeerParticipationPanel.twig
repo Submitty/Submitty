@@ -1,0 +1,24 @@
+<div id="peer_participation" class="rubric_panel" data-testid="peer-participation">
+    <div class="draggable_content" style="width:100%">
+        <div style="padding:20px; margin-top:10px;">
+            <span class="col grading_label">Peer Participation</span>
+            {% if participation is empty %}
+                <p data-testid="peer-participation-empty">No peer grading participation found.</p>
+            {% else %}
+                {% for graded_user_id, data in participation %}
+                    <div data-testid="peer-participation-entry" style="margin-top:15px;">
+                        <strong>Student graded:</strong> {{ graded_user_id }}<br>
+                        {% for component in data.components %}
+                            <div data-testid="peer-participation-component" style="margin-left:15px;">
+                                <strong>{{ component.title }}:</strong> {{ component.score }} &mdash; {{ component.comment }}
+                            </div>
+                        {% endfor %}
+                        {% if data.overall_comment %}
+                            <strong>Overall comment:</strong> {{ data.overall_comment }}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
