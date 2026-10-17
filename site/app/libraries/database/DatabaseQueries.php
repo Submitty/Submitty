@@ -5081,6 +5081,51 @@ SQL;
     }
 
     /**
+     * Get the peer feedback from a student left for others on a gradeable, grouped by the student they graded
+     *
+     * @param string $grader_id
+     * @param string $gradeable_id
+     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: string, comment: string}>}>
+     */
+    public function getPeerParticipationForGrader(string $grader_id, string $gradeable_id): array {
+        $result = [];
+        $this->course_db->query(
+            "SELECT gd.gd_user_id, gc.gc_title, gcd.gcd_score, gcd.gcd_component_comment
+            FROM gradeable_component_data gcd
+            JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
+            JOIN gradeable_component gc ON gc.gc_id = gcd.gc_id
+            WHERE gcd.gcd_grader_id = ? AND gd.g_id = ? AND gc.gc_is_peer = true AND gd.gd_user_id IS NOT NULL
+            ORDER BY gd.gd_user_id, gc.gc_order",
+            [$grader_id, $gradeable_id]
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['gd_user_id']]['overall_comment'] ??= null;
+            $result[$row['gd_user_id']]['components'][] = [
+                'title' => $row['gc_title'],
+                'score' => $row['gcd_score'],
+                'comment' => $row['gcd_component_comment']
+            ];
+        }
+
+        $this->course_db->query(
+            "SELECT goc_user_id, goc_overall_comment
+            FROM gradeable_data_overall_comment
+            WHERE goc_grader_id = ? AND g_id = ? AND goc_user_id IS NOT NULL
+            ORDER BY goc_user_id",
+            [$grader_id, $gradeable_id]
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['goc_user_id']]['overall_comment'] = $row['goc_overall_comment'];
+            $result[$row['goc_user_id']]['components'] ??= [];
+        }
+
+        ksort($result);
+        return $result;
+    }
+
+    /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
      * If the $archived parameter is false, then we run the check:
