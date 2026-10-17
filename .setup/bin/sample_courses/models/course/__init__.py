@@ -2,6 +2,7 @@
 Contain all the global variables and init
 Only import this class
 """
+
 from sqlalchemy import Table
 
 from sample_courses.utils import get_current_semester

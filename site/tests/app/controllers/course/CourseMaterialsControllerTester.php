@@ -61,7 +61,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
                 for ($j = 0; $j < $num_files; $j++) {
                     $fname = "test" . $j . ".txt";
                     $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname, "w");
-                    $zip->addFile($this->config['course_path'] . $lev . "/" . $fname);
+                    // store entries relative to the zip root, absolute entry names are rejected
+                    $zip->addFile($this->config['course_path'] . $lev . "/" . $fname, ltrim($lev . "/" . $fname, "/"));
                     $files[] = $this->config['course_path'] . $lev . "/" . $fname;
                 }
                 $lev .= "/lev" . $i . "";
@@ -181,7 +182,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         }
 
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(8))
+            ->expects($this->exactly(5))
             ->method('persist')
             ->willReturnCallback(function () use ($course_materials, &$i) {
                 switch ($i) {
@@ -208,10 +209,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
                 $this->upload_path . "/$zipfile_name"]
             ],
             ['path' => [
-                $this->upload_path . $this->config['course_path'] . '/test0.txt',
-                $this->upload_path . $this->config['course_path'] . '/test1.txt',
-                $this->upload_path . $this->config['course_path'] . '/lev0/test0.txt',
-                $this->upload_path . $this->config['course_path'] . '/lev0/test1.txt']
+                $this->upload_path . '/test0.txt',
+                $this->upload_path . '/test1.txt',
+                $this->upload_path . '/lev0/test0.txt',
+                $this->upload_path . '/lev0/test1.txt']
             ]
         ];
         $repository = $this->createMock(EntityRepository::class);
@@ -251,9 +252,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $f1 = Utils::getFirstArrayElement($files);
         $expected_files1 = [
             'name' => 'test0.txt',
-            'path' => $this->upload_path . $this->config['course_path'] . '/lev0/test0.txt',
+            'path' => $this->upload_path . '/lev0/test0.txt',
             'size' => 0,
-            'relative_name' => ltrim($this->config['course_path'], '/') . '/lev0/test0.txt'
+            'relative_name' => 'lev0/test0.txt'
         ];
 
         $this->assertEquals($expected_files1, $f1);
