@@ -3,6 +3,7 @@
 namespace tests\app\models\gradeable;
 
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
@@ -10,6 +11,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\Submitter;
+use app\models\SimpleGradeOverriddenUser;
 use app\models\User;
 use tests\BaseUnitTest;
 
@@ -213,6 +215,148 @@ class LateDayInfoTester extends BaseUnitTest {
         $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_BAD));
         $this->assertFalse(LateDayInfo::isValidStatus(LateDayInfo::STATUS_NO_ACTIVE_VERSION));
         $this->assertFalse(LateDayInfo::isValidStatus(-1));
-        $this->assertFalse(LateDayInfo::isValidStatus(4));
+        $this->assertTrue(LateDayInfo::isValidStatus(LateDayInfo::STATUS_OVERRIDDEN));
+        $this->assertTrue(LateDayInfo::isValidStatus(4));
+    }
+
+    public function testGradeOverrideClearsLateDayCharge() {
+        $due_date = '10-10-2010 11:59:59';
+        $submission_date = '11-10-2010 11:59:59';
+        $user = $this->createMockModel(User::class);
+        $user->method('getId')->willReturn('student');
+
+        $overridden = $this->lateDayInfoFromGradeable($due_date, $submission_date, $user, true);
+        $this->assertEquals(0, $overridden->getLateDaysCharged());
+        $this->assertEquals(5, $overridden->getLateDaysRemaining());
+        $this->assertEquals(LateDayInfo::STATUS_OVERRIDDEN, $overridden->getStatus());
+        $this->assertEquals('Overridden', $overridden->getStatusMessage());
+        $this->assertTrue($overridden->isOnTimeSubmission());
+
+        $charged = $this->lateDayInfoFromGradeable($due_date, $submission_date, $user, false);
+        $this->assertEquals(1, $charged->getLateDaysCharged());
+        $this->assertEquals(4, $charged->getLateDaysRemaining());
+        $this->assertEquals(LateDayInfo::STATUS_LATE, $charged->getStatus());
+        $this->assertEquals('Late', $charged->getStatusMessage());
+    }
+
+    public function testCachedOverriddenStatus() {
+        $core = $this->createMock(Core::class);
+        $user = $this->createMock(User::class);
+        $submitter = $this->createMock(Submitter::class);
+        $submitter->method('hasUser')->willReturn(true);
+
+        $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
+        $auto_graded_gradeable->method('hasActiveVersion')->willReturn(true);
+        $auto_graded_gradeable->method('hasSubmission')->willReturn(true);
+
+        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+        $graded_gradeable->method('getSubmitter')->willReturn($submitter);
+        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
+
+        $ldi = new LateDayInfo($core, $user, [
+            'graded_gradeable' => $graded_gradeable,
+            'late_days_allowed' => 3,
+            'late_day_date' => new \DateTime('10-10-2010 11:59:59'),
+            'submission_days_late' => 1,
+            'late_day_exceptions' => 0,
+            'late_days_remaining' => 5,
+            'late_days_change' => 0,
+            'late_day_status' => LateDayInfo::STATUS_OVERRIDDEN
+        ]);
+
+        $this->assertEquals(LateDayInfo::STATUS_OVERRIDDEN, $ldi->getStatus());
+        $this->assertEquals('Overridden', $ldi->getStatusMessage());
+        $this->assertTrue($ldi->isOnTimeSubmission());
+        $this->assertEquals(0, $ldi->getLateDaysCharged());
+    }
+
+    public function testGradeOverrideIsLookedUpPerUser() {
+        $due_date = '10-10-2010 11:59:59';
+        $submission_date = '11-10-2010 11:59:59';
+
+        $alice = $this->createMockModel(User::class);
+        $alice->method('getId')->willReturn('alice');
+        $bob = $this->createMockModel(User::class);
+        $bob->method('getId')->willReturn('bob');
+
+        $gradeable = $this->createMockModel(Gradeable::class);
+        $gradeable->method('getSubmissionDueDate')->willReturn(new \DateTime($due_date));
+        $gradeable->method('getLateDays')->willReturn(3);
+
+        $auto_graded_version = $this->createMockModel(AutoGradedVersion::class);
+        $auto_graded_version->method('getDaysLate')->willReturn(DateUtils::calculateDayDiff($due_date, $submission_date));
+
+        $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
+        $auto_graded_gradeable->method('getActiveVersionInstance')->willReturn($auto_graded_version);
+        $auto_graded_gradeable->method('hasActiveVersion')->willReturn(true);
+        $auto_graded_gradeable->method('hasSubmission')->willReturn(true);
+
+        $submitter = $this->createMock(Submitter::class);
+        $submitter->method('hasUser')->willReturn(true);
+
+        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+        $graded_gradeable->method('getGradeable')->willReturn($gradeable);
+        $graded_gradeable->method('getGradeableId')->willReturn('team_homework');
+        $graded_gradeable->method('getSubmitter')->willReturn($submitter);
+        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
+        $graded_gradeable->method('getLateDayException')->willReturn(0);
+        $graded_gradeable->method('getReasonForException')->willReturn('');
+
+        $overridden_row = $this->createMock(SimpleGradeOverriddenUser::class);
+        $lookups = [];
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries->method('getAUserWithOverriddenGrades')->willReturnCallback(
+            function ($gradeable_id, $user_id) use ($overridden_row, &$lookups) {
+                $lookups[] = [$gradeable_id, $user_id];
+                return $user_id === 'alice' ? $overridden_row : null;
+            }
+        );
+        $core = $this->createMock(Core::class);
+        $core->method('getQueries')->willReturn($queries);
+
+        $alice_info = LateDayInfo::fromGradeableLateDaysRemaining($core, $alice, $graded_gradeable, 5);
+        $bob_info = LateDayInfo::fromGradeableLateDaysRemaining($core, $bob, $graded_gradeable, 5);
+
+        $this->assertSame([['team_homework', 'alice'], ['team_homework', 'bob']], $lookups);
+        $this->assertSame(LateDayInfo::STATUS_OVERRIDDEN, $alice_info->getStatus());
+        $this->assertSame(0, $alice_info->getLateDaysCharged());
+        $this->assertTrue($alice_info->isOnTimeSubmission());
+        $this->assertSame(LateDayInfo::STATUS_LATE, $bob_info->getStatus());
+        $this->assertSame(1, $bob_info->getLateDaysCharged());
+        $this->assertTrue($bob_info->isOnTimeSubmission());
+    }
+
+    private function lateDayInfoFromGradeable(string $due_date, string $submission_date, User $user, bool $overridden): LateDayInfo {
+        $gradeable = $this->createMockModel(Gradeable::class);
+        $gradeable->method('getSubmissionDueDate')->willReturn(new \DateTime($due_date));
+        $gradeable->method('getLateDays')->willReturn(3);
+
+        $auto_graded_version = $this->createMockModel(AutoGradedVersion::class);
+        $auto_graded_version->method('getDaysLate')->willReturn(DateUtils::calculateDayDiff($due_date, $submission_date));
+
+        $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
+        $auto_graded_gradeable->method('getActiveVersionInstance')->willReturn($auto_graded_version);
+        $auto_graded_gradeable->method('hasActiveVersion')->willReturn(true);
+        $auto_graded_gradeable->method('hasSubmission')->willReturn(true);
+
+        $submitter = $this->createMock(Submitter::class);
+        $submitter->method('hasUser')->willReturn(true);
+
+        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+        $graded_gradeable->method('getGradeable')->willReturn($gradeable);
+        $graded_gradeable->method('getGradeableId')->willReturn('homework');
+        $graded_gradeable->method('getSubmitter')->willReturn($submitter);
+        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
+        $graded_gradeable->method('getLateDayException')->willReturn(0);
+        $graded_gradeable->method('getReasonForException')->willReturn('');
+
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries->method('getAUserWithOverriddenGrades')->willReturn(
+            $overridden ? $this->createMock(SimpleGradeOverriddenUser::class) : null
+        );
+        $core = $this->createMock(Core::class);
+        $core->method('getQueries')->willReturn($queries);
+
+        return LateDayInfo::fromGradeableLateDaysRemaining($core, $user, $graded_gradeable, 5);
     }
 }
