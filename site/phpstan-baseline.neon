@@ -13696,7 +13696,7 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			rawMessage: 'Class app\repositories\SessionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\SessionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/SessionRepository.php
@@ -13708,43 +13708,43 @@ parameters:
 			path: app/repositories/SessionRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\VcsAuthTokenRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\VcsAuthTokenRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/VcsAuthTokenRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\course\CourseMaterialRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\course\CourseMaterialRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/course/CourseMaterialRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\email\EmailRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\email\EmailRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\forum\CategoryRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\forum\CategoryRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/forum/CategoryRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\forum\PostRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\forum\PostRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/forum/PostRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\forum\ThreadRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\forum\ThreadRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/forum/ThreadRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\poll\OptionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\poll\OptionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
@@ -13756,7 +13756,7 @@ parameters:
 			path: app/repositories/poll/OptionRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\poll\PollRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\poll\PollRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/poll/PollRepository.php
