@@ -181,6 +181,7 @@ function getRowGroups(tbody: HTMLTableSectionElement) {
 
 // Comparison function run during row sorting
 function compareFn(text_a: string, text_b: string, sort_direction: string, col_data_type: colDataTypes) {
+    // eslint-disable-next-line no-useless-assignment
     let cmp = 0;
     switch (col_data_type) {
         case colDataTypes.Number: {
@@ -202,7 +203,7 @@ function compareFn(text_a: string, text_b: string, sort_direction: string, col_d
         }
         case colDataTypes.String:
         default: {
-            cmp = text_a.localeCompare(text_b);
+            cmp = text_a.localeCompare(text_b, undefined, { numeric: true });
             break;
         }
     }

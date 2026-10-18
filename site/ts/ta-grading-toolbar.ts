@@ -76,6 +76,7 @@ export function gotoPrevStudent() {
             // eslint-disable-next-line no-var
             var component_id = getFirstOpenComponentId(true);
             if (component_id === NO_COMPONENT_ID) {
+                // eslint-disable-next-line no-useless-assignment
                 component_id = getFirstOpenComponentId();
             }
             break;
@@ -152,6 +153,7 @@ export function gotoNextStudent() {
             // eslint-disable-next-line no-var
             var component_id = getFirstOpenComponentId(true);
             if (component_id === NO_COMPONENT_ID) {
+                // eslint-disable-next-line no-useless-assignment
                 component_id = getFirstOpenComponentId();
             }
             break;

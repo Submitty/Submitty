@@ -6,7 +6,7 @@ import jest from 'eslint-plugin-jest';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 // eslint-pluging-cypress/flat doesnt have ts definitions yet
-import cypress from 'eslint-plugin-cypress/flat';
+import cypress from 'eslint-plugin-cypress';
 import vuelint from 'eslint-plugin-vue';
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
 import vueParser from 'vue-eslint-parser';
@@ -47,6 +47,9 @@ export default tseslint.config(
                 ecmaVersion: 2020,
                 sourceType: 'module',
             },
+        },
+        linterOptions: {
+            reportUnusedDisableDirectives: 'error',
         },
         rules: {
             // twig and eslint do not play well together, would be nice to re-enable this rule

@@ -18,7 +18,7 @@ if [[ "$UID" -ne "0" ]] ; then
     exit
 fi
 
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     export SUBMISSION_URL='http://localhost:1501'
     export SUBMISSION_PORT=1501
     export DATABASE_PORT=16432
@@ -63,7 +63,7 @@ apt-get install -qqy postgresql-10
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
 apt-get install -qqy php php-cli php-fpm php-curl php-pgsql php-zip php-mbstring php-xml php-ds php-imagick
 
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     apt-get install -qqy php-xdebug
 fi
 
@@ -112,12 +112,12 @@ apt-get install -qqy protobuf-compiler libprotoc-dev
 # fix networking on vagrants
 # https://bugs.launchpad.net/ubuntu/+source/netplan.io/+bug/1768560
 # When the vagrant box comes with netplan.io 0.40+ we can remove this
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     # In case they upgrade before we notice, don't run this fix
     NETPLANIO_VERSION=$(apt-cache policy netplan.io | grep 'Installed' | sed -E 's/^.*: (.*)$/\1/')
     NPIO_MAJOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f1)
     NPIO_MINOR=$(echo "$NETPLANIO_VERSION" | cut -d "." -f2)
-    if [ "$NPIO_MAJOR" -eq 0 -a "$NPIO_MINOR" -lt 40 ]; then
+    if [ "$NPIO_MAJOR" -eq 0 ] && [ "$NPIO_MINOR" -lt 40 ]; then
         # Update netplan.io
         echo "Detected old version of netplan.io (${NETPLANIO_VERSION})... updating it automatically"
         apt-get install -y netplan.io=0.40.1~18.04.4
@@ -144,7 +144,7 @@ apt-get install git -y
 # ------------------------------------------------------------------
 
 # Install OpenLDAP for testing on Vagrant
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     apt-get install -qqy php-ldap
     echo 'slapd/root_password password password' | debconf-set-selections &&\
         echo 'slapd/root_password_again password password' | debconf-set-selections && \

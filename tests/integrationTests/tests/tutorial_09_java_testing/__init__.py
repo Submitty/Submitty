@@ -13,6 +13,7 @@ import traceback
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/09_java_testing/config"
 SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/09_java_testing/submissions/"
 
+
 @prebuild
 def initialize(test):
     try:
@@ -27,12 +28,20 @@ def initialize(test):
     except OSError:
         pass
 
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-                     os.path.join(test.testcase_path, "assignment_config")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "provided_code", "FactorialTest.java"),
-                     os.path.join(test.testcase_path, "data")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+            os.path.join(test.testcase_path, "assignment_config"),
+        ]
+    )
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "provided_code", "FactorialTest.java"),
+            os.path.join(test.testcase_path, "data"),
+        ]
+    )
 
 
 ############################################################################
@@ -40,43 +49,54 @@ def initialize(test):
 
 def cleanup(test):
     # seem to need to cleanup this class file, otherwise it doesn't recompile
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "*.zip")))
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.class")))
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.java")))
-    subprocess.call(["rm"] + ["-rf"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/", "test*")))
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/grade.txt")))
-    subprocess.call(["rm"] + ["-f"] +
-                    glob.glob(os.path.join(test.testcase_path, "data/results.json")))
+    subprocess.call(["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data/", "*.zip")))
+    subprocess.call(
+        ["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.class"))
+    )
+    subprocess.call(
+        ["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data/", "Factorial.java"))
+    )
+    subprocess.call(
+        ["rm"] + ["-rf"] + glob.glob(os.path.join(test.testcase_path, "data/", "test*"))
+    )
+    subprocess.call(["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data/grade.txt")))
+    subprocess.call(
+        ["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data/results.json"))
+    )
 
 
 @testcase
 def schema_validation(test):
     cleanup(test)
-    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    config_path = os.path.join(test.testcase_path, "assignment_config", "complete_config.json")
     try:
         test.validate_complete_config(config_path)
     except Exception:
         traceback.print_exc()
         raise
 
+
 @testcase
 def correct(test):
     return  # TODO: REMOVE THIS!
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "correct.zip"),
-                     os.path.join(test.testcase_path, "data/")])
-    subprocess.call(["unzip",
-                     "-q",  # quiet
-                     "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/correct.zip"),
-                     "-d",  # save to directory
-                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "correct.zip"),
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
+    subprocess.call(
+        [
+            "unzip",
+            "-q",  # quiet
+            "-o",  # overwrite files
+            os.path.join(test.testcase_path, "data/correct.zip"),
+            "-d",  # save to directory
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -95,15 +115,23 @@ def correct(test):
 def does_not_compile(test):
     return  # TODO: REMOVE THIS!
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "does_not_compile.zip"),
-                     os.path.join(test.testcase_path, "data/")])
-    subprocess.call(["unzip",
-                     "-q",  # quiet
-                     "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/does_not_compile.zip"),
-                     "-d",  # save to directory
-                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "does_not_compile.zip"),
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
+    subprocess.call(
+        [
+            "unzip",
+            "-q",  # quiet
+            "-o",  # overwrite files
+            os.path.join(test.testcase_path, "data/does_not_compile.zip"),
+            "-d",  # save to directory
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -122,15 +150,23 @@ def does_not_compile(test):
 def buggy(test):
     return  # TODO: REMOVE THIS!
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "buggy.zip"),
-                     os.path.join(test.testcase_path, "data/")])
-    subprocess.call(["unzip",
-                     "-q",  # quiet
-                     "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/buggy.zip"),
-                     "-d",  # save to directory
-                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "buggy.zip"),
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
+    subprocess.call(
+        [
+            "unzip",
+            "-q",  # quiet
+            "-o",  # overwrite files
+            os.path.join(test.testcase_path, "data/buggy.zip"),
+            "-d",  # save to directory
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -149,15 +185,23 @@ def buggy(test):
 def still_buggy(test):
     return  # TODO: REMOVE THIS!
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "still_buggy.zip"),
-                     os.path.join(test.testcase_path, "data/")])
-    subprocess.call(["unzip",
-                     "-q",  # quiet
-                     "-o",  # overwrite files
-                     os.path.join(test.testcase_path, "data/still_buggy.zip"),
-                     "-d",  # save to directory
-                     os.path.join(test.testcase_path, "data/")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "still_buggy.zip"),
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
+    subprocess.call(
+        [
+            "unzip",
+            "-q",  # quiet
+            "-o",  # overwrite files
+            os.path.join(test.testcase_path, "data/still_buggy.zip"),
+            "-d",  # save to directory
+            os.path.join(test.testcase_path, "data/"),
+        ]
+    )
     test.run_compile()
     test.run_run()
     test.run_validator()

@@ -418,8 +418,8 @@ HTML;
         foreach ($users as $user => $details) {
             $given_name = htmlspecialchars($details["given_name"]);
             $family_name = htmlspecialchars($details["family_name"]);
-            $upload_timestamp = $details["upload_time"];
-            $submit_timestamp = $details["submit_time"];
+            $upload_timestamp = htmlspecialchars($details["upload_time"]);
+            $submit_timestamp = htmlspecialchars($details["submit_time"]);
             $filepath = htmlspecialchars($details["file"]);
 
             $return .= <<<HTML
@@ -1053,7 +1053,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0, ?string $cluster_name = null) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $isPeerPanel = false;
@@ -1066,12 +1066,14 @@ HTML;
         $isPeerSolutions = $gradeable->getPeerSolutions();
         $isPeerDiscussion = $gradeable->getPeerDiscussion();
         $is_peer_grader = false;
+        $isPeerParticipationPanel = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
         if ($gradeable->hasPeerComponent()) {
             if ($this->core->getUser()->getGroup() !== 4) {
                 $isPeerPanel = true;
                 $isStudentInfoPanel = true;
+                $isPeerParticipationPanel = true;
             }
             else {
                 $isPeerPanel = false;
@@ -1188,7 +1190,7 @@ HTML;
                     <div class="content-item content-item-right">
 HTML;
 
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === 2), $anon_mode, $blind_grading);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === 2), $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_clustered, $cluster_student_count, $cluster_name);
             $return .= $this->core->getOutput()->renderTemplate(
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
@@ -1204,7 +1206,8 @@ HTML;
                 $isGradeInquiryPanel,
                 $gradeable->getAutogradingConfig()->isNotebookGradeable(),
                 $error_message['color'],
-                $error_message['message']
+                $error_message['message'],
+                $isPeerParticipationPanel
             );
 
             $return .= <<<HTML
@@ -1235,7 +1238,7 @@ HTML;
         }
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
         if (!$isPeerGrader || $isPeerRubric) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader);
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit, $is_peer_grader, $ta_grading_cluster_mode, $is_clustered, $cluster_student_count);
         }
         if (!$isPeerGrader || $isPeerSolutions) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderSolutionTaNotesPanel', $gradeable, $solution_ta_notes, $submitter_itempool_map);
@@ -1244,6 +1247,9 @@ HTML;
         if ($isPeerPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerPanel', $graded_gradeable, $display_version);
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
+        }
+        if ($isPeerParticipationPanel) {
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerParticipationPanel', $graded_gradeable);
         }
         if ($isDiscussionPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', $graded_gradeable->getGradeable()->getDiscussionThreadId(), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
@@ -1354,7 +1360,7 @@ HTML;
      * @param string $direction
      * @return string
      */
-    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading) {
+    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, bool $peer, $sort, $direction, $from, $limited_access_blind, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0, ?string $cluster_name = null) {
         $gradeable = $graded_gradeable->getGradeable();
         $isBlind = false;
         if (
@@ -1375,6 +1381,7 @@ HTML;
         if ($peer && $this->core->getUser()->getGroup() === 4) {
             $i_am_a_peer = true;
         }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "anon_mode" => $anon_mode,
             "peer_blind_grading" => $blind_grading,
@@ -1390,11 +1397,16 @@ HTML;
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased(),
             'submitter' => $graded_gradeable->getSubmitter(),
             'team_assignment' => $gradeable->isTeamAssignment(),
-            'isBlind' => $isBlind
+            'isBlind' => $isBlind,
+            "clustering_enabled" => $clustering_enabled,
+            "clusters_exist" => $clusters_exist,
+            "ta_grading_cluster_mode" => $ta_grading_cluster_mode,
+            "cluster_name" => $cluster_name,
+            "cluster_size" => $cluster_student_count
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isPeerGrader, bool $isPeerAutograding, bool $isPeerRubric, bool $isPeerFiles, bool $isPeerSolutions, bool $isPeerDiscussion, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isPeerGrader, bool $isPeerAutograding, bool $isPeerRubric, bool $isPeerFiles, bool $isPeerSolutions, bool $isPeerDiscussion, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message, bool $isPeerParticipationPanel): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
             'isPeerGrader' => $isPeerGrader,
@@ -1409,7 +1421,8 @@ HTML;
             'is_notebook' => $is_notebook,
             "student_grader" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
             "error_color" => $error_color,
-            "error_message" => $error_message
+            "error_message" => $error_message,
+            'isPeerParticipationPanel' => $isPeerParticipationPanel
         ]);
     }
 
@@ -1636,7 +1649,6 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         $this->core->getOutput()->addInternalCss('details.css');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
@@ -1744,7 +1756,7 @@ HTML;
      * @param bool $show_silent_edit
      * @return string
      */
-    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grader) {
+    public function renderRubricPanel(GradedGradeable $graded_gradeable, int $display_version, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, bool $is_peer_grader, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0) {
         $return = "";
         $student_anon_ids = [];
         $gradeable = $graded_gradeable->getGradeable();
@@ -1808,6 +1820,9 @@ HTML;
                 "has_submission" => $has_submission,
                 "has_overridden_grades" => $has_overridden_grades,
                 "has_active_version" => $has_active_version,
+                "ta_grading_cluster_mode" => $ta_grading_cluster_mode,
+                "is_clustered" => $is_clustered,
+                "cluster_student_count" => $cluster_student_count,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
                 "show_clear_conflicts" => $show_clear_conflicts,
@@ -1993,6 +2008,26 @@ HTML;
                 "active_version" => $active_version
             ]
         );
+    }
+
+    /**
+     * Render the Peer Participation panel
+     *
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
+    public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable): string {
+        $submitter = $graded_gradeable->getSubmitter();
+        $participation = [];
+        if (!$submitter->isTeam()) {
+            $participation = $this->core->getQueries()->getPeerParticipationForGrader(
+                $submitter->getId(),
+                $graded_gradeable->getGradeable()->getId()
+            );
+        }
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
+            'participation' => $participation
+        ]);
     }
 
     /**
