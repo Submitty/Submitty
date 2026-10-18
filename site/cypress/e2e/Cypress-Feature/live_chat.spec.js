@@ -318,6 +318,7 @@ describe('Tests for creating, editing and using tests', () => {
     it('Should update chatroom edits over WebSocket', () => {
         createChatroom(title1, description1, false);
         startChatSession(title1);
+        verifyWebSocketStatus();
 
         getChatroom(title1).then(($chatroom) => {
             const id = Number($chatroom.attr('id'));
