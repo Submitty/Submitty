@@ -93,10 +93,13 @@ class Container:
 
         try:
             if self.is_server:
+                # No tty: nothing attaches to a server container, so the pty
+                # keeps a 0x0 window size and psql blocks in its pager, treating
+                # any output as too large to fit. Servers run nothing interactive.
                 self.container = client.containers.create(
                     self.image,
                     stdin_open=True,
-                    tty=True,
+                    tty=False,
                     network="none",
                     volumes=mount,
                     working_dir=self.directory,
@@ -206,7 +209,9 @@ class Container:
             status = self.container.wait()
             self.return_code = status["StatusCode"]
 
-        logs = self.container.logs(stdout=True, stderr=False).decode("utf-8")
+        # Server containers have no tty, so their streams are not merged;
+        # without stderr their startup failures would go unrecorded.
+        logs = self.container.logs(stdout=True, stderr=True).decode("utf-8")
         print(f"Log entry for {self.name}:\n", file=logfile)
         print(logs, file=logfile)
         print("\n", file=logfile)
