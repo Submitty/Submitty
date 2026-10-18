@@ -6463,24 +6463,6 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			rawMessage: 'Method app\libraries\Output::getCss() return type with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Method app\libraries\Output::getJs() return type with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Method app\libraries\Output::getModuleJs() return type with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			rawMessage: 'Method app\libraries\Output::getOutput() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6697,26 +6679,8 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			rawMessage: 'Property app\libraries\Output::$css with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Property app\libraries\Output::$js with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			rawMessage: Property app\libraries\Output::$loaded_views has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Property app\libraries\Output::$module_js with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
 			count: 1
 			path: app/libraries/Output.php
 
