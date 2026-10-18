@@ -90,6 +90,7 @@
     "jest-environment-jsdom": "^30.5.2",
     "node-fetch": "^2.7.0",
     "nyc": "^18.0.0",
+    "patch-package": "^8.0.1",
     "postcss-html": "^2.0.0",
     "prettier": "^3.9.9",
     "regenerator-runtime": "^0.14.1",
@@ -112,6 +113,7 @@
     "eslint:fix": "eslint . --fix",
     "test": "jest",
     "test:api": "jest --config jest.config.api.js",
-    "build": "vue-tsc && node .build.js && vite build vue"
+    "build": "vue-tsc && node .build.js && vite build vue",
+    "postinstall": "patch-package"
   }
 }
