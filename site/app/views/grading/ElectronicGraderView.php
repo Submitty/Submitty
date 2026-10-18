@@ -418,8 +418,8 @@ HTML;
         foreach ($users as $user => $details) {
             $given_name = htmlspecialchars($details["given_name"]);
             $family_name = htmlspecialchars($details["family_name"]);
-            $upload_timestamp = $details["upload_time"];
-            $submit_timestamp = $details["submit_time"];
+            $upload_timestamp = htmlspecialchars($details["upload_time"]);
+            $submit_timestamp = htmlspecialchars($details["submit_time"]);
             $filepath = htmlspecialchars($details["file"]);
 
             $return .= <<<HTML
