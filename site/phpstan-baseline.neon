@@ -199,6 +199,36 @@ parameters:
 			path: app/controllers/ChatroomController.php
 
 		-
+			rawMessage: Value assigned to variable $display_name is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/ChatroomController.php
+
+		-
+			rawMessage: Value assigned to variable $indiv_msg_array is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/ChatroomController.php
+
+		-
+			rawMessage: Value assigned to variable $msg_array is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/ChatroomController.php
+
+		-
+			rawMessage: 'Variable $indiv_msg_array is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/ChatroomController.php
+
+		-
+			rawMessage: 'Variable $msg_array is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/ChatroomController.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
@@ -313,6 +343,30 @@ parameters:
 			path: app/controllers/GlobalController.php
 
 		-
+			rawMessage: Variable $duck_img is assigned value 'moorthy_duck/00…' but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
+			rawMessage: Variable $hour is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
+			rawMessage: Variable $minute is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
+			rawMessage: Variable $second is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/GlobalController.php
+
+		-
 			rawMessage: '''
 				Call to deprecated method JsonOnlyResponse() of class app\libraries\response\MultiResponse:
 				should not be used, just return JsonResponse directly
@@ -370,6 +424,18 @@ parameters:
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 5
+			path: app/controllers/MiscController.php
+
+		-
+			rawMessage: Foreach key variable $name is never read before being overwritten.
+			identifier: foreach.keyOverwritten
+			count: 3
+			path: app/controllers/MiscController.php
+
+		-
+			rawMessage: Foreach key variable $name is never read.
+			identifier: foreach.unusedKey
+			count: 1
 			path: app/controllers/MiscController.php
 
 		-
@@ -574,6 +640,30 @@ parameters:
 			rawMessage: 'Method app\controllers\MiscController::readFile() has parameter $path with no type specified.'
 			identifier: missingType.parameter
 			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			rawMessage: Value assigned to variable $file_name is never read.
+			identifier: assign.unused
+			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			rawMessage: Variable $active_version is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			rawMessage: Variable $job_data is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/MiscController.php
+
+		-
+			rawMessage: Variable $section_key is never read.
+			identifier: variable.unused
+			count: 2
 			path: app/controllers/MiscController.php
 
 		-
@@ -841,9 +931,27 @@ parameters:
 			path: app/controllers/PollController.php
 
 		-
+			rawMessage: Value assigned to variable $response_counts is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/PollController.php
+
+		-
+			rawMessage: 'Variable $response_counts is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/PollController.php
+
+		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 2
+			path: app/controllers/SelfRejoinController.php
+
+		-
+			rawMessage: Foreach key variable $access_place is never read.
+			identifier: foreach.unusedKey
+			count: 1
 			path: app/controllers/SelfRejoinController.php
 
 		-
@@ -900,6 +1008,18 @@ parameters:
 		-
 			rawMessage: For loop initial assignment overwrites variable $x.
 			identifier: for.variableOverwrite
+			count: 2
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Foreach key variable $i is never read before being overwritten.
+			identifier: foreach.keyOverwritten
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Foreach key variable $i is never read.
+			identifier: foreach.unusedKey
 			count: 2
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -1312,6 +1432,36 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
+			rawMessage: Offset 'autograding_config…' of array assigned to variable $values is never read before being overwritten.
+			identifier: array.offsetOverwritten
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Offset 'id' of array assigned to variable $values is never read before being overwritten.
+			identifier: array.offsetOverwritten
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Offset 'syllabus_bucket' of array assigned to variable $values is never read before being overwritten.
+			identifier: array.offsetOverwritten
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Offset 'title' of array assigned to variable $values is never read before being overwritten.
+			identifier: array.offsetOverwritten
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Offset 'type' of array assigned to variable $values is never read before being overwritten.
+			identifier: array.offsetOverwritten
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
 			rawMessage: 'Only booleans are allowed in &&, int<0, max> given on the right side.'
 			identifier: booleanAnd.rightNotBoolean
 			count: 1
@@ -1320,6 +1470,30 @@ parameters:
 		-
 			rawMessage: 'Only booleans are allowed in a ternary operator condition, string|null given.'
 			identifier: ternary.condNotBoolean
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: 'Value assigned to $rubric_components[] is never read.'
+			identifier: assign.unused
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Value assigned to variable $template_gradeable is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Variable $form_json is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			rawMessage: Variable $late_day_status is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -1468,12 +1642,24 @@ parameters:
 			path: app/controllers/admin/GradeOverrideController.php
 
 		-
+			rawMessage: Variable $user is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/admin/GradeOverrideController.php
+
+		-
 			rawMessage: '''
 				Call to deprecated method JsonOnlyResponse() of class app\libraries\response\MultiResponse:
 				should not be used, just return JsonResponse directly
 			'''
 			identifier: staticMethod.deprecated
 			count: 19
+			path: app/controllers/admin/LateController.php
+
+		-
+			rawMessage: Foreach key variable $index is never read.
+			identifier: foreach.unusedKey
+			count: 1
 			path: app/controllers/admin/LateController.php
 
 		-
@@ -1557,6 +1743,12 @@ parameters:
 		-
 			rawMessage: 'Parameter #2 $timestamp of method app\libraries\database\DatabaseQueries::updateLateDays() expects string, DateTime given.'
 			identifier: argument.type
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			rawMessage: Value assigned to variable $late_days is never read before being overwritten.
+			identifier: assign.overwritten
 			count: 1
 			path: app/controllers/admin/LateController.php
 
@@ -1684,6 +1876,12 @@ parameters:
 			rawMessage: 'Method app\controllers\admin\PlagiarismController::toggleNightlyRerun() has no return type specified.'
 			identifier: missingType.return
 			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			rawMessage: 'Value assigned to $regex_dirs[] is never read.'
+			identifier: assign.unused
+			count: 3
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
@@ -1840,6 +2038,12 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
+			rawMessage: Value assigned to variable $failure_detected is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 2
+			path: app/controllers/admin/ReportController.php
+
+		-
 			rawMessage: 'Loose comparison via "!=" between mixed and null is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 6
@@ -1873,6 +2077,12 @@ parameters:
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 23
+			path: app/controllers/admin/UsersController.php
+
+		-
+			rawMessage: Foreach key variable $key is never read before being overwritten.
+			identifier: foreach.keyOverwritten
+			count: 1
 			path: app/controllers/admin/UsersController.php
 
 		-
@@ -1978,26 +2188,14 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
-			rawMessage: 'Parameter #1 $url of method app\libraries\Core::redirect() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: 'Parameter #2 $semester of method app\libraries\database\DatabaseQueries::insertCourseUser() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			rawMessage: 'Parameter #3 $course of method app\libraries\database\DatabaseQueries::insertCourseUser() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			rawMessage: 'Parameter #3 $value of function curl_setopt expects bool, int given.'
 			identifier: argument.type
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			rawMessage: Variable $key is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
@@ -2038,6 +2236,24 @@ parameters:
 			path: app/controllers/calendar/CalendarController.php
 
 		-
+			rawMessage: Value assigned to variable $show_all_courses is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/calendar/CalendarController.php
+
+		-
+			rawMessage: Variable $global_calendar_messages is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/calendar/CalendarController.php
+
+		-
+			rawMessage: Variable $show_all_courses is assigned value '1' but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/calendar/CalendarController.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 2
@@ -2046,6 +2262,12 @@ parameters:
 		-
 			rawMessage: 'Call to static method app\libraries\FileUtils::validPath() with incorrect case: ValidPath'
 			identifier: staticMethod.nameCase
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			rawMessage: Foreach key variable $name is never read.
+			identifier: foreach.unusedKey
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
 
@@ -2142,6 +2364,24 @@ parameters:
 		-
 			rawMessage: Unable to resolve the template type T in call to function array_values
 			identifier: argument.templateType
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			rawMessage: Value assigned to variable $success is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			rawMessage: Variable $file_type is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			rawMessage: Variable $success is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
 
@@ -2530,6 +2770,54 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
+			rawMessage: 'Value assigned to $result[''next_page''] is never read before being overwritten.'
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: Value assigned to variable $category_visible_date is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: Value assigned to variable $is_reply_announcement is never read.
+			identifier: assign.unused
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: Value assigned to variable $reply_level is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: Value assigned to variable $thread_id is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: Value assigned to variable $type is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: Variable $category_visible_date is assigned value null but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			rawMessage: Variable $current_user_id is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 5
@@ -2539,6 +2827,24 @@ parameters:
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 12
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Foreach key variable $key is never read before being overwritten.
+			identifier: foreach.keyOverwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Foreach key variable $key is never read.
+			identifier: foreach.unusedKey
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Foreach overwrites $member with its value variable.
+			identifier: foreach.valueOverwrite
+			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -3022,6 +3328,12 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::amIBlindGrading() has an unused parameter $user.'
+			identifier: method.unusedParameter
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			rawMessage: 'Method app\controllers\grading\ElectronicGraderController::amIBlindGrading() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -3370,6 +3682,186 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			rawMessage: Value assigned to variable $graded is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $graded_component is never read.
+			identifier: assign.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $graded_gradeable is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $graders_of_inquiries is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $non_late_graded is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $non_late_total_submitted is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $num_submitted is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $overall_scores is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $section is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $sections is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $submitter is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $autograded_average is assigned value null but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $average_scores is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: 'Variable $component_averages is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $graded_array is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $graded_gradeable is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $indexUrl is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $manual_average is assigned value null but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: 'Variable $no_team_users is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $non_late_total_submitted is assigned value 0 but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $num_unsubmitted is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $overall_average is assigned value null but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $overall_scores is assigned value null but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $peer_graded_components is assigned value 0 but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $section_key is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $ta_graded_components is never read.
+			identifier: variable.unused
+			count: 3
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: 'Variable $team_users is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: 'Variable $testcase_averages is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $total is never read.
+			identifier: variable.unused
+			count: 4
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			rawMessage: Variable $total_indvidual_students is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 1
@@ -3379,6 +3871,18 @@ parameters:
 			rawMessage: 'Loose comparison via "!=" between mixed and float is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			rawMessage: Value assigned to variable $total only flows into values that are never used.
+			identifier: assign.unusedFlow
+			count: 2
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			rawMessage: Variable $any_numeric_present_in_row is never read.
+			identifier: variable.unused
+			count: 2
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
@@ -3526,6 +4030,30 @@ parameters:
 			path: app/controllers/student/GradeInquiryController.php
 
 		-
+			rawMessage: 'Value assigned to $notifications[] is never read before being overwritten.'
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			rawMessage: Value assigned to variable $component is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			rawMessage: Value assigned to variable $component_title is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			rawMessage: Value assigned to variable $graders is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
 			rawMessage: 'Method app\controllers\student\LateDaysTableController::showLateTablePage() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -3534,6 +4062,18 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
+			count: 1
+			path: app/controllers/student/LeaderboardController.php
+
+		-
+			rawMessage: Value assigned to variable $leaderboards is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/controllers/student/LeaderboardController.php
+
+		-
+			rawMessage: Value assigned to variable $valid_testcases is never read before being overwritten.
+			identifier: assign.overwritten
 			count: 1
 			path: app/controllers/student/LeaderboardController.php
 
@@ -3552,6 +4092,12 @@ parameters:
 		-
 			rawMessage: Expression on left side of ?? is not nullable.
 			identifier: nullCoalesce.expr
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			rawMessage: Foreach key variable $i is never read before being overwritten.
+			identifier: foreach.keyOverwritten
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -3832,6 +4378,42 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
+			rawMessage: Value assigned to variable $i only flows into values that are never used.
+			identifier: assign.unusedFlow
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			rawMessage: Value of variable $i after ++ only flows into values that are never used.
+			identifier: postInc.unusedFlow
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			rawMessage: Variable $empty_pages is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			rawMessage: Variable $ta is assigned value true but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			rawMessage: Variable $total is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			rawMessage: Variable $vcs_full_path is never read.
+			identifier: variable.unused
+			count: 3
+			path: app/controllers/student/SubmissionController.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 2
@@ -3841,6 +4423,12 @@ parameters:
 			rawMessage: 'Call to method app\libraries\Core::addErrorMessage() with incorrect case: addErrorMEssage'
 			identifier: method.nameCase
 			count: 7
+			path: app/controllers/student/TeamController.php
+
+		-
+			rawMessage: Foreach overwrites $student with its value variable.
+			identifier: foreach.valueOverwrite
+			count: 1
 			path: app/controllers/student/TeamController.php
 
 		-
@@ -3972,6 +4560,12 @@ parameters:
 		-
 			rawMessage: 'Method app\controllers\student\TeamController::stopSeekTeam() has parameter $gradeable_id with no type specified.'
 			identifier: missingType.parameter
+			count: 1
+			path: app/controllers/student/TeamController.php
+
+		-
+			rawMessage: Value assigned to variable $students_not_on_teams_count is never read before being overwritten.
+			identifier: assign.overwritten
 			count: 1
 			path: app/controllers/student/TeamController.php
 
@@ -4591,6 +5185,18 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
+			rawMessage: Value assigned to variable $gradeable is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			rawMessage: Variable $now is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/libraries/Access.php
+
+		-
 			rawMessage: 'Class app\libraries\CascadingIterator implements generic interface Iterator but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
@@ -4843,8 +5449,20 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
+			rawMessage: Foreach key variable $key only flows into values that are never used.
+			identifier: foreach.unusedKeyFlow
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
 			rawMessage: Foreach overwrites $diff with its value variable.
 			identifier: foreach.valueOverwrite
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			rawMessage: Foreach value variable $value only flows into values that are never used.
+			identifier: foreach.unusedValueFlow
 			count: 1
 			path: app/libraries/DiffViewer.php
 
@@ -5041,8 +5659,32 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
+			rawMessage: Value assigned to variable $return only flows into values that are never used.
+			identifier: assign.unusedFlow
+			count: 2
+			path: app/libraries/DiffViewer.php
+
+		-
+			rawMessage: Variable $test is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			rawMessage: Variable $test2 is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
+			count: 1
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			rawMessage: Foreach key variable $kk is never read.
+			identifier: foreach.unusedKey
 			count: 1
 			path: app/libraries/ExceptionHandler.php
 
@@ -5091,6 +5733,12 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			rawMessage: Foreach key variable $key is never read.
+			identifier: foreach.unusedKey
 			count: 1
 			path: app/libraries/FileUtils.php
 
@@ -5215,8 +5863,32 @@ parameters:
 			path: app/libraries/FileUtils.php
 
 		-
+			rawMessage: Value assigned to variable $size is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			rawMessage: Value assigned to variable $zip_status is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
+			count: 1
+			path: app/libraries/ForumUtils.php
+
+		-
+			rawMessage: Foreach key variable $index is never read before being overwritten.
+			identifier: foreach.keyOverwritten
+			count: 1
+			path: app/libraries/ForumUtils.php
+
+		-
+			rawMessage: Foreach key variable $index is never read.
+			identifier: foreach.unusedKey
 			count: 1
 			path: app/libraries/ForumUtils.php
 
@@ -5623,6 +6295,12 @@ parameters:
 			path: app/libraries/NumberUtils.php
 
 		-
+			rawMessage: Value assigned to variable $shift is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/NumberUtils.php
+
+		-
 			rawMessage: 'Call to static method app\libraries\FileUtils::joinPaths() with incorrect case: joinpaths'
 			identifier: staticMethod.nameCase
 			count: 1
@@ -5781,24 +6459,6 @@ parameters:
 		-
 			rawMessage: 'Method app\libraries\Output::getBreadcrumbs() return type has no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Method app\libraries\Output::getCss() return type with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Method app\libraries\Output::getJs() return type with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Method app\libraries\Output::getModuleJs() return type with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
 			count: 1
 			path: app/libraries/Output.php
 
@@ -6019,26 +6679,8 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			rawMessage: 'Property app\libraries\Output::$css with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Property app\libraries\Output::$js with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			rawMessage: Property app\libraries\Output::$loaded_views has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			rawMessage: 'Property app\libraries\Output::$module_js with generic class Ds\Set does not specify its types: TValue'
-			identifier: missingType.generics
 			count: 1
 			path: app/libraries/Output.php
 
@@ -6081,6 +6723,12 @@ parameters:
 		-
 			rawMessage: Property app\libraries\Output::$use_mobile_viewport has no type specified.
 			identifier: missingType.property
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			rawMessage: Variable $namespace is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/libraries/Output.php
 
@@ -6220,6 +6868,12 @@ parameters:
 			path: app/libraries/Utils.php
 
 		-
+			rawMessage: Variable $email_extension is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
@@ -6355,6 +7009,18 @@ parameters:
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 14
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Foreach key variable $i is never read.
+			identifier: foreach.unusedKey
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Foreach key variable $key is never read.
+			identifier: foreach.unusedKey
+			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
@@ -9388,6 +10054,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			rawMessage: Offset 3 of array assigned to variable $param is never read before being overwritten.
+			identifier: array.offsetOverwritten
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			rawMessage: 'Only booleans are allowed in a ternary operator condition, app\models\Team|null given.'
 			identifier: ternary.condNotBoolean
 			count: 1
@@ -9426,6 +10098,66 @@ parameters:
 		-
 			rawMessage: 'Strict comparison using !== between non-empty-array and null will always evaluate to true.'
 			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Value assigned to variable $auto_graded_gradeable is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Value assigned to variable $orderBy is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 3
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Value assigned to variable $parameters is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Value assigned to variable $row is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Value assigned to variable $submitter is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Value assigned to variable $submitter_data_inject is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Value assigned to variable $submitter_inject is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Variable $count is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Variable $result_rows is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			rawMessage: Variable $return is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -10300,6 +11032,18 @@ parameters:
 			path: app/models/DockerUI.php
 
 		-
+			rawMessage: Value assigned to variable $buffer is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
+			rawMessage: Value assigned to variable $is_match is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
 			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
@@ -10345,6 +11089,12 @@ parameters:
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 4
+			path: app/models/GradingOrder.php
+
+		-
+			rawMessage: Foreach key variable $name is never read.
+			identifier: foreach.unusedKey
+			count: 5
 			path: app/models/GradingOrder.php
 
 		-
@@ -10458,6 +11208,12 @@ parameters:
 		-
 			rawMessage: Property app\models\Notification::$elapsed_time has unknown class app\models\real as its type.
 			identifier: class.notFound
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			rawMessage: Value assigned to variable $base_url is never read before being overwritten.
+			identifier: assign.overwritten
 			count: 1
 			path: app/models/Notification.php
 
@@ -10976,6 +11732,12 @@ parameters:
 			identifier: constructor.missingParentCall
 			count: 1
 			path: app/models/QueueItem.php
+
+		-
+			rawMessage: Value assigned to variable $c_bucket is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/models/RainbowCustomization.php
 
 		-
 			rawMessage: Variable property access on object.
@@ -11674,6 +12436,18 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			rawMessage: Variable $config is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			rawMessage: Variable $course_path is never read.
+			identifier: variable.unused
+			count: 2
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			rawMessage: 'Method app\models\gradeable\AutoGradedVersionHistory::__construct() has parameter $details with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11772,6 +12546,12 @@ parameters:
 		-
 			rawMessage: 'Class app\models\gradeable\AutogradingConfig has PHPDoc tag @method for method getNotebookConfig() return type with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			rawMessage: Foreach value variable $testcase is never read.
+			identifier: foreach.unusedValue
 			count: 1
 			path: app/models/gradeable/AutogradingConfig.php
 
@@ -12274,6 +13054,30 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			rawMessage: Foreach key variable $grader is never read before being overwritten.
+			identifier: foreach.keyOverwritten
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			rawMessage: Foreach key variable $i is never read.
+			identifier: foreach.unusedKey
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			rawMessage: Foreach key variable $row_num is never read before being overwritten.
+			identifier: foreach.keyOverwritten
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			rawMessage: Foreach key variable $row_num is never read.
+			identifier: foreach.unusedKey
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			rawMessage: Foreach overwrites $user with its value variable.
 			identifier: foreach.valueOverwrite
 			count: 2
@@ -12766,6 +13570,24 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			rawMessage: Variable $graded_components is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			rawMessage: Variable $notebook_data is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			rawMessage: Variable $now is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			rawMessage: Variable method call on app\models\Team.
 			identifier: method.dynamicName
 			count: 1
@@ -12786,6 +13608,12 @@ parameters:
 		-
 			rawMessage: 'Loose comparison via "==" between string and string is not allowed.'
 			identifier: equal.notAllowed
+			count: 1
+			path: app/models/gradeable/GradeableList.php
+
+		-
+			rawMessage: Variable $value is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/models/gradeable/GradeableList.php
 
@@ -12961,6 +13789,12 @@ parameters:
 			rawMessage: 'Parameter #1 $dividend of static method app\libraries\Utils::safeCalcPercent() expects int, float given.'
 			identifier: argument.type
 			count: 1
+			path: app/models/gradeable/GradedComponentContainer.php
+
+		-
+			rawMessage: Variable $number_of_graders is never read.
+			identifier: variable.unused
+			count: 2
 			path: app/models/gradeable/GradedComponentContainer.php
 
 		-
@@ -13156,6 +13990,12 @@ parameters:
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
+			rawMessage: 'Value assigned to $ldi[''graded_gradeable''] is never read before being overwritten.'
+			identifier: assign.overwritten
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
 			rawMessage: 'Call to function array_search() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
@@ -13206,6 +14046,30 @@ parameters:
 		-
 			rawMessage: Property app\models\gradeable\LateDays::$late_days_updates type has no value type specified in iterable type array.
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			rawMessage: Value assigned to variable $late_days_change is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			rawMessage: Variable $auto_graded_gradeable is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			rawMessage: Variable $late_days_charged is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			rawMessage: Variable $prev_time_stamp is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
@@ -13434,6 +14298,18 @@ parameters:
 		-
 			rawMessage: 'Strict comparison using === between app\models\gradeable\GradedGradeable and null will always evaluate to false.'
 			identifier: identical.alwaysFalse
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			rawMessage: 'Value assigned to $graded_components[] is never read.'
+			identifier: assign.unused
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			rawMessage: 'Value assigned to $graders[$graded_component->getGrader()->getId()] is never read.'
+			identifier: assign.unused
 			count: 1
 			path: app/models/gradeable/TaGradedGradeable.php
 
@@ -13684,7 +14560,7 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			rawMessage: 'Class app\repositories\SessionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\SessionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/SessionRepository.php
@@ -13696,43 +14572,49 @@ parameters:
 			path: app/repositories/SessionRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\VcsAuthTokenRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\VcsAuthTokenRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/VcsAuthTokenRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\course\CourseMaterialRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: Variable $currentDate is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/repositories/banner/BannerImageRepository.php
+
+		-
+			rawMessage: 'Class app\repositories\course\CourseMaterialRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/course/CourseMaterialRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\email\EmailRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\email\EmailRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\forum\CategoryRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\forum\CategoryRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/forum/CategoryRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\forum\PostRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\forum\PostRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/forum/PostRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\forum\ThreadRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\forum\ThreadRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/forum/ThreadRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\poll\OptionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\poll\OptionRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
@@ -13744,7 +14626,7 @@ parameters:
 			path: app/repositories/poll/OptionRepository.php
 
 		-
-			rawMessage: 'Class app\repositories\poll\PollRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: TEntityClass'
+			rawMessage: 'Class app\repositories\poll\PollRepository extends generic class Doctrine\ORM\EntityRepository but does not specify its types: T'
 			identifier: missingType.generics
 			count: 1
 			path: app/repositories/poll/PollRepository.php
@@ -13810,6 +14692,12 @@ parameters:
 			path: app/views/AuthenticationView.php
 
 		-
+			rawMessage: Variable $new_account_text is never read.
+			identifier: variable.unused
+			count: 2
+			path: app/views/AuthenticationView.php
+
+		-
 			rawMessage: 'Loose comparison via "!=" between string and string is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 4
@@ -13852,6 +14740,24 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
+			rawMessage: Value assigned to variable $peer_aliases is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			rawMessage: Value assigned to variable $ta_grader_names is never read.
+			identifier: assign.unused
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			rawMessage: 'Variable $peer_aliases is assigned value array{} but it already has that value.'
+			identifier: assign.redundant
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
 			rawMessage: 'Method app\views\AutogradingStatusView::displayPage() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13862,6 +14768,12 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/AutogradingStatusView.php
+
+		-
+			rawMessage: Variable $roomId is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/ChatroomView.php
 
 		-
 			rawMessage: 'Method app\views\ErrorView::courseErrorPage() has no return type specified.'
@@ -14032,6 +14944,12 @@ parameters:
 			path: app/views/GlobalView.php
 
 		-
+			rawMessage: Variable $currentDate is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/GlobalView.php
+
+		-
 			rawMessage: 'Method app\views\HomePageView::showCourseCreationPage() has parameter $courses with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -14164,6 +15082,12 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
+			rawMessage: Foreach key variable $gradeable_id is never read.
+			identifier: foreach.unusedKey
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
 			rawMessage: 'Loose comparison via "!=" between int and int is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 2
@@ -14284,6 +15208,18 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
+			rawMessage: Value assigned to variable $date_time is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			rawMessage: Variable $messsage_file_details is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
 			rawMessage: 'Method app\views\PollView::pollForm() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -14322,6 +15258,12 @@ parameters:
 		-
 			rawMessage: 'Method app\views\PollView::showPollsStudent() has no return type specified.'
 			identifier: missingType.return
+			count: 1
+			path: app/views/PollView.php
+
+		-
+			rawMessage: 'Value assigned to $response_option_ids[] is never read.'
+			identifier: assign.unused
 			count: 1
 			path: app/views/PollView.php
 
@@ -14484,6 +15426,12 @@ parameters:
 		-
 			rawMessage: 'Method app\views\admin\LateDayView::displayLateDays() has parameter $users with no type specified.'
 			identifier: missingType.parameter
+			count: 1
+			path: app/views/admin/LateDayView.php
+
+		-
+			rawMessage: Variable $lastest_gradeable is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/views/admin/LateDayView.php
 
@@ -14680,6 +15628,18 @@ parameters:
 			path: app/views/calendar/CalendarView.php
 
 		-
+			rawMessage: Variable $display_names is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/calendar/CalendarView.php
+
+		-
+			rawMessage: Variable $unformatted_courses is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/calendar/CalendarView.php
+
+		-
 			rawMessage: 'Loose comparison via "!=" between int<0, max> and int is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
@@ -14740,6 +15700,12 @@ parameters:
 			path: app/views/course/CourseMaterialsView.php
 
 		-
+			rawMessage: Value assigned to variable $inner_full_path is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
@@ -14782,6 +15748,18 @@ parameters:
 			path: app/views/email/EmailStatusView.php
 
 		-
+			rawMessage: Value assigned to variable $count only flows into values that are never used.
+			identifier: assign.unusedFlow
+			count: 1
+			path: app/views/email/EmailStatusView.php
+
+		-
+			rawMessage: Value of variable $count after ++ only flows into values that are never used.
+			identifier: postInc.unusedFlow
+			count: 1
+			path: app/views/email/EmailStatusView.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 2
@@ -14791,6 +15769,12 @@ parameters:
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
 			count: 10
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			rawMessage: Foreach key variable $user is never read.
+			identifier: foreach.unusedKey
+			count: 1
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -14966,6 +15950,48 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/views/forum/ForumThreadView.php
+
+		-
+			rawMessage: Value assigned to variable $post_user_info is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			rawMessage: Value assigned to variable $posts is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			rawMessage: Value assigned to variable $return is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 2
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			rawMessage: Variable $show_deleted_class is assigned value '' but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			rawMessage: Variable $use_as_heading is never read.
+			identifier: variable.unused
+			count: 3
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			rawMessage: Foreach key variable $key is never read.
+			identifier: foreach.unusedKey
+			count: 2
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Foreach key variable $user is never read.
+			identifier: foreach.unusedKey
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
 
 		-
 			rawMessage: Implicit array creation is not allowed - variable $component_details might not exist.
@@ -15214,6 +16240,90 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			rawMessage: Value assigned to variable $id is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Value assigned to variable $id is never read.
+			identifier: assign.unused
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Value assigned to variable $isGradeInquiryPanel is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Value assigned to variable $peer_percentage is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 2
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Value assigned to variable $submitters is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Value assigned to variable $user is never read.
+			identifier: assign.unused
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Value assigned to variable $verified only flows into values that are never used.
+			identifier: assign.unusedFlow
+			count: 2
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Variable $entire_peer_graded is assigned value 0 but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Variable $entire_peer_percentage is assigned value 0 but it already has that value.
+			identifier: assign.redundant
+			count: 2
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Variable $entire_peer_total is assigned value 0 but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Variable $isPeerPanel is assigned value false but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Variable $isStudentInfoPanel is assigned value true but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Variable $non_late_total_grading_percentage is assigned value 0 but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Variable $total_grading_percentage is assigned value 0 but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			rawMessage: 'Call to function in_array() requires parameter #3 to be set.'
 			identifier: function.strict
 			count: 1
@@ -15280,6 +16390,12 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
+			rawMessage: 'Loose comparison via "==" between DateTime and DateTime is not allowed.'
+			identifier: equal.notAllowed
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
 			rawMessage: 'Loose comparison via "==" between bool and true is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
@@ -15293,12 +16409,6 @@ parameters:
 
 		-
 			rawMessage: 'Loose comparison via "==" between int<0, max> and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/views/submission/HomeworkView.php
-
-		-
-			rawMessage: 'Loose comparison via "==" between mixed and mixed is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/views/submission/HomeworkView.php
@@ -15334,8 +16444,128 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
+			rawMessage: 'Method app\views\submission\HomeworkView::renderVersionBox() has an unused parameter $show_hidden.'
+			identifier: method.unusedParameter
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
 			rawMessage: 'Only booleans are allowed in a ternary operator condition, app\models\gradeable\GradedGradeable|null given.'
 			identifier: ternary.condNotBoolean
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: 'Strict comparison using !== between mixed and null will always evaluate to true.'
+			identifier: notIdentical.alwaysTrue
+			count: 2
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Value assigned to variable $data is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Value assigned to variable $id is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Value assigned to variable $is_valid is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Value assigned to variable $late_days_allowed is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Value assigned to variable $notebook is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Value assigned to variable $notebook_model is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Value assigned to variable $vcs_partial_path is never read before being overwritten.
+			identifier: assign.overwritten
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $active_days_late is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $can_download is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $course is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $gradeable_id is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $id is assigned value '' but it already has that value.
+			identifier: assign.redundant
+			count: 2
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $input_data is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $is_valid is assigned value true but it already has that value.
+			identifier: assign.redundant
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $notebook_file_submissions is never read.
+			identifier: variable.unused
+			count: 2
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $numberUtils is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $semester is never read.
+			identifier: variable.unused
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			rawMessage: Variable $show_incentive_message is never read.
+			identifier: variable.unused
 			count: 1
 			path: app/views/submission/HomeworkView.php
 
