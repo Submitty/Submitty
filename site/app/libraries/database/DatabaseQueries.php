@@ -5085,13 +5085,12 @@ SQL;
      *
      * @param string $grader_id
      * @param string $gradeable_id
-     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: ?float, max: float, comment: string}>}>
+     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: ?float, max: float}>}>
      */
     public function getPeerParticipationForGrader(string $grader_id, string $gradeable_id): array {
         $result = [];
         $this->course_db->query(
             "SELECT gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, 
-                gcd.gcd_component_comment,
                 CASE
                     WHEN COUNT(gcm.gcm_id) = 0 AND gcd.gcd_score = 0 THEN NULL
                     ELSE LEAST(GREATEST(
@@ -5109,7 +5108,7 @@ SQL;
                 AND gd.gd_user_id IS NOT NULL
             GROUP BY gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, gc.gc_order,
                 gc.gc_default, gc.gc_lower_clamp, gc.gc_upper_clamp,
-                gcd.gcd_score, gcd.gcd_component_comment
+                gcd.gcd_score
             ORDER BY gd.gd_user_id, gc.gc_order",
             [$grader_id, $gradeable_id]
         );
@@ -5120,7 +5119,6 @@ SQL;
                 'title' => $row['gc_title'],
                 'score' => $row['total_score'] !== null ? (float) $row['total_score'] : null,
                 'max' => (float) $row['gc_max_value'],
-                'comment' => $row['gcd_component_comment'],
             ];
         }
 
