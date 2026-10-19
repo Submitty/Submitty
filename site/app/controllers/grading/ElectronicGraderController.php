@@ -1173,7 +1173,7 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $rawOverrides = $this->core->getQueries()->getRawUsersWithOverriddenGrades($gradeable->getId());
+        $rawOverrides = $peer ? [] : $this->core->getQueries()->getRawUsersWithOverriddenGrades($gradeable->getId());
         $overrides = [];
         $override_data = [];
         foreach ($rawOverrides as $o) {
@@ -1241,7 +1241,7 @@ class ElectronicGraderController extends AbstractController {
             ];
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_group_by_clusters, $algorithms, $current_algorithm, $cluster_map);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_group_by_clusters, $algorithms, $current_algorithm, $cluster_map, $skip_withdrawn);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -1627,6 +1627,7 @@ class ElectronicGraderController extends AbstractController {
      * Evenly distributes them between all sections, giving extra teams to Sections numerically if necessary
      * Ex: 13 teams in 3 sections will always give Section 1: 5 teams; Section 2: 4 teams;  Section 3: 4 teams
      */
+    #[AccessControl(permission: "grading.electronic.submit_team_form")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/randomize_rotating")]
     public function randomizeTeamRotatingSections($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1923,6 +1924,8 @@ class ElectronicGraderController extends AbstractController {
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
+            $skip_withdrawn = !$this->core->getUser()->accessFullGrading()
+                || ($_COOKIE['include_withdrawn_students'] ?? 'omit') !== 'include';
             $goToStudent = null;
             $cluster_map = [];
             $cluster_navigation = $filter === 'cluster'
@@ -1953,28 +1956,28 @@ class ElectronicGraderController extends AbstractController {
                 $filter = 'default';
             }
             if ($cluster_navigation && $to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+                $goToStudent = $order_all_sections->getPrevSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map, $skip_withdrawn);
             }
             elseif ($cluster_navigation && $to === 'prev') {
-                $goToStudent = $order_grading_sections->getPrevSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+                $goToStudent = $order_grading_sections->getPrevSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map, $skip_withdrawn);
             }
             elseif ($cluster_navigation && $to === 'next' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+                $goToStudent = $order_all_sections->getNextSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map, $skip_withdrawn);
             }
             elseif ($cluster_navigation && $to === 'next') {
-                $goToStudent = $order_grading_sections->getNextSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map);
+                $goToStudent = $order_grading_sections->getNextSubmitterByCluster($from_id, is_numeric($component_id) ? $component_id : -1, $cluster_map, $skip_withdrawn);
             }
             elseif ($to === 'prev' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
             }
             elseif ($to === 'prev') {
-                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
             }
             elseif ($to === 'next' && $navigate_assigned_students_only === "false" && $this->core->getUser()->accessFullGrading()) {
-                $goToStudent = $order_all_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
             }
             elseif ($to === 'next') {
-                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter);
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id, is_numeric($component_id) ? $component_id : -1, $filter, $skip_withdrawn);
             }
             // Reassign who_id
             if ($goToStudent !== null) {

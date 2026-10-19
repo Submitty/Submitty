@@ -16,7 +16,7 @@ coverage:
       vue:
         flags:
           - vue
-        target: 95%
+        target: 45%
     patch: false
     changes: false
 

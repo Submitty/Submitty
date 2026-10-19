@@ -264,10 +264,14 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @param int $component_id Component ID to check (for ungraded/itempool)
      * @param string $filter The filter to use when checking submitters
+     * @param bool $skip_withdrawn True to skip withdrawn students (individual gradeables only)
      * @return Submitter|null Previous submitter to grade
      */
-    public function getPrevSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
-        return $this->getPrevSubmitterMatching($submitter, $this->getFilterFunction($submitter, $component_id, $filter));
+    public function getPrevSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default', bool $skip_withdrawn = false): ?Submitter {
+        $fn = $this->getFilterFunction($submitter, $component_id, $filter);
+        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) use ($fn, $skip_withdrawn) {
+            return $fn($sub) && !($skip_withdrawn && $this->isWithdrawn($sub));
+        });
     }
 
     /**
@@ -276,10 +280,14 @@ class GradingOrder extends AbstractModel {
      * @param Submitter $submitter Current grading submitter
      * @param int $component_id Component ID to check (for ungraded/itempool)
      * @param string $filter The filter to use when checking submitters
+     * @param bool $skip_withdrawn True to skip withdrawn students (individual gradeables only)
      * @return Submitter|null Next submitter to grade
      */
-    public function getNextSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default'): ?Submitter {
-        return $this->getNextSubmitterMatching($submitter, $this->getFilterFunction($submitter, $component_id, $filter));
+    public function getNextSubmitter(Submitter $submitter, int $component_id = -1, string $filter = 'default', bool $skip_withdrawn = false): ?Submitter {
+        $fn = $this->getFilterFunction($submitter, $component_id, $filter);
+        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) use ($fn, $skip_withdrawn) {
+            return $fn($sub) && !($skip_withdrawn && $this->isWithdrawn($sub));
+        });
     }
 
     /**
@@ -287,8 +295,8 @@ class GradingOrder extends AbstractModel {
      *
      * @param array<string, int|string> $cluster_map Submitter ID to cluster ID/name
      */
-    public function getPrevSubmitterByCluster(Submitter $submitter, int $component_id, array $cluster_map): ?Submitter {
-        return $this->getClusterSubmitter($submitter, $this->getFilterFunction($submitter, $component_id, 'default'), $cluster_map, -1);
+    public function getPrevSubmitterByCluster(Submitter $submitter, int $component_id, array $cluster_map, bool $skip_withdrawn = false): ?Submitter {
+        return $this->getClusterSubmitter($submitter, $this->getFilterFunction($submitter, $component_id, 'default'), $cluster_map, -1, $skip_withdrawn);
     }
 
     /**
@@ -296,8 +304,8 @@ class GradingOrder extends AbstractModel {
      *
      * @param array<string, int|string> $cluster_map Submitter ID to cluster ID/name
      */
-    public function getNextSubmitterByCluster(Submitter $submitter, int $component_id, array $cluster_map): ?Submitter {
-        return $this->getClusterSubmitter($submitter, $this->getFilterFunction($submitter, $component_id, 'default'), $cluster_map, 1);
+    public function getNextSubmitterByCluster(Submitter $submitter, int $component_id, array $cluster_map, bool $skip_withdrawn = false): ?Submitter {
+        return $this->getClusterSubmitter($submitter, $this->getFilterFunction($submitter, $component_id, 'default'), $cluster_map, 1, $skip_withdrawn);
     }
 
     /**
@@ -308,7 +316,7 @@ class GradingOrder extends AbstractModel {
      * @param callable $fn
      * @param array<string, int|string> $cluster_map Submitter ID to cluster ID/name
      */
-    private function getClusterSubmitter(Submitter $submitter, callable $fn, array $cluster_map, int $step): ?Submitter {
+    private function getClusterSubmitter(Submitter $submitter, callable $fn, array $cluster_map, int $step, bool $skip_withdrawn): ?Submitter {
         $index = $this->containsSubmitter($submitter) ? $this->getSubmitterIndex($submitter) : ($step < 0 ? $this->getSubmitterCount() : -1);
         if ($index === false) {
             return null;
@@ -322,7 +330,7 @@ class GradingOrder extends AbstractModel {
                 return null;
             }
             $candidate_cluster = $cluster_map[$candidate->getId()] ?? null;
-        } while (($current_cluster !== null && $candidate_cluster === $current_cluster) || !$fn($candidate));
+        } while (($current_cluster !== null && $candidate_cluster === $current_cluster) || !$fn($candidate) || ($skip_withdrawn && $this->isWithdrawn($candidate)));
         return $candidate;
     }
 
@@ -355,6 +363,13 @@ class GradingOrder extends AbstractModel {
         if (is_null($this->grade_inquiry_users)) {
             $this->grade_inquiry_users = $this->core->getQueries()->getGradeInquiriesUsers($this->gradeable->getId(), $ungraded, $component_id);
         }
+    }
+
+    /**
+     * True if the submitter is a withdrawn student on an individual (non-team) gradeable.
+     */
+    private function isWithdrawn(Submitter $sub): bool {
+        return !$sub->isTeam() && $sub->getUser()->getRegistrationType() === 'withdrawn';
     }
 
     /**

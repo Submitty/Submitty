@@ -12,13 +12,15 @@ from sqlalchemy import text
 def delete_expired_sessions(db):
     """Delete the sessions which have expired."""
 
-    return db.execute(text("""
+    return db.execute(
+        text("""
         WITH deleted AS (
             DELETE FROM sessions
             WHERE session_expires < current_timestamp
             RETURNING *
         ) SELECT COUNT(*) FROM deleted
-        """)).fetchone()[0]
+        """)
+    ).fetchone()[0]
 
 
 def main():
@@ -33,7 +35,7 @@ def main():
 
     except Exception as e:
         e_str = f"[{datetime.datetime.now()}] Error while deleting sessions: {e}"
-        database_queries.LOG_FILE.write(e_str+"\n")
+        database_queries.LOG_FILE.write(e_str + "\n")
         print(e_str)
 
 
