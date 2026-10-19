@@ -1,0 +1,22 @@
+{% include 'Vue.twig' with {
+    'type': 'page',
+    'name': 'CourseNotificationsPage',
+    'args': {
+        'notifications': notifications,
+    },
+    'events': {
+        'update-badge-dom': '(count) => {
+            const badges = document.querySelectorAll(
+                "#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge"
+            );
+            if (count <= 0) {
+                badges.forEach((el) => el.remove());
+            }
+            else {
+                badges.forEach((el) => {
+                    el.textContent = `${count}`;
+                });
+            }
+        }',
+    },
+} %}
