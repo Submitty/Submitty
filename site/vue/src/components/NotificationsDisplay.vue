@@ -16,7 +16,10 @@ const props = defineProps<{
     course: boolean;
 }>();
 
-const showPopup = ref(false);
+const emit = defineEmits<{
+    'update-badge-dom': [count: number];
+}>();
+
 const showUnseenOnly = ref(true);
 const initialUnseenCount = props.unseenCount >= 0
     ? props.unseenCount
@@ -33,7 +36,7 @@ onMounted(() => {
         showUnseenOnly.value = false;
     }
     if (props.course) {
-        updateBadgeDOM(localUnseenCount.value);
+        emit('update-badge-dom', localUnseenCount.value);
     }
 });
 
@@ -62,20 +65,6 @@ const visibleNotifications = computed(() =>
         : filteredNotifications.value.slice(0, 10),
 );
 
-function updateBadgeDOM(count: number) {
-    const badges = document.querySelectorAll(
-        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
-    );
-    if (count <= 0) {
-        badges.forEach((el) => el.remove());
-    }
-    else {
-        badges.forEach((el) => {
-            el.textContent = `${count}`;
-        });
-    }
-}
-
 function markSeen() {
     // Course Page
     if (props.course) {
@@ -92,21 +81,13 @@ function markSeen() {
                     }
                 }
                 localUnseenCount.value = 0;
-                updateBadgeDOM(0);
+                emit('update-badge-dom', 0);
             },
             error: function (err) {
                 console.error(err);
             },
         });
     }
-    // Home Page
-    else {
-        showPopup.value = true;
-    }
-}
-
-function goToNotificationSettings() {
-    window.location.href = buildCourseUrl(['notifications', 'settings']);
 }
 
 // mark notification as seen without reloading
@@ -115,7 +96,7 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
         if (n.id === id && n.course === course) {
             n.seen = true;
             localUnseenCount.value = Math.max(0, localUnseenCount.value - 1);
-            updateBadgeDOM(localUnseenCount.value);
+            emit('update-badge-dom', localUnseenCount.value);
             break;
         }
     }
@@ -131,7 +112,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
             }
         }
     }
-    updateBadgeDOM(localUnseenCount.value);
+    emit('update-badge-dom', localUnseenCount.value);
 }
 
 </script>
@@ -160,14 +141,14 @@ function markAllSeen(courses: Record<string, unknown>[]) {
           v-if="notifications.length !== 0 && !props.course"
           @mark-all="({ courses }) => markAllSeen(courses)"
         />
-        <button
+        <a
           v-if="props.course"
           class="btn btn-primary"
           data-testid="notification-settings-button"
-          @click="goToNotificationSettings"
+          :href="buildCourseUrl(['notifications', 'settings'])"
         >
           Settings
-        </button>
+        </a>
       </div>
     </div>
     <p
