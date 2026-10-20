@@ -173,17 +173,21 @@ class RunGenerateRepos(CourseGradeableJob):
             with open(log_file_path, "a") as output_file:
                 print("At time: " + current_time, file=output_file)
                 output_file.flush()
-                subprocess.run([
-                    "sudo",
-                    "/usr/local/submitty/venv/bin/python3",
-                    gen_script,
-                    "--non-interactive",
-                    semester,
-                    course,
-                    gradeable,
-                    "--subdirectory",
-                    subdirectory
-                ], stdout=output_file, stderr=output_file)
+                subprocess.run(
+                    [
+                        "sudo",
+                        "/usr/local/submitty/venv/bin/python3",
+                        gen_script,
+                        "--non-interactive",
+                        semester,
+                        course,
+                        gradeable,
+                        "--subdirectory",
+                        subdirectory,
+                    ],
+                    stdout=output_file,
+                    stderr=output_file,
+                )
         except PermissionError:
             print("error, could not open " + output_file + " for writing")
 
@@ -426,13 +430,43 @@ class CreateCourse(AbstractJob):
         )
 
         with log_file_path.open("w") as output_file:
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group],
-                           stdout=output_file, stderr=output_file)
-            subprocess.run(["sudo", "/usr/local/submitty/venv/bin/python3", "/usr/local/submitty/sbin/adduser_course.py",
-                           head_instructor, semester, course], stdout=output_file, stderr=output_file)
+            subprocess.run(
+                [
+                    "sudo",
+                    "/usr/local/submitty/sbin/create_course.sh",
+                    semester,
+                    course,
+                    head_instructor,
+                    base_group,
+                ],
+                stdout=output_file,
+                stderr=output_file,
+            )
+            subprocess.run(
+                [
+                    "sudo",
+                    "/usr/local/submitty/venv/bin/python3",
+                    "/usr/local/submitty/sbin/adduser_course.py",
+                    head_instructor,
+                    semester,
+                    course,
+                ],
+                stdout=output_file,
+                stderr=output_file,
+            )
             if VERIFIED_ADMIN_USER != "":
-                subprocess.run(["sudo", "/usr/local/submitty/venv/bin/python3", "/usr/local/submitty/sbin/adduser_course.py",
-                               VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
+                subprocess.run(
+                    [
+                        "sudo",
+                        "/usr/local/submitty/venv/bin/python3",
+                        "/usr/local/submitty/sbin/adduser_course.py",
+                        VERIFIED_ADMIN_USER,
+                        semester,
+                        course,
+                    ],
+                    stdout=output_file,
+                    stderr=output_file,
+                )
 
     def cleanup_job(self):
         pass

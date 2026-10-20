@@ -57,16 +57,34 @@ if __name__ == "__main__":
         sys.exit(1)
 
     delay_in_seconds = 5
-    print('Stopping the local shipper daemon...')
-    subprocess.call(["/usr/local/submitty/venv/bin/python3", SYSTEMCTL_WRAPPER_SCRIPT, "stop",
-                    "--daemon", "shipper", "--target", "primary"])
+    print("Stopping the local shipper daemon...")
+    subprocess.call(
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "stop",
+            "--daemon",
+            "shipper",
+            "--target",
+            "primary",
+        ]
+    )
 
-    print('Stopping all local worker daemon...')
-    subprocess.call(["/usr/local/submitty/venv/bin/python3", SYSTEMCTL_WRAPPER_SCRIPT, "stop",
-                    "--daemon", "worker", "--target", "primary"])
+    print("Stopping all local worker daemon...")
+    subprocess.call(
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "stop",
+            "--daemon",
+            "worker",
+            "--target",
+            "primary",
+        ]
+    )
 
-    print('Stopping all remote worker daemons...')
-    cmd = '/usr/local/submitty/venv/bin/python3 {0} stop --daemon worker --target perform_on_all_workers'
+    print("Stopping all remote worker daemons...")
+    cmd = "/usr/local/submitty/venv/bin/python3 {0} stop --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
@@ -74,16 +92,34 @@ if __name__ == "__main__":
     print("Delaying {0} seconds to allow the system to stabilize...".format(delay_in_seconds))
     time.sleep(delay_in_seconds)
 
-    print('Starting the local shipper daemon...')
-    subprocess.call(["/usr/local/submitty/venv/bin/python3", SYSTEMCTL_WRAPPER_SCRIPT, "start", "--daemon",
-                    "shipper", "--target", "primary"])
+    print("Starting the local shipper daemon...")
+    subprocess.call(
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "start",
+            "--daemon",
+            "shipper",
+            "--target",
+            "primary",
+        ]
+    )
 
-    print('Starting the local worker daemon...')
-    subprocess.call(["/usr/local/submitty/venv/bin/python3", SYSTEMCTL_WRAPPER_SCRIPT, "start", "--daemon",
-                    "worker", "--target", "primary"])
+    print("Starting the local worker daemon...")
+    subprocess.call(
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "start",
+            "--daemon",
+            "worker",
+            "--target",
+            "primary",
+        ]
+    )
 
-    print('Starting all worker daemons...')
-    cmd = '/usr/local/submitty/venv/bin/python3 {0} start --daemon worker --target perform_on_all_workers'
+    print("Starting all worker daemons...")
+    cmd = "/usr/local/submitty/venv/bin/python3 {0} start --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
@@ -128,11 +164,17 @@ if __name__ == "__main__":
             w_url = worker_cfg[e_worker]["address"]
             w_usr = worker_cfg[e_worker]["username"]
 
-            subprocess.run(["/usr/local/submitty/venv/bin/python3", "-x", "-c",
-                            f"""import restart_shipper_and_all_workers as r;    \
-                                r.get_log('{e_worker}', '{w_usr}', '{w_url}')"""],
-                           cwd=path.dirname(path.realpath(__file__)),
-                           env={"HOME": os.path.expanduser("~submitty_daemon")},
-                           preexec_fn=chguid(usr_cfg["daemon_uid"], usr_cfg["daemon_gid"]))
+            subprocess.run(
+                [
+                    "/usr/local/submitty/venv/bin/python3",
+                    "-x",
+                    "-c",
+                    f"""import restart_shipper_and_all_workers as r;    \
+                                r.get_log('{e_worker}', '{w_usr}', '{w_url}')""",
+                ],
+                cwd=path.dirname(path.realpath(__file__)),
+                env={"HOME": os.path.expanduser("~submitty_daemon")},
+                preexec_fn=chguid(usr_cfg["daemon_uid"], usr_cfg["daemon_gid"]),
+            )
 
-    print('Finished!')
+    print("Finished!")
