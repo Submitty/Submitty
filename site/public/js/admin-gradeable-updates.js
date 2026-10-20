@@ -925,15 +925,16 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 for (let i = 1; i < lines.length; i++) {
                     const built_line = {};
                     const cells = lines[i].split(',');
+                    if (cells.every((cell) => cell.trim() === '')) {
+                        continue;
+                    }
 
                     for (let j = 0; j < cells.length; j++) {
                         if (cells[j].trim() !== '') {
                             built_line[headers[j].trim()] = cells[j].trim();
                         }
                     }
-                    // built_line[headers[0].trim()]= cells[students_lines_index].trim();
-                    // built_line[headers[1].trim()]= cells[graders_lines_index].trim();
-                    jsonFile[i - 1] = built_line;
+                    jsonFile.push(built_line);
                 }
                 const container = $('#container-rubric');
                 if (container.length === 0) {
@@ -944,7 +945,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 if (!container.is(':visible')) {
                     return;
                 }
-                p_values['peer_graders_list'] = jsonFile;
+                p_values['peer_graders_list'] = JSON.stringify(jsonFile);
                 setGradeableUpdateInProgress();
                 $.getJSON({
                     type: 'POST',
