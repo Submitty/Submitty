@@ -51,12 +51,14 @@ def up(config):
                 )
 
         # Use visudo to validate the temp file using -c to check syntax
-        result =  subprocess.run(
+        result = subprocess.run(
             ["visudo", "-c", "-f", temp_sudoers_path], capture_output=True, text=True
         )
 
         if result.returncode != 0:
-            raise RuntimeError(f"visudo validation failed, sudoers changes aborted:\n{result.stderr}")
+            raise RuntimeError(
+                f"visudo validation failed, sudoers changes aborted:\n{result.stderr}"
+            )
 
         # Overwrite /etc/sudoers
         shutil.copy2(temp_sudoers_path, sudoers_path)
