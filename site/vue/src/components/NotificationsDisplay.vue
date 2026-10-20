@@ -189,7 +189,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       </p>
       <!-- Unseen notifications that will not reach the front-end -->
       <p
-        v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && localNotifications.length > 10 && (localUnseenCount - visibleNotifications.length) > 0"
+        v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && (localUnseenCount - visibleNotifications.length) > 0"
         class="unseen-count-p"
       >
         You have <span class="unseen-count">{{ localUnseenCount - visibleNotifications.length }}</span> older unseen notification<span v-if="localUnseenCount > 1">s</span> in your course notifications not displayed here.
