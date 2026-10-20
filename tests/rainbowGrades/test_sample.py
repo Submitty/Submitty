@@ -76,6 +76,8 @@ def remove_info_last_updated(raw_line):
     """
     if "<em>Information last updated:" in raw_line:
         return False
+    if "Lecture Participation Polls for:" in raw_line:
+        return False
     return True
 
 
