@@ -1812,6 +1812,23 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
+            if ($prop === 'peer_graders_list') {
+                try {
+                    if (is_string($post_val)) {
+                        $post_val = json_decode($post_val, true, 512, JSON_THROW_ON_ERROR);
+                    }
+                    if (!is_array($post_val)) {
+                        throw new \InvalidArgumentException(
+                            'Peer graders list must be an array.'
+                        );
+                    }
+                }
+                catch (\JsonException | \InvalidArgumentException $e) {
+                    $errors[$prop] = $e->getMessage();
+                    continue;
+                }
+            }
+
             if (in_array($prop, $numeric_properties, true) && !is_numeric($post_val)) {
                 $errors[$prop] = "{$prop} must be a number";
                 continue;
