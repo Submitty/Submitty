@@ -52,7 +52,7 @@ class OfficeHoursQueueController extends AbstractController {
         $queue_code = trim($_POST['code']);
         $token = trim($_POST['token']) != "" ? trim($_POST['token']) : null;
 
-        $re = '/^[\sa-zA-Z0-9_\-]+$/m';
+        $re = '/^[ a-zA-Z0-9_\-]+$/';
         $matches_code = [0];
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
         $matches_token = [0];
@@ -460,7 +460,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         //Replace whitespace with "_"
         $token = trim($_POST['token']);
-        $re = '/^[\sa-zA-Z0-9_\-]*$/m';
+        $re = '/^[ a-zA-Z0-9_\-]*$/';
         preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         if (count($matches_token) !== 1) {
             $this->core->addErrorMessage('Queue secret code must only contain letters, numbers, spaces, "_", and "-"');
