@@ -48,7 +48,7 @@ class GradeInquiryController extends AbstractController {
             return JsonResponse::getFailResponse("No graded gradeable found for submitter");
         }
 
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && $user->accessGrading();
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Insufficient permissions to create grade inquiry')
@@ -184,7 +184,7 @@ class GradeInquiryController extends AbstractController {
         $can_inquiry = $this->core->getAccess()->canI(
             "grading.electronic.grade_inquiry",
             ['graded_gradeable' => $graded_gradeable]
-        ) && $user->accessGrading();
+        );
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return "";
         }
@@ -238,7 +238,7 @@ class GradeInquiryController extends AbstractController {
             return JsonResponse::getFailResponse("Failed to get submitter");
         }
 
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]) && $user->accessGrading();
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
         if (!($graded_gradeable->getSubmitter()->hasUser($user) || $can_inquiry)) {
             return JsonResponse::getFailResponse('Insufficient permissions to change grade inquiry status');
         }
@@ -280,14 +280,28 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @return MultiResponse
+     * @return MultiResponse|JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods: ["POST"])]
     public function getGradeInquiryDiscussion($gradeable_id) {
-        $submitter_id = $_POST['submitter_id'];
+        $submitter_id = $_POST['submitter_id'] ?? '';
 
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false) {
+            return JsonResponse::getFailResponse('Could not find gradeable');
+        }
+
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
+        if ($graded_gradeable === false) {
+            return JsonResponse::getFailResponse('No graded gradeable found for submitter');
+        }
+
+        $user = $this->core->getUser();
+        $can_view = $graded_gradeable->getSubmitter()->hasUser($user)
+            || $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        if (!$can_view) {
+            return JsonResponse::getFailResponse('Insufficient permissions to view grade inquiry');
+        }
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
