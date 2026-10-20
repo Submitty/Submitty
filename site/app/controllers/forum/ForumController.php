@@ -1296,10 +1296,10 @@ class ForumController extends AbstractController {
 
     private function getAllowedCategoryColor() {
         $colors = [];
-        $colors["RED"]    = --colorblind-friendly-red;
-        $colors["GREEN"]  = --colorblind-friendly-green;
-        $colors["PURPLE"] = --colorblind-friendly-purple;
-        $colors["BLUE"]   = --colorblind-friendly-blue;
+        $colors["RED"]    = "#c40233";
+        $colors["GREEN"]  = "#008000";
+        $colors["PURPLE"] = "#800080";
+        $colors["BLUE"]   = "#0000ff";
         return $colors;
     }
 
