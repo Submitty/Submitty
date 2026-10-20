@@ -6,11 +6,11 @@ import os
 import requests
 from requests.exceptions import RequestException
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config")
 
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+with open(os.path.join(CONFIG_PATH, "submitty.json")) as open_file:
     OPEN_JSON = json.load(open_file)
-SUBMISSION_URL = OPEN_JSON['submission_url']
+SUBMISSION_URL = OPEN_JSON["submission_url"]
 
 
 def check_password(environ, user, password):
@@ -27,18 +27,18 @@ def check_password(environ, user, password):
     # /<VCS>/<SEMESTER>/<COURSE>/<G_ID>/<USER_ID> that have
     # to do with the GIT and whether it's pushing, pulling, cloning, etc.
 
-    params = list(filter(lambda x: len(x) > 0, environ['REQUEST_URI'].split("/")))
+    params = list(filter(lambda x: len(x) > 0, environ["REQUEST_URI"].split("/")))
     vcs = params[0]
 
     vcs_paths = []
-    if vcs == 'git':
+    if vcs == "git":
         # info/refs?service=git-upload-pack
         vcs_paths = [
-            'info',
-            'git-upload-pack',
-            'refs?service=git-upload-pack',
-            'refs?service=git-receive-pack',
-            'git-receive-pack'
+            "info",
+            "git-upload-pack",
+            "refs?service=git-upload-pack",
+            "refs?service=git-receive-pack",
+            "git-receive-pack",
         ]
 
     params = list(filter(lambda x: x not in vcs_paths, params))
@@ -48,22 +48,21 @@ def check_password(environ, user, password):
         return None
 
     data = {
-        'user_id': user,
-        'password': password,
-        'gradeable_id': gradeable,
-        'id': unknown_id,
+        "user_id": user,
+        "password": password,
+        "gradeable_id": gradeable,
+        "id": unknown_id,
     }
 
     try:
         req = requests.post(
-            SUBMISSION_URL + f'/{semester}/{course}/authentication/vcs_login',
-            data=data
+            SUBMISSION_URL + f"/{semester}/{course}/authentication/vcs_login", data=data
         )
         response = req.json()
-        if response['status'] == 'error':
+        if response["status"] == "error":
             return None
         else:
-            return response['status'] == 'success'
+            return response["status"] == "success"
     except RequestException:
         pass
     return False
@@ -84,19 +83,15 @@ if __name__ == "__main__":
     None
     """
     #
-    request_uri = '/git/s19/sample/open_homework/instructor'
-    print(check_password({'REQUEST_URI': request_uri}, 'instructor', 'instructor'))
-    print(check_password({'REQUEST_URI': request_uri}, 'ta', 'ta'))
-    print(check_password({'REQUEST_URI': request_uri}, 'student', 'student'))
-    print(check_password(
-        {'REQUEST_URI': '/git/s19/sample/open_homework/student'},
-        'student',
-        'student')
+    request_uri = "/git/s19/sample/open_homework/instructor"
+    print(check_password({"REQUEST_URI": request_uri}, "instructor", "instructor"))
+    print(check_password({"REQUEST_URI": request_uri}, "ta", "ta"))
+    print(check_password({"REQUEST_URI": request_uri}, "student", "student"))
+    print(
+        check_password(
+            {"REQUEST_URI": "/git/s19/sample/open_homework/student"}, "student", "student"
+        )
     )
 
     # Wrong URI. Returns None.
-    print(check_password(
-        {'REQUEST_URI': '/git/s19/sample/instructor'},
-        'instructor',
-        'instructor'
-    ))
+    print(check_password({"REQUEST_URI": "/git/s19/sample/instructor"}, "instructor", "instructor"))

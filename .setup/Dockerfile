@@ -16,6 +16,7 @@ RUN apt-get update \
     poppler-utils \
     libzbar0 \
     shellcheck \
+    yamllint \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -85,3 +86,6 @@ RUN composer install --no-scripts --no-interaction --prefer-dist \
 # install requirements for python_submitty_utils
 COPY python_submitty_utils/requirements.txt $HOME/python_submitty_utils/
 RUN pip3 install --no-cache-dir -r $HOME/python_submitty_utils/requirements.txt
+
+# make python_submitty_utils importable
+ENV PYTHONPATH="${HOME}/python_submitty_utils"

@@ -296,8 +296,10 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run ruff
+      - name: Run ruff check
         run: ruff check .
+      - name: Run ruff format
+        run: ruff format --check --diff .
 
   python-unit:
     name: Python Unit
@@ -367,8 +369,9 @@ jobs:
       - name: Install bulk upload dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y poppler-utils
-          sudo apt-get install -y libzbar0
+          sudo apt-get install -y \
+            poppler-utils \
+            libzbar0
 
       - name: Run bulk upload unit tests
         working-directory: sbin/submitty_daemon_jobs
@@ -777,7 +780,6 @@ jobs:
           spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-          env: autograding_shipper_off=True
 
       - name: Restart autograding shipper
         run: |
@@ -790,7 +792,6 @@ jobs:
           spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-          env: autograding_shipper_off=True
 
       - name: Restart autograding worker
         run: |
@@ -984,7 +985,7 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
-          env: run_area=CI
+          expose: run_area=CI
 
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
