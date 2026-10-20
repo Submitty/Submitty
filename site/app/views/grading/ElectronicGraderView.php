@@ -90,11 +90,15 @@ class ElectronicGraderView extends AbstractView {
         $peer_total = 0;
         $peer_graded = 0;
         $peer_percentage = 0;
-        $entire_peer_graded = 0;
-        $entire_peer_total = 0;
+        $peer_review_components_completed = 0;
+        $peer_review_components_total = 0;
+        $peer_review_components_percentage = 0;
+        $peer_review_assignments_total = 0;
+        $peer_graders_started = 0;
+        $peer_graders_assigned = 0;
+        $peer_grader_participation_percentage = 0;
         $total_grading_percentage = 0;
         $non_late_total_grading_percentage = 0;
-        $entire_peer_percentage = 0;
         $viewed_total = 0;
         $viewed_percent = 0;
         $overall_total = 0;
@@ -189,24 +193,31 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($peer) {
                 $peer_count = count($gradeable->getPeerComponents());
-                $entire_peer_total = 0;
+                $peer_review_components_total = 0;
                 $total_students_submitted = 0;
                 $total_grading_percentage = 0;
-                $entire_peer_graded = 0;
-                $entire_peer_percentage = 0;
+                $peer_review_components_completed = 0;
+                $peer_review_components_percentage = 0;
+                $peer_review_assignments_total = 0;
+                $peer_graders_started = 0;
+                $peer_graders_assigned = 0;
+                $peer_grader_participation_percentage = 0;
                 if ($peer_count > 0 && array_key_exists("peer_stu_grad", $sections)) {
                     if ($num_peer_components > 0) {
                         $total_students_submitted =  floor(($sections['peer_stu_grad']['total_who_submitted']));
                         $submitted_percentage_peer = round((($total_students_submitted) / $total_submissions) * 100, 1);
                         $total_grading_percentage =  number_format(($graded_total / $total_students_submitted ) * 100, 1);
-                        $entire_peer_total =  floor(($sections['peer_stu_grad']['view_peer_components']));
-                        $entire_peer_graded =  $sections['peer_stu_grad']['view_peer_graded_components'] / $num_peer_components;
+                        $peer_review_assignments_total = $sections['peer_stu_grad']['view_peer_components'];
+                        $peer_review_components_total = $peer_review_assignments_total * $num_peer_components;
+                        $peer_review_components_completed = $sections['peer_stu_grad']['view_peer_graded_components'];
+                        $peer_graders_started = $sections['peer_stu_grad']['peer_graders_started'];
+                        $peer_graders_assigned = $sections['peer_stu_grad']['peer_graders_assigned'];
                     }
-                    if ($entire_peer_total > 0) {
-                        $entire_peer_percentage = number_format(($entire_peer_graded / ($entire_peer_total) ) * 100, 1);
+                    if ($peer_review_components_total > 0) {
+                        $peer_review_components_percentage = number_format(($peer_review_components_completed / $peer_review_components_total) * 100, 1);
                     }
-                    else {
-                        $entire_peer_percentage = 0;
+                    if ($peer_graders_assigned > 0) {
+                        $peer_grader_participation_percentage = number_format(($peer_graders_started / $peer_graders_assigned) * 100, 1);
                     }
                 }
                 if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
@@ -260,7 +271,7 @@ class ElectronicGraderView extends AbstractView {
 
             if ($gradeable->isTaGradeReleased()) {
                 if ($peer) {
-                    $viewed_total = $entire_peer_total;
+                    $viewed_total = $peer_review_assignments_total;
                 }
                 else {
                     $viewed_total = $total;
@@ -347,11 +358,14 @@ class ElectronicGraderView extends AbstractView {
             "peer_total" => $peer_total,
             "peer_graded" => $peer_graded,
             "peer_percentage" => $peer_percentage,
-            "entire_peer_total" => $entire_peer_total,
+            "peer_review_components_total" => $peer_review_components_total,
             "total_grading_percentage" => $total_grading_percentage,
             "non_late_total_grading_percentage" => $non_late_total_grading_percentage, //****
-            "entire_peer_graded" => $entire_peer_graded,
-            "entire_peer_percentage" => $entire_peer_percentage,
+            "peer_review_components_completed" => $peer_review_components_completed,
+            "peer_review_components_percentage" => $peer_review_components_percentage,
+            "peer_graders_started" => $peer_graders_started,
+            "peer_graders_assigned" => $peer_graders_assigned,
+            "peer_grader_participation_percentage" => $peer_grader_participation_percentage,
             "sections" => $sections,
             "viewed_grade" => $viewed_grade,
             "viewed_total" => $viewed_total,
