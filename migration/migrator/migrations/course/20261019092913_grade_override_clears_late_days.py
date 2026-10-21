@@ -229,3 +229,14 @@ CREATE OR REPLACE FUNCTION public.calculate_remaining_cache_for_user(user_id tex
     END;
     $$;
 """)
+
+    database.execute("""
+DELETE FROM late_day_cache ldc
+WHERE EXISTS (
+    SELECT 1
+    FROM grade_override go
+    JOIN electronic_gradeable eg ON eg.g_id = go.g_id
+    WHERE go.user_id = ldc.user_id
+        AND ldc.late_day_date >= eg.eg_submission_due_date
+);
+""")
