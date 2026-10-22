@@ -258,7 +258,8 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             elem.data('grader', $('#data-table').data('current-grader'));
 
             // create border we can animate to reflect ajax status
-            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+            elem.stop(true, true);
+            elem.css('border-right', `${elem[0].offsetWidth}px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
         }
     });
 
@@ -288,7 +289,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                 elems.each((idx, elem) => {
                     elem = $(elem);
                     elem.stop(true, true);
-                    elem.css('border-right', '60px solid var(--simple-save-error-red)');
+                    elem.css(`border-right', '${elem[0].offsetWidth}px solid var(--simple-save-error-red)`);
                 });
             }
             updateVisibility();
@@ -911,7 +912,8 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
                     elem.css('background-color', '');
                     break;
             }
-            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+            elem.stop(true, true);
+            elem.css('border-right', `${elem[0].offsetWidth}px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
             elem.animate({ 'border-right-width': '0px' }, 400);
         }
     }
