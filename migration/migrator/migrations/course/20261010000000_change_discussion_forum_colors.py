@@ -15,32 +15,32 @@ def up (config, database, semester, course):
     database.execute("""
     UPDATE categories_list 
     SET color = '#c40233' 
-    WHERE(color == '#808000')""")
+    WHERE(color = '#808000')""")
     
     database.execute("""
     UPDATE categories_list 
     SET color = '#c40233' 
-    WHERE(color == '#800000')""")
+    WHERE(color = '#800000')""")
     
     database.execute("""
     UPDATE categories_list 
     SET color = '#008000' 
-    WHERE(color == '#008080')""")
+    WHERE(color = '#008080')""")
     
     database.execute("""
     UPDATE categories_list 
     SET color = '#800080' 
-    WHERE(color == '#808080')""")
+    WHERE(color = '#808080')""")
     
     database.execute("""
     UPDATE categories_list 
     SET color = '#0000ff' 
-    WHERE(color == '#000080')""")
+    WHERE(color = '#000080')""")
     
     database.execute("""
     UPDATE categories_list 
     SET color = '#0000ff' 
-    WHERE(color == '#000000')""")
+    WHERE(color = '#000000')""")
     
 
 def down (config, database, semester, course):
@@ -61,10 +61,10 @@ def down (config, database, semester, course):
     database.execute("""
     UPDATE categories_list 
     SET color = '#800000' 
-    WHERE(color == '#c40233')""")
+    WHERE(color = '#c40233')""")
     
     database.execute("""
     UPDATE categories_list 
     SET color = '#000080' 
-    WHERE(color == '#0000ff')""")
+    WHERE(color = '#0000ff')""")
     
