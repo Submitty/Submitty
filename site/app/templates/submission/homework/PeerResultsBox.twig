@@ -1,5 +1,13 @@
 {# If the student does not submit anything, the only message will be "No submissions for this assignment." #}
 <div class="content peer-results-box">
+    {% if incomplete_manual_grading %}
+        <div class="red-message incomplete-manual-grading-banner" data-testid="incomplete-manual-grading-banner" role="alert">
+            <strong>The manual grading for your assignment is incomplete.</strong>
+            Partial grades for your assignment are displayed below.
+            Please refer to course announcements for guidance on when this grading is expected to be completed.
+            Please contact the teaching staff if you believe this is an oversight.
+        </div>
+    {% endif %}
     {% if been_peer_graded %}
         {{ rendered_peer_results|raw }}
     {% else %}

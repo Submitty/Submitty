@@ -6657,6 +6657,7 @@ AND gc_id IN (
                   eg_use_ta_grading AS ta_grading,
                   eg_student_view AS student_view,
                   eg_student_view_after_grades as student_view_after_grades,
+                  eg_release_incomplete_manual_grading AS release_incomplete_manual_grading,
                   eg_student_download AS student_download,
                   eg_student_submit AS student_submit,
                   eg_instructor_blind AS instructor_blind,
@@ -7615,6 +7616,7 @@ AND gc_id IN (
                     $gradeable->getDependsOnPoints(),
                     // Reset the release notification state if the submission open date has changed to a future date
                     $gradeable->getReleaseNotificationsSent() ? $gradeable->isSubmissionOpen() : false,
+                    $gradeable->getReleaseIncompleteManualGrading(),
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -7653,7 +7655,8 @@ AND gc_id IN (
                       eg_hidden_files=?,
                       eg_depends_on=?,
                       eg_depends_on_points=?,
-                      eg_release_notifications_sent=?
+                      eg_release_notifications_sent=?,
+                      eg_release_incomplete_manual_grading=?
                     WHERE g_id=?",
                     $params
                 );

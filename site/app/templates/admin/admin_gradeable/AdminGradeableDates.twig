@@ -73,6 +73,14 @@
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
         
             <br />
+
+            {% if electronic %}
+            <fieldset id="release_incomplete_manual_grading_container" data-testid="release_incomplete_manual_grading_container" style="margin-top: 5px; max-width: 600px;">
+                <legend>Release partial grades to students with incomplete manual/peer grading? (Ungraded components count as zero. If "No", students will not see any manual grading until all components are graded.)</legend>
+                <input id="release_incomplete_manual_grading_yes" data-testid="release_incomplete_manual_grading_yes" name="release_incomplete_manual_grading" value="true" type="radio" {{ gradeable.getReleaseIncompleteManualGrading() ? 'checked' : '' }}/><label for="release_incomplete_manual_grading_yes">Yes</label>
+                <input id="release_incomplete_manual_grading_no" data-testid="release_incomplete_manual_grading_no" name="release_incomplete_manual_grading" value="false" type="radio" {{ not gradeable.getReleaseIncompleteManualGrading() ? 'checked' : '' }}/><label for="release_incomplete_manual_grading_no">No</label>
+            </fieldset>
+            {% endif %}
             
             {% if not gradeable.isStudentView() %}
             <p style="max-width:600px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
