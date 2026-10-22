@@ -51,6 +51,9 @@
                     ],
                     'cookie': 'active_student_columns',
                 },
+                'events': {
+                    'save': '() => { window.location.reload(); }',
+                },
             } %}
             <a href="javascript:newDownloadForm()" class="btn btn-primary" data-testid="download-users-button">Download Users</a>
             <a href="javascript:newClassListForm()" class="btn btn-primary" data-testid="upload-classlist-button">Upload Classlist</a>

@@ -63,6 +63,11 @@
                             {% set text_area_label_text = 'Add comment to grade inquiry:' %}
                         {% endif %}
                         <label for="reply-text-area">{{ text_area_label_text }}</label>
+                        {% if grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == 0 %}
+                            {% set placeholder_text = 'NOTE: If you wish to re-open this grade inquiry, you must explain why you believe this issue is unresolved.' %}
+                        {% else %}
+                            {% set placeholder_text = 'Enter response here...' %}
+                        {% endif %}
                         {% include "Vue.twig" with { "name" : "MarkdownArea",
                             "type": "component",
                             "class": "markdown-area fill-available",
@@ -70,7 +75,7 @@
                                 "markdownAreaId" : "reply-text-area-" ~ component.id,
                                 "markdownAreaName" : "replyTextArea",
                                 "markdownAreaValue" : "",
-                                "placeholder" : "{% if grade_inquiries[component.id].status is defined and grade_inquiries[component.id].status == 0 %}NOTE: If you wish to re-open this grade inquiry, you must explain why you believe this issue is unresolved.{% else %}Enter response here...{% endif %}",
+                                "placeholder" : placeholder_text,
                                 "previewDivId" : "inquiry_preview",
                                 "renderHeader" : true,
                                 "minHeight" : "100px",
