@@ -117,15 +117,25 @@ function markAllSeen(courses: Record<string, unknown>[]) {
 
 </script>
 <template>
-  <div>
-    <div class="notifications-header-container">
-      <h1 class="notifications-header">
+  <div data-testid="notifications-display">
+    <div
+      class="notifications-header-container"
+      data-testid="notifications-header-container"
+    >
+      <h1
+        class="notifications-header"
+        data-testid="notifications-header"
+      >
         Notifications
       </h1>
-      <div class="notifications-actions">
+      <div
+        class="notifications-actions"
+        data-testid="notifications-actions"
+      >
         <button
           v-if="notifications.length !== 0"
           class="btn btn-default"
+          data-testid="toggle-unseen-button"
           @click="toggleUnseenOnly"
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
@@ -133,12 +143,14 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         <button
           v-if="notifications.length !== 0 && props.course"
           class="btn btn-primary"
+          data-testid="mark-seen-button"
           @click="markSeen"
         >
           Mark as seen
         </button>
         <MarkSeenPopup
           v-if="notifications.length !== 0 && !props.course"
+          data-testid="mark-seen-popup"
           @mark-all="({ courses }) => markAllSeen(courses)"
         />
         <a
@@ -155,6 +167,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       v-if="localNotifications.length === 0"
       id="no-recent-notifications"
       class="no-recent"
+      data-testid="no-notifications-message"
     >
       No notifications to view.
     </p>
@@ -162,6 +175,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       v-if="visibleNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount <= 0"
       id="no-recent-notifications"
       class="no-recent"
+      data-testid="no-unseen-notifications-message"
     >
       No unseen notifications.
     </p>
@@ -170,6 +184,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       :key="n.id"
       class="notification"
       :class="{ unseen: !n.seen }"
+      data-testid="notification-item-wrapper"
     >
       <SingleNotification
         :notification="n"
@@ -184,6 +199,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       <p
         v-if="visibleNotifications.length >= 10 && localUnseenCount >= 11"
         class="unseen-count-p"
+        data-testid="additional-unseen-message"
       >
         You have <span class="unseen-count">{{ localUnseenCount - 10 }}</span> additional unseen notification<span v-if="localUnseenCount > 11">s</span>.
       </p>
@@ -191,6 +207,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       <p
         v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && (localUnseenCount - visibleNotifications.length) > 0"
         class="unseen-count-p"
+        data-testid="older-unseen-message"
       >
         You have <span class="unseen-count">{{ localUnseenCount - visibleNotifications.length }}</span> older unseen notification<span v-if="localUnseenCount > 1">s</span> in your course notifications not displayed here.
       </p>

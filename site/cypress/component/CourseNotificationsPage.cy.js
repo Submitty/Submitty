@@ -1,4 +1,5 @@
 import CourseNotificationsPage from '../../vue/src/pages/CourseNotificationsPage.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils';
 
 describe('CourseNotificationsPage', () => {
     it('mounts and passes computed unseen count to NotificationsDisplay', () => {
@@ -25,12 +26,12 @@ describe('CourseNotificationsPage', () => {
             },
         });
 
-        cy.get('.notifications-header').should('contain.text', 'Notifications');
-        cy.get('.notification-text').should('have.length', 1);
+        cy.get('[data-testid="course-notifications-page"]').should('exist');
+        cy.get('[data-testid="notifications-header"]').should('contain.text', 'Notifications');
+        cy.get('[data-testid="notification-text"]').should('have.length', 1);
     });
 
     it('forwards update-badge-dom event to parent listener', () => {
-        const badgeSpy = cy.stub().as('badgeSpy');
         const notifications = [
             {
                 id: 1,
@@ -48,12 +49,9 @@ describe('CourseNotificationsPage', () => {
             },
         ];
 
-        cy.mount(CourseNotificationsPage, {
-            props: {
-                notifications,
-                onUpdateBadgeDom: badgeSpy,
-            },
-        });
+        mountWithEmitSpy(CourseNotificationsPage, 'update-badge-dom', {
+            notifications,
+        }, 'badgeSpy');
 
         cy.get('@badgeSpy').should('have.been.calledWith', 1);
     });

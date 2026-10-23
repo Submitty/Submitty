@@ -123,12 +123,12 @@ describe('NotificationsDisplay', () => {
         cy.get('@badgeSpy').should('have.been.calledWith', 2);
 
         // Click mark seen on first individual notification
-        cy.get('.notification-seen').first().click();
+        cy.get('[data-testid="notification-seen-button"]').first().click();
         cy.get('@badgeSpy').should('have.been.calledWith', 1);
         cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '1');
 
         // Click Mark as seen button
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-button"]').click();
         cy.get('@badgeSpy').should('have.been.calledWith', 0);
         cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
     });
@@ -142,16 +142,16 @@ describe('NotificationsDisplay', () => {
 
         // Initially sidebar badge exists and 2 unseen mark buttons exist
         cy.get('#nav-sidebar-notifications .notification-badge').should('exist').and('have.text', '2');
-        cy.get('.notification-seen').should('have.length', 2);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
 
         // Click Mark as seen button
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-button"]').click();
 
         // Badge should be removed on success and no unseen buttons remain
         cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
         cy.get('#mobile-nav-sidebar-notifications .notification-badge').should('not.exist');
         cy.get('#menu-button .notification-badge').should('not.exist');
-        cy.get('.notification-seen').should('have.length', 0);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 0);
     });
 
     it('retains sidebar badge and unseen status when markSeen request fails', () => {
@@ -171,14 +171,14 @@ describe('NotificationsDisplay', () => {
 
         // Initially sidebar badge exists and 2 unseen buttons exist
         cy.get('#nav-sidebar-notifications .notification-badge').should('exist').and('have.text', '2');
-        cy.get('.notification-seen').should('have.length', 2);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
 
         // Click Mark as seen button
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-button"]').click();
 
         // Badge should NOT be removed on failure and unseen buttons should remain
         cy.get('#nav-sidebar-notifications .notification-badge').should('exist').and('have.text', '2');
-        cy.get('.notification-seen').should('have.length', 2);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
     });
 
     it('updates sidebar badge count on individual notification mark seen success', () => {
@@ -189,15 +189,15 @@ describe('NotificationsDisplay', () => {
         });
 
         cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '2');
-        cy.get('.notification-seen').should('have.length', 2);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
 
         // Click mark seen on first individual notification
-        cy.get('.notification-seen').first().click();
+        cy.get('[data-testid="notification-seen-button"]').first().click();
 
         // Count should decrease to 1 and only 1 unseen button remains
         cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '1');
         cy.get('#mobile-nav-sidebar-notifications .notification-badge').should('have.text', '1');
-        cy.get('.notification-seen').should('have.length', 1);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 1);
     });
 
     it('derives unseen count when unseenCount is -1, updates badge to 1 on individual seen, and removes badge on mark all seen', () => {
@@ -212,14 +212,14 @@ describe('NotificationsDisplay', () => {
 
         // The derived count is 2; badge should show 2
         cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '2');
-        cy.get('.notification-seen').should('have.length', 2);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
 
         // Step 2: Mark one notification individually
-        cy.get('.notification-seen').first().click();
+        cy.get('[data-testid="notification-seen-button"]').first().click();
 
         // Badge must show 1 (not 0!) and one unseen notification remains
         cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '1');
-        cy.get('.notification-seen').should('have.length', 1);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 1);
 
         // Step 3: Simulate navigating away and returning (mount again with 1 remaining unseen notification)
         const updatedNotifications = [
@@ -235,14 +235,14 @@ describe('NotificationsDisplay', () => {
 
         // Returning to course page syncs badge to 1
         cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '1');
-        cy.get('.notification-seen').should('have.length', 1);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 1);
 
         // Step 4: Click Mark as seen to clear all
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-button"]').click();
 
         // Badge should be completely removed and no unseen items remain
         cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
-        cy.get('.notification-seen').should('have.length', 0);
+        cy.get('[data-testid="notification-seen-button"]').should('have.length', 0);
     });
 
     it('removes stale sidebar badge on mount if course page has zero unseen notifications', () => {
@@ -256,7 +256,7 @@ describe('NotificationsDisplay', () => {
 
         // DOM badge should have been cleaned up on mount
         cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
-        cy.contains('No unseen notifications.').should('exist');
+        cy.get('[data-testid="no-unseen-notifications-message"]').should('exist');
     });
 
     it('toggles between Show All and Show Unseen Only and respects local storage preference', () => {
@@ -272,19 +272,19 @@ describe('NotificationsDisplay', () => {
         });
 
         // Default is Show All button visible, showing unseen notifications (length 1)
-        cy.get('.notification-text').should('have.length', 1);
-        cy.contains('button', 'Show All').click();
+        cy.get('[data-testid="notification-text"]').should('have.length', 1);
+        cy.get('[data-testid="toggle-unseen-button"]').should('contain.text', 'Show All').click();
 
         // Now showing all notifications (length 2), button says Show Unseen Only
-        cy.get('.notification-text').should('have.length', 2);
-        cy.contains('button', 'Show Unseen Only').should('exist');
+        cy.get('[data-testid="notification-text"]').should('have.length', 2);
+        cy.get('[data-testid="toggle-unseen-button"]').should('contain.text', 'Show Unseen Only');
         cy.window().then((win) => {
             expect(win.localStorage.getItem('notification-preference')).to.equal('all');
         });
 
         // Toggle back to unseen only
-        cy.contains('button', 'Show Unseen Only').click();
-        cy.get('.notification-text').should('have.length', 1);
+        cy.get('[data-testid="toggle-unseen-button"]').click();
+        cy.get('[data-testid="notification-text"]').should('have.length', 1);
         cy.window().then((win) => {
             expect(win.localStorage.getItem('notification-preference')).to.equal('unseen');
         });
@@ -301,7 +301,7 @@ describe('NotificationsDisplay', () => {
             course: true,
         });
 
-        cy.contains('button', 'Show All').should('exist');
+        cy.get('[data-testid="toggle-unseen-button"]').should('contain.text', 'Show All');
     });
 
     it('respects initial all preference in localStorage on mount', () => {
@@ -316,7 +316,7 @@ describe('NotificationsDisplay', () => {
         });
 
         // Show Unseen Only button should be visible because preference was all
-        cy.contains('button', 'Show Unseen Only').should('exist');
+        cy.get('[data-testid="toggle-unseen-button"]').should('contain.text', 'Show Unseen Only');
     });
 
     it('renders settings link on course page with correct URL', () => {
@@ -353,7 +353,7 @@ describe('NotificationsDisplay', () => {
             course: true,
         });
 
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-button"]').click();
         cy.then(() => {
             expect(capturedCsrf).to.equal('fallback_csrf');
         });
@@ -371,7 +371,7 @@ describe('NotificationsDisplay', () => {
             course: true,
         });
 
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-button"]').click();
         cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
     });
 
@@ -394,7 +394,7 @@ describe('NotificationsDisplay', () => {
             course: true,
         });
 
-        cy.get('.notification-seen').first().click();
+        cy.get('[data-testid="notification-seen-button"]').first().click();
         cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
     });
 
@@ -406,7 +406,7 @@ describe('NotificationsDisplay', () => {
             course: true,
         });
 
-        cy.get('.unseen-count-p').should('exist')
+        cy.get('[data-testid="older-unseen-message"]').should('exist')
             .and('contain.text', 'You have 2 older unseen notifications in your course notifications not displayed here.');
     });
 
@@ -417,8 +417,9 @@ describe('NotificationsDisplay', () => {
             course: false,
         });
 
-        cy.contains('button', 'Show All').click();
-        cy.get('.unseen-count-p').should('not.exist');
+        cy.get('[data-testid="toggle-unseen-button"]').click();
+        cy.get('[data-testid="older-unseen-message"]').should('not.exist');
+        cy.get('[data-testid="additional-unseen-message"]').should('not.exist');
     });
 
     it('renders empty message when no notifications exist', () => {
@@ -428,8 +429,8 @@ describe('NotificationsDisplay', () => {
             course: true,
         });
 
-        cy.get('#no-recent-notifications').should('contain.text', 'No notifications to view.');
-        cy.contains('button', 'Mark as seen').should('not.exist');
+        cy.get('[data-testid="no-notifications-message"]').should('contain.text', 'No notifications to view.');
+        cy.get('[data-testid="mark-seen-button"]').should('not.exist');
     });
 
     it('renders additional unseen notification count message when count exceeds 10', () => {
@@ -457,7 +458,7 @@ describe('NotificationsDisplay', () => {
             course: false,
         });
 
-        cy.get('.unseen-count-p').should('exist').and('contain.text', 'additional unseen notifications');
+        cy.get('[data-testid="additional-unseen-message"]').should('exist').and('contain.text', 'additional unseen notifications');
     });
 
     it('renders singular unseen count message when count is exactly 11', () => {
@@ -476,7 +477,7 @@ describe('NotificationsDisplay', () => {
             course: false,
         });
 
-        cy.get('.unseen-count-p').should('exist')
+        cy.get('[data-testid="additional-unseen-message"]').should('exist')
             .and('contain.text', 'You have 1 additional unseen notification.');
     });
 
@@ -497,7 +498,7 @@ describe('NotificationsDisplay', () => {
             course: false,
         });
 
-        cy.get('.unseen-count-p').should('exist')
+        cy.get('[data-testid="older-unseen-message"]').should('exist')
             .and('contain.text', 'You have 2 older unseen notifications in your course notifications not displayed here.');
     });
 
@@ -518,7 +519,7 @@ describe('NotificationsDisplay', () => {
             course: false,
         });
 
-        cy.get('.unseen-count-p').should('exist')
+        cy.get('[data-testid="older-unseen-message"]').should('exist')
             .and('contain.text', 'You have 1 older unseen notification in your course notifications not displayed here.');
     });
 
@@ -557,11 +558,11 @@ describe('NotificationsDisplay', () => {
         cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '2');
 
         // Button should exist for Mark as seen (triggering popup on home page)
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-trigger-button"]').click();
         cy.get('[data-testid="popup-window"]').should('be.visible');
 
         // Select all and save -> triggers mark-all event -> calls markAllSeen
-        cy.contains('a', 'Select All').click();
+        cy.get('[data-testid="select-all-button"]').click();
         cy.get('[data-testid="popup-save-button"]').click();
 
         // Badge should be removed after markAllSeen
@@ -610,8 +611,8 @@ describe('NotificationsDisplay', () => {
             course: false,
         });
 
-        cy.contains('button', 'Mark as seen').click();
-        cy.contains('a', 'Select All').click();
+        cy.get('[data-testid="mark-seen-trigger-button"]').click();
+        cy.get('[data-testid="select-all-button"]').click();
         cy.get('[data-testid="popup-save-button"]').click();
 
         // 2 sample notifications marked seen, 1 other_course remains unseen

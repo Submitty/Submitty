@@ -1,4 +1,5 @@
 import SingleNotification from '../../vue/src/components/Notification.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils';
 
 describe('Notification', () => {
     beforeEach(() => {
@@ -17,8 +18,6 @@ describe('Notification', () => {
     });
 
     it('renders notification content, icon, and handles mark-seen on course page', () => {
-        const onMarkIndividual = cy.stub().as('markStub');
-
         const notification = {
             id: 1,
             component: 'forum',
@@ -34,24 +33,19 @@ describe('Notification', () => {
             url: 'http://localhost/sample/forum',
         };
 
-        cy.mount(SingleNotification, {
-            props: {
-                notification,
-                course: true,
-                onMarkIndividual,
-            },
-        });
+        mountWithEmitSpy(SingleNotification, 'mark-individual', {
+            notification,
+            course: true,
+        }, 'markStub');
 
-        cy.get('.fa-comments').should('exist');
-        cy.contains('.notification-text', 'Forum announcement').should('exist');
-        cy.get('.notification-seen').click();
+        cy.get('[data-testid="notification-icon-forum"]').should('exist');
+        cy.get('[data-testid="notification-text"]').should('contain.text', 'Forum announcement');
+        cy.get('[data-testid="notification-seen-button"]').click();
 
         cy.get('@markStub').should('have.been.calledWith', { id: 1, course: 'sample' });
     });
 
     it('renders grading and team icons and handles enter key on mark-seen', () => {
-        const onMarkIndividual = cy.stub().as('markStub');
-
         const notification = {
             id: 2,
             component: 'grading',
@@ -67,22 +61,17 @@ describe('Notification', () => {
             url: 'http://localhost/sample/gradeable',
         };
 
-        cy.mount(SingleNotification, {
-            props: {
-                notification,
-                course: true,
-                onMarkIndividual,
-            },
-        });
+        mountWithEmitSpy(SingleNotification, 'mark-individual', {
+            notification,
+            course: true,
+        }, 'markStub');
 
-        cy.get('.fa-star').should('exist');
-        cy.get('.notification-seen').trigger('keydown', { key: 'Enter' });
+        cy.get('[data-testid="notification-icon-grading"]').should('exist');
+        cy.get('[data-testid="notification-seen-button"]').trigger('keydown', { key: 'Enter' });
         cy.get('@markStub').should('have.been.calledWith', { id: 2, course: 'sample' });
     });
 
     it('handles home page mode with course link and home mark_seen ajax', () => {
-        const onMarkIndividual = cy.stub().as('markStub');
-
         const notification = {
             id: 3,
             component: 'team',
@@ -98,35 +87,30 @@ describe('Notification', () => {
             url: 'http://localhost/sample/team',
         };
 
-        cy.mount(SingleNotification, {
-            props: {
-                notification,
-                course: false,
-                onMarkIndividual,
-            },
-        });
+        mountWithEmitSpy(SingleNotification, 'mark-individual', {
+            notification,
+            course: false,
+        }, 'markStub');
 
-        cy.get('.fa-users').should('exist');
-        cy.get('.course-notification-link').should('contain.text', 'Sample Course');
+        cy.get('[data-testid="notification-icon-team"]').should('exist');
+        cy.get('[data-testid="course-notification-link"]').should('contain.text', 'Sample Course');
 
         // Click course link to test goToCourseNotifications
         cy.window().then((win) => {
             cy.stub(win.HTMLFormElement.prototype, 'submit').as('formSubmit');
         });
-        cy.get('.course-notification-link').click();
+        cy.get('[data-testid="course-notification-link"]').click();
         cy.get('@formSubmit').should('have.been.called');
 
         // Click mark seen in home mode
-        cy.get('.notification-seen').click();
+        cy.get('[data-testid="notification-seen-button"]').click();
         cy.get('@markStub').should('have.been.calledWith', { id: 3, course: 'sample' });
     });
 
     it('handles ajax error on individual mark seen', () => {
-        const onMarkIndividual = cy.stub().as('markStub');
-
         const notification = {
             id: 4,
-            component: 'forum',
+            component: 'student',
             metadata: '',
             content: 'Error test notification',
             seen: false,
@@ -139,14 +123,6 @@ describe('Notification', () => {
             url: 'http://localhost/sample/forum',
         };
 
-        cy.mount(SingleNotification, {
-            props: {
-                notification,
-                course: true,
-                onMarkIndividual,
-            },
-        });
-
         cy.window().then((win) => {
             win.$.ajax = (options) => {
                 if (options.error) {
@@ -155,7 +131,13 @@ describe('Notification', () => {
             };
         });
 
-        cy.get('.notification-seen').click();
+        mountWithEmitSpy(SingleNotification, 'mark-individual', {
+            notification,
+            course: true,
+        }, 'markStub');
+
+        cy.get('[data-testid="notification-icon-student"]').should('exist');
+        cy.get('[data-testid="notification-seen-button"]').click();
         cy.get('@markStub').should('not.have.been.called');
     });
 });
