@@ -1100,8 +1100,81 @@ tr.is_publish {
     border-bottom: 2px solid var(--error-alert-dark-red);
 }
 
+/* Peer marks table: Points and Title stay pinned on the left, the peer graders scroll sideways */
+.gradeable .peer-table-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
 .gradeable #peer-grading-table {
-    border-collapse: collapse;
+    --peer-points-width: 3.5em;
+    --peer-title-width: 10em;
+    --peer-grader-min-width: 4em;
+    --peer-grader-max-width: 9em;
+    --peer-row-line: var(--standard-light-gray);
+
+    width: 100%;
+
+    /* Separate (not collapsed) borders: a collapsed border is painted over the pinned columns
+       when the table is scrolled, so a version conflict outline would show through them. */
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.gradeable #peer-grading-table th,
+.gradeable #peer-grading-table td {
+    padding: 0.4em 0.3em;
+    vertical-align: middle;
+    text-align: center;
+    box-shadow: inset 0 -1px 0 var(--peer-row-line);
+}
+
+.gradeable #peer-grading-table thead th {
+    box-shadow: inset 0 -2px 0 var(--standard-medium-gray);
+}
+
+.gradeable #peer-grading-table .peer-table-points,
+.gradeable #peer-grading-table .peer-table-title {
+    position: sticky;
+    z-index: 1;
+    background-color: var(--default-white);
+}
+
+.gradeable #peer-grading-table .peer-table-points {
+    left: 0;
+    width: var(--peer-points-width);
+    min-width: var(--peer-points-width);
+    max-width: var(--peer-points-width);
+}
+
+.gradeable #peer-grading-table .peer-table-title {
+    left: var(--peer-points-width);
+    min-width: var(--peer-title-width);
+    text-align: left;
+    overflow-wrap: anywhere;
+    box-shadow:
+        inset -2px 0 0 var(--peer-row-line),
+        inset 0 -1px 0 var(--peer-row-line);
+}
+
+.gradeable #peer-grading-table thead .peer-table-title {
+    box-shadow:
+        inset -2px 0 0 var(--peer-row-line),
+        inset 0 -2px 0 var(--standard-medium-gray);
+}
+
+/* Each peer column is as wide as its username, within limits. A very long username is
+   cut short with "..." (the full name is in the title attribute). */
+.gradeable #peer-grading-table .peer-table-header {
+    min-width: var(--peer-grader-min-width);
+}
+
+.gradeable #peer-grading-table .peer-table-name {
+    display: block;
+    max-width: var(--peer-grader-max-width);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .peer-edit-marks-list {
