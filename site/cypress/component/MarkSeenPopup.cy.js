@@ -1,4 +1,5 @@
 import MarkSeenPopup from '../../vue/src/components/MarkSeenPopup.vue';
+import { mountWithEmitSpy } from '../support/component_test_utils';
 
 describe('MarkSeenPopup', () => {
     beforeEach(() => {
@@ -38,7 +39,7 @@ describe('MarkSeenPopup', () => {
         cy.mount(MarkSeenPopup);
 
         // Click trigger button
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-trigger-button"]').click();
 
         // Popup should be visible with course counts
         cy.get('[data-testid="popup-window"]').should('be.visible');
@@ -46,28 +47,22 @@ describe('MarkSeenPopup', () => {
         cy.contains('Math Course').should('exist');
 
         // Select All button selects all checkboxes
-        cy.contains('a', 'Select All').click();
-        cy.get('.course-count-grid input[type="checkbox"]').should('be.checked');
+        cy.get('[data-testid="select-all-button"]').click();
+        cy.get('[data-testid="course-count-checkbox"]').should('be.checked');
 
         // Clear Selection unchecks all
-        cy.contains('a', 'Clear Selection').click();
-        cy.get('.course-count-grid input[type="checkbox"]').should('not.be.checked');
+        cy.get('[data-testid="clear-all-button"]').click();
+        cy.get('[data-testid="course-count-checkbox"]').should('not.be.checked');
     });
 
     it('emits mark-all when courses are selected and saved', () => {
-        const onMarkAll = cy.stub().as('markAllStub');
-
-        cy.mount(MarkSeenPopup, {
-            props: {
-                onMarkAll,
-            },
-        });
+        mountWithEmitSpy(MarkSeenPopup, 'mark-all', {}, 'markAllStub');
 
         // Open popup
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-trigger-button"]').click();
 
         // Select all courses and save
-        cy.contains('a', 'Select All').click();
+        cy.get('[data-testid="select-all-button"]').click();
         cy.get('[data-testid="popup-save-button"]').click();
 
         cy.get('@markAllStub').should('have.been.calledWith', {
@@ -79,16 +74,10 @@ describe('MarkSeenPopup', () => {
     });
 
     it('closes popup without emitting when no courses are selected and save is clicked', () => {
-        const onMarkAll = cy.stub().as('markAllStub');
-
-        cy.mount(MarkSeenPopup, {
-            props: {
-                onMarkAll,
-            },
-        });
+        mountWithEmitSpy(MarkSeenPopup, 'mark-all', {}, 'markAllStub');
 
         // Open popup
-        cy.contains('button', 'Mark as seen').click();
+        cy.get('[data-testid="mark-seen-trigger-button"]').click();
 
         // Save with none selected
         cy.get('[data-testid="popup-save-button"]').click();
