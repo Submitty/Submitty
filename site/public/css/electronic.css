@@ -1147,6 +1147,11 @@ tr.is_publish {
     max-width: var(--peer-points-width);
 }
 
+/* details.css numbers the first cell of every table row on this page; not wanted in this table */
+.gradeable #peer-grading-table .peer-table-points::after {
+    content: none;
+}
+
 .gradeable #peer-grading-table .peer-table-title {
     left: var(--peer-points-width);
     min-width: var(--peer-title-width);
