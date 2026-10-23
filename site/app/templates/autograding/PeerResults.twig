@@ -94,7 +94,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
             <div id="normal_peer_wrapper">
                 {% for component in peer_components %}
                     {% if component.peer_ids | length <= 5 %}
-                        {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded)  }}
+                        {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded, anon_grader_id_mapping) }}
                     {% else %}
                         {{ self.renderManyPeerResults(component, num_decimals, active_same_as_graded) }}
                     {% endif %}
@@ -171,7 +171,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
 {%- endmacro -%}
 
 
-{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded) -%}
+{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded, anon_grader_id_mapping) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
@@ -188,7 +188,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
                 <table class="mobile-table" style="border-color:white;">
                      <thead>
                         <tr>
-                            {% for grader in ordered_graders|filter(grader => grader in component.peer_ids) %}
+                            {% for grader in ordered_graders|filter(grader => anon_grader_id_mapping[grader] in component.peer_ids) %}
                                 <th class="peer-table-header">
                                     {{ peer_aliases[grader] }}
                                 </th>
@@ -200,9 +200,9 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
                     <tbody>
                         {% for mark in component.marks|filter((mark) => mark.show_mark) %}
                             <tr>
-                                {% for grader in ordered_graders|filter(grader => grader in component.peer_ids) %}
+                                {% for grader in ordered_graders|filter(grader => anon_grader_id_mapping[grader] in component.peer_ids) %}
                                     <td class="peer-table-data">
-                                        {% if mark.earned[grader] %}
+                                        {% if mark.earned[anon_grader_id_mapping[grader]] %}
                                             <div class="col-no-gutters indicator">
                                                 <i class="far fa-check-square fa-1g"></i>
                                             </div>
@@ -240,7 +240,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
                             <div class="box-info">
                                 <h4>{{ component.title|escape }}</h4>
                                 <p>
-                                    {% for mark in component.marks %}
+                                        {% for mark in component.marks|filter(mark => mark.published or mark.earned[anon_grader_id_mapping[grader]]) %}
                                         {% if mark.earned[anon_grader_id_mapping[grader]] %}
                                             <i class="far fa-check-square fa-1g"></i>
                                         {% else %}

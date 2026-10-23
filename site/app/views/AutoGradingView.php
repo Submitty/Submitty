@@ -596,6 +596,7 @@ class AutoGradingView extends AbstractView {
                     'points' => $mark->getPoints(),
 
                     'show_mark' => $mark->isPublish() || $container->hasMark($mark),
+                    'published' => $mark->isPublish(),
                     'earned' => array_map(function (User $grader) use ($mark, $container) {
                                     return $container->hasMark($mark, $grader);
                     }, $container->getGraders()),
