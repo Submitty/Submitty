@@ -278,6 +278,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         (returned_data) => {
             const returned_date = returned_data?.data?.date;
             if (isNaN(new Date(returned_date).getTime())) {
+                console.log('Date not found in response:', returned_data);
                 failCallback();
             }
             updateVisibility();
