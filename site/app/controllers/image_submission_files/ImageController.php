@@ -5,6 +5,7 @@ namespace app\controllers\image_submission_files;
 use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\ImageAnnotationUtils;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
@@ -53,39 +54,6 @@ class ImageController extends AbstractController {
         return $path;
     }
 
-    /**
-     * Load annotation JSON data for a given file path from the annotation directory
-     * @param string $annotation_dir The directory containing annotation files
-     * @param string $file_path The file path to generate MD5 hash for matching
-     * @param int|false|null $latest_timestamp Reference to track latest modification time (optional)
-     * @return array<mixed> Array of annotation JSONs keyed by grader_id
-     */
-    private function loadAnnotationJsons(string $annotation_dir, string $file_path, &$latest_timestamp = null): array {
-        $annotation_jsons = [];
-        $file_path_md5 = md5($file_path);
-
-        if (is_dir($annotation_dir)) {
-            $dir_iter = new \FilesystemIterator($annotation_dir);
-            foreach ($dir_iter as $annotation_file) {
-                if (explode('_', $annotation_file->getFilename())[0] === $file_path_md5) {
-                    $file_contents = file_get_contents($annotation_file->getPathname());
-                    $annotation_decoded = json_decode($file_contents, true);
-                    if ($annotation_decoded !== null) {
-                        $grader_id = $annotation_decoded["grader_id"];
-                        $annotation_jsons[$grader_id] = json_encode($annotation_decoded['annotations']);
-
-                        // Track latest timestamp if requested
-                        if ($latest_timestamp !== null && $latest_timestamp < $annotation_file->getMTime()) {
-                            $latest_timestamp = $annotation_file->getMTime();
-                        }
-                    }
-                }
-            }
-        }
-
-        return $annotation_jsons;
-    }
-
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/img")]
     public function showStudentImg(string $gradeable_id, string $filename, string $path, string $anon_path): JsonResponse {
         $id = $this->core->getUser()->getId();
@@ -100,14 +68,20 @@ class ImageController extends AbstractController {
         $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
+        $real_path = $this->getSubmittedFilePath($path, $id, true);
+        $annotation_key = ImageAnnotationUtils::getAnnotationKey($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id);
+        if ($annotation_key === null) {
+            return JsonResponse::getErrorResponse('The image file could not be found');
+        }
+
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $path);
+        $annotation_jsons = ImageAnnotationUtils::loadAnnotationJsons($annotation_path, $annotation_key, [$path, $anon_path]);
 
         // Construct the image URL for display_file endpoint
         $image_url = $this->core->buildCourseUrl(['display_file']) .
-            '?dir=submissions_processed' .
+            '?dir=' . explode('/', $annotation_key)[0] .
             '&file=' . urlencode($filename) .
-            '&path=' . urlencode($path) .
+            '&path=' . urlencode($real_path) .
             '&ta_grading=true' .
             '&view_annotated_file=true';
 
@@ -160,7 +134,9 @@ class ImageController extends AbstractController {
 
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
-        $annotation_jsons = $this->loadAnnotationJsons($annotation_dir, $file_path);
+        $annotation_key = ImageAnnotationUtils::getAnnotationKey($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id);
+        // Images outside of the annotatable directories are view only
+        $annotation_jsons = $annotation_key === null ? [] : ImageAnnotationUtils::loadAnnotationJsons($annotation_dir, $annotation_key, [$file_path, $real_path]);
 
         $this->core->getOutput()->renderOutput(['Image'], 'showImageEmbedded', $gradeable_id, $id, $filename, $file_path, $file_path, $file_path, $annotation_jsons, false, $is_peer_grader);
     }
@@ -199,6 +175,13 @@ class ImageController extends AbstractController {
             return JsonResponse::getErrorResponse('You do not have permission to grade this student');
         }
 
+        // file_path may be an anonymous path
+        $real_path = $this->getSubmittedFilePath($file_path, $user_id, true);
+        $annotation_key = ImageAnnotationUtils::getAnnotationKey($real_path, $course_path, $gradeable_id, $user_id);
+        if ($annotation_key === null) {
+            return JsonResponse::getErrorResponse('This file cannot be annotated');
+        }
+
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $annotation_gradeable_path = FileUtils::joinPaths($course_path, $target_dir, $gradeable_id);
@@ -215,7 +198,9 @@ class ImageController extends AbstractController {
         }
 
         $decoded_annotations = json_decode($annotations, true) ?? [];
-        $annotation_file_path = FileUtils::joinPaths($annotation_version_path, md5($file_path) . "_" . $grader_id . '.json');
+        $annotation_file_path = ImageAnnotationUtils::getAnnotationFilePath($annotation_version_path, $annotation_key, $grader_id);
+        // Older annotation files are replaced by the one at $annotation_file_path
+        ImageAnnotationUtils::removeLegacyAnnotationFiles($annotation_version_path, [$file_path, $real_path], $grader_id);
 
         // Check if annotations have no markers (empty annotations)
         $has_markers = isset($decoded_annotations['markers']) && is_array($decoded_annotations['markers']) && count($decoded_annotations['markers']) > 0;
@@ -236,7 +221,7 @@ class ImageController extends AbstractController {
 
         // Has markers - save the annotation file
         $annotation_body = [
-            'file_path' => $file_path,
+            'file_path' => $annotation_key,
             'grader_id' => $grader_id,
             'annotations' => $decoded_annotations
         ];
