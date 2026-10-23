@@ -259,13 +259,6 @@ function updateCheckpointCells(elems, scores, no_cookie) {
     }
 
     // Update the buttons to reflect that they were clicked
-    function failCallback() {
-        elems.each((idx, elem) => {
-            elem = $(elem);
-            elem.stop(true, false);
-            elem.css('border-right', `${elem[0].offsetWidth}px solid var(--simple-save-error-red)`);
-        });
-    }
     submitAJAX(
         buildCourseUrl(['gradeable', g_id, 'grading']),
         {
@@ -279,11 +272,15 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             const returned_date = returned_data?.data?.date;
             if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
-                failCallback();
+                elems.each((idx, elem) => {
+                    elem = $(elem);
+                    elem.stop(true, false);
+                    elem.css('border-right', `${elem[0].offsetWidth}px solid var(--simple-save-error-red)`);
+                });
             }
             updateVisibility();
         },
-        failCallback,
+        () => {},
     );
 }
 
