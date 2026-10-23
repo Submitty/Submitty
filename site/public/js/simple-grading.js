@@ -240,7 +240,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             elem.stop(true, false);
             elem.css('border-right-style', 'solid');
             elem.css('border-right-color', `${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-            if(firstLoad && old_scores[elem.data('id')] === 0){
+            if (firstLoad && old_scores[elem.data('id')] === 0) {
                 elem.css('border-right-width', `${elem[0].offsetWidth}px`);
             }
 
@@ -259,12 +259,12 @@ function updateCheckpointCells(elems, scores, no_cookie) {
     }
 
     // Update the buttons to reflect that they were clicked
-    function failCallback(){
+    function failCallback() {
         elems.each((idx, elem) => {
             elem = $(elem);
             elem.stop(true, false);
             elem.css('border-right', `${elem[0].offsetWidth}px solid var(--simple-save-error-red)`);
-        });   
+        });
     }
     submitAJAX(
         buildCourseUrl(['gradeable', g_id, 'grading']),
@@ -283,7 +283,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             }
             updateVisibility();
         },
-        failCallback
+        failCallback,
     );
 }
 
