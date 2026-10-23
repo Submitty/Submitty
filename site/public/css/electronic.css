@@ -1454,6 +1454,17 @@ tr.is_publish {
     padding-left: 10px;
 }
 
+/* Gives #file-view a definite height to fill */
+.submission-browser-body {
+    height: 100%;
+}
+
+/* The header stays put while #file-content scrolls below it */
+#file-view,
+#notebook-file-view {
+    flex-direction: column;
+}
+
 #file-view {
     height: 100%;
     width: 100%;
@@ -1478,7 +1489,6 @@ tr.is_publish {
 
 #file-content,
 #notebook-file-content {
-    height: 90%;
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
