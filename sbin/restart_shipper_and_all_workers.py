@@ -59,16 +59,32 @@ if __name__ == "__main__":
     delay_in_seconds = 5
     print("Stopping the local shipper daemon...")
     subprocess.call(
-        ["python3", SYSTEMCTL_WRAPPER_SCRIPT, "stop", "--daemon", "shipper", "--target", "primary"]
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "stop",
+            "--daemon",
+            "shipper",
+            "--target",
+            "primary",
+        ]
     )
 
     print("Stopping all local worker daemon...")
     subprocess.call(
-        ["python3", SYSTEMCTL_WRAPPER_SCRIPT, "stop", "--daemon", "worker", "--target", "primary"]
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "stop",
+            "--daemon",
+            "worker",
+            "--target",
+            "primary",
+        ]
     )
 
     print("Stopping all remote worker daemons...")
-    cmd = "python3 {0} stop --daemon worker --target perform_on_all_workers"
+    cmd = "/usr/local/submitty/venv/bin/python3 {0} stop --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
@@ -78,16 +94,32 @@ if __name__ == "__main__":
 
     print("Starting the local shipper daemon...")
     subprocess.call(
-        ["python3", SYSTEMCTL_WRAPPER_SCRIPT, "start", "--daemon", "shipper", "--target", "primary"]
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "start",
+            "--daemon",
+            "shipper",
+            "--target",
+            "primary",
+        ]
     )
 
     print("Starting the local worker daemon...")
     subprocess.call(
-        ["python3", SYSTEMCTL_WRAPPER_SCRIPT, "start", "--daemon", "worker", "--target", "primary"]
+        [
+            "/usr/local/submitty/venv/bin/python3",
+            SYSTEMCTL_WRAPPER_SCRIPT,
+            "start",
+            "--daemon",
+            "worker",
+            "--target",
+            "primary",
+        ]
     )
 
     print("Starting all worker daemons...")
-    cmd = "python3 {0} start --daemon worker --target perform_on_all_workers"
+    cmd = "/usr/local/submitty/venv/bin/python3 {0} start --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
@@ -96,7 +128,7 @@ if __name__ == "__main__":
     time.sleep(delay_in_seconds)
 
     print("Verifying all worker daemons...")
-    cmd = "python3 {0} status --daemon worker --target perform_on_all_workers"
+    cmd = "/usr/local/submitty/venv/bin/python3 {0} status --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     result = subprocess.run(
@@ -134,7 +166,7 @@ if __name__ == "__main__":
 
             subprocess.run(
                 [
-                    "python3",
+                    "/usr/local/submitty/venv/bin/python3",
                     "-x",
                     "-c",
                     f"""import restart_shipper_and_all_workers as r;    \
