@@ -593,7 +593,8 @@ fi
 #####################################
 # Build & Install Lichen Modules
 
-/bin/bash "${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh"
+# its pip install lands in the venv under the caller umask, and its own chmod only covers dist-packages
+(umask 022 && /bin/bash "${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh")
 
 
 ################################################################################################################
