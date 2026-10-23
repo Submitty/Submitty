@@ -31,8 +31,10 @@ if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.jso
 with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as open_file:
     SUBMITTY_JSON = json.load(open_file)
 
+SUBMITTY_DATA_DIR = SUBMITTY_JSON["submitty_data_dir"]
+
 repository_path = SUBMITTY_JSON["submitty_repository"]
-script_path = os.path.join(SUBMITTY_JSON["submitty_data_dir"], "test_suite", "rainbowGrades")
+script_path = os.path.join(SUBMITTY_INSTALL_DIR, "test_suite", "rainbowGrades")
 runner_dir = os.path.join(SUBMITTY_JSON["submitty_data_dir"], "to_be_graded_queue")
 rainbow_path = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "RainbowGrades")
 
@@ -73,6 +75,8 @@ def remove_info_last_updated(raw_line):
     :return: True if no time-sensitive fields are present in the line
     """
     if "<em>Information last updated:" in raw_line:
+        return False
+    if "Lecture Participation Polls for:" in raw_line:
         return False
     return True
 
@@ -129,9 +133,7 @@ def sample_rainbow_grades_test():
             os.path.join(script_path, "Makefile_sample"), os.path.join(summary_tmp, "Makefile")
         )
         shutil.copy(
-            os.path.join(
-                "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", ".setup", "customization_sample.json"
-            ),
+            os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "customization_sample.json"),
             os.path.join(summary_tmp, "customization.json"),
         )
         shutil.copy(
@@ -153,7 +155,7 @@ def sample_rainbow_grades_test():
                 elif len(line) >= 18 and line[:18] == "REPORTS_DIRECTORY=":
                     make_file.write(
                         os.path.join(
-                            "REPORTS_DIRECTORY=__INSTALL__FILLIN__SUBMITTY_DATA_DIR__",
+                            "REPORTS_DIRECTORY=" + SUBMITTY_DATA_DIR,
                             "courses",
                             dateutils.get_current_semester(),
                             "sample",
@@ -180,7 +182,7 @@ def sample_rainbow_grades_test():
     # Extract the test version of the reports for comparison
     print("Extracting known raw data")
     known_raw_path = os.path.join(test_tmp, "raw_data")
-    summary_raw_path = os.path.join(summary_tmp, "raw_data")
+    summary_raw_path = os.path.join(summary_tmp, "raw_data", "all_grades")
     os.mkdir(known_raw_path)
     return_code = subprocess.call(
         [
@@ -251,9 +253,8 @@ def sample_rainbow_grades_test():
 
     # PRECONDITION: Input at this point is verified. Test running Rainbow Grades.
     print("Running Rainbow Grades on rsync'd data. This could take several minutes.")
-    make_output = ""
     try:
-        make_output = subprocess.check_output(["make"])
+        subprocess.check_output(["make"])
     except subprocess.CalledProcessError as e:
         error_and_cleanup(test_tmp, "Make failed with code {}".format(e.returncode))
 
@@ -264,11 +265,12 @@ def sample_rainbow_grades_test():
 
     print("Checking summary files against expected summaries.")
     # Verify that a valid copy of output.html was sent to all_students_summary_html
-    make_output = make_output.decode().splitlines()
-    make_output = make_output[-1].strip()  # Get the RUN COMMAND LINE
-    make_output = make_output.split("/")
-    make_output = make_output[-1]  # Get the name of the output.html file since it uses the date
-    if not os.path.isfile(os.path.join(summary_tmp, "all_students_summary_html", make_output)):
+    html_copies = [
+        f
+        for f in os.listdir(os.path.join(summary_tmp, "all_students_summary_html"))
+        if f.startswith("output_") and f.endswith(".html")
+    ]
+    if not html_copies:
         error_and_cleanup(test_tmp, "Failed to find output file in all_students_summary_html")
 
     output_generated_contents = ""
