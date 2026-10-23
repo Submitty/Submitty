@@ -213,12 +213,8 @@ echo -e "Install python_submitty_utils"
 rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
 pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
+# pip creates files with the process umask, so this is what makes the package world-readable
 (umask 022 && pip3 install .)
-
-# sometimes, pip will set the permissions incorrectly, depending on what they were previously
-# this ensures that the directory & contents are always installed with the correct permissions
-find "${SUBMITTY_INSTALL_DIR}/venv/lib/python3.10/site-packages/submitty_utils" -type d -exec chmod 755 {} \;
-find "${SUBMITTY_INSTALL_DIR}/venv/lib/python3.10/site-packages/submitty_utils" -type f -exec chmod 644 {} \;
 
 popd > /dev/null
 
