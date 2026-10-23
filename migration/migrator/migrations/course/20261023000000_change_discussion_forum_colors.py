@@ -67,4 +67,3 @@ def down (config, database, semester, course):
     UPDATE categories_list 
     SET color = '#000080' 
     WHERE(color = '#0000ff')""")
-    
