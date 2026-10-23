@@ -1100,8 +1100,86 @@ tr.is_publish {
     border-bottom: 2px solid var(--error-alert-dark-red);
 }
 
+/* Peer grading table: the mark Points and Title columns stay pinned on the left
+ * while the peer grader columns scroll horizontally inside the panel. */
+.gradeable .peer-grading-scroll-wrapper {
+    --peer-points-col-width: 3.5rem;
+
+    overflow-x: auto;
+
+    /* size columns from the panel width, not the viewport (e.g. 4 panel layout) */
+    container-type: inline-size;
+}
+
 .gradeable #peer-grading-table {
-    border-collapse: collapse;
+    /* collapsed borders do not move with sticky cells, so keep them separate */
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.gradeable #peer-grading-table th,
+.gradeable #peer-grading-table td {
+    padding: 6px 8px;
+    vertical-align: middle;
+}
+
+.gradeable #peer-grading-table thead th,
+.gradeable #peer-grading-table tbody tr:not(:last-child) > * {
+    border-bottom: 1px solid var(--standard-light-gray);
+}
+
+/* details.css numbers the first cell of every table row, which is not wanted here */
+.gradeable #peer-grading-table td::after {
+    content: none;
+}
+
+.gradeable #peer-grading-table .peer-mark-points,
+.gradeable #peer-grading-table .peer-mark-title {
+    position: sticky;
+    z-index: 1;
+    background-color: var(--default-white);
+}
+
+.gradeable #peer-grading-table .peer-mark-points {
+    left: 0;
+    width: var(--peer-points-col-width);
+    min-width: var(--peer-points-col-width);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.gradeable #peer-grading-table .peer-mark-title {
+    left: var(--peer-points-col-width);
+    min-width: clamp(8rem, 45cqi, 20rem);
+    max-width: 20rem;
+    text-align: left;
+    font-weight: normal;
+    overflow-wrap: break-word;
+    border-right: 1px solid var(--standard-light-gray);
+}
+
+.gradeable #peer-grading-table thead .peer-mark-title {
+    font-weight: bold;
+}
+
+/* fixed width grader columns; long user ids wrap instead of widening the table */
+.gradeable #peer-grading-table .peer-table-header {
+    min-width: 5.5rem;
+    max-width: 5.5rem;
+    padding-inline: 4px;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.gradeable #peer-grading-table .peer-table-data {
+    text-align: center;
+}
+
+/* too narrow to pin the title as well, so let it scroll with the grader columns */
+@container (max-width: 16rem) {
+    .gradeable #peer-grading-table .peer-mark-title {
+        position: static;
+    }
 }
 
 .peer-edit-marks-list {
