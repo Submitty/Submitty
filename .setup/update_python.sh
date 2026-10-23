@@ -17,8 +17,13 @@ umask 022
 
 VENV_PATH="${SUBMITTY_INSTALL_DIR}/venv"
 
-if [[ ! -d $VENV_PATH ]]; then
-    python3 -m venv "$VENV_PATH"
+# A release upgrade swaps the system Python under an existing venv, whose packages
+# then sit in the old version's site-packages, so rebuild the venv when the versions differ.
+PYTHON_VERSION=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')
+VENV_VERSION=$(sed -n 's/^version = \([0-9]*\.[0-9]*\).*/\1/p' "${VENV_PATH}/pyvenv.cfg" 2>/dev/null)
+if [[ "$VENV_VERSION" != "$PYTHON_VERSION" ]]; then
+    echo "Building the venv for Python ${PYTHON_VERSION} (found: ${VENV_VERSION:-none})"
+    python3 -m venv --clear "$VENV_PATH"
 fi
 
 # shellcheck disable=SC1091
