@@ -231,7 +231,7 @@ describe('Test cases involving auto opening single file submissions', () => {
         combined with the use of display inline styling. A better approach to toggling the file view
         would be to toggle only classes or only inline styles, not both.
     */
-    const file_view_selector = '#file-view[style^="display: block;"]';
+    const file_view_selector = '#file-view[style^="display: flex;"]';
 
     function assertSingleImageSubmissionClosed() {
         cy.get(file_view_selector).should('not.exist');

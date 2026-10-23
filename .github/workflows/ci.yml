@@ -780,7 +780,6 @@ jobs:
           spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-          env: autograding_shipper_off=True
 
       - name: Restart autograding shipper
         run: |
@@ -793,7 +792,6 @@ jobs:
           spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-          env: autograding_shipper_off=True
 
       - name: Restart autograding worker
         run: |
@@ -987,7 +985,7 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
-          env: run_area=CI
+          expose: run_area=CI
 
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
