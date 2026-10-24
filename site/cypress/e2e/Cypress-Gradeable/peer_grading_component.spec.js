@@ -64,10 +64,16 @@ describe('Peer Grading Component testing', () => {
     it('Uploads peer assignment CSV files with more than 500 pairs', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework_pdf', 'update?nav_tab=4']);
+        const getResponseStatus = (response) => {
+            const responseData = typeof response.body === 'string'
+                ? JSON.parse(response.body)
+                : response.body;
+            return responseData.status;
+        };
 
         cy.fixture('peer_assign_file.csv').then((fixture) => {
             const userIds = [...new Set(
-                fixture.trim().split(/\r?\n/).slice(1).map((line) => line.split(',')[0]).filter(Boolean)
+                fixture.trim().split(/\r?\n/).slice(1).map((line) => line.split(',')[0]).filter(Boolean),
             )];
             const assignments = [];
             for (const grader of userIds) {
@@ -101,11 +107,13 @@ describe('Peer Grading Component testing', () => {
                     : requestData.peer_graders_list;
                 expect(assignmentsJson).to.be.a('string');
                 expect(JSON.parse(assignmentsJson)).to.have.length(600);
-                expect(response.body.status).to.equal('success');
+                expect(getResponseStatus(response)).to.equal('success');
             });
 
             cy.get('[data-testid="upload-peer-graders-list"]').selectFile('cypress/fixtures/peer_assign_file.csv', { force: true });
-            cy.wait('@uploadPeerAssignments').its('response.body.status').should('equal', 'success');
+            cy.wait('@uploadPeerAssignments').then(({ response }) => {
+                expect(getResponseStatus(response)).to.equal('success');
+            });
         });
     });
 });

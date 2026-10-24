@@ -4983,7 +4983,7 @@ SQL;
      * Replace all peer grading assignments for a gradeable in one transaction.
      *
      * @param string $gradeable_id
-     * @param array $assignments Pairs of grader and student IDs
+     * @param list<array{string, string}> $assignments Pairs of grader and student IDs
      */
     public function replacePeerGradingAssignments(string $gradeable_id, array $assignments): void {
         $owns_transaction = !$this->course_db->inTransaction();
