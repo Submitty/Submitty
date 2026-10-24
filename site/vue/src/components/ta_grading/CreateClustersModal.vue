@@ -6,8 +6,10 @@ const props = defineProps<{
     currentAlgorithm?: string;
     createClusteringUrl: string;
     checkClusteringStatusUrl: string;
+    deleteClusteringUrl: string;
     csrfToken: string;
     canCreateClustering: boolean;
+    clustersExist: boolean;
     gradeableId: string;
 }>();
 
@@ -82,6 +84,39 @@ async function submitClustering() {
         emit('clustering-error', 'Failed to connect to the server.');
     }
 }
+
+async function deleteClustering() {
+    if (!props.clustersExist) {
+        return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete all clusters for this gradeable?')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('csrf_token', props.csrfToken);
+
+    try {
+        const response = await fetch(props.deleteClusteringUrl, {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = (await response.json()) as { status: string; message?: string; data?: string };
+        if (result.status === 'success') {
+            alert(result.data || 'Clusters deleted successfully.');
+            emit('clustering-done');
+        }
+        else {
+            emit('clustering-error', result.message || 'Error deleting clusters');
+        }
+    }
+    catch (error) {
+        console.error('Error:', error);
+        emit('clustering-error', 'Failed to connect to the server.');
+    }
+}
 </script>
 
 <template>
@@ -93,6 +128,15 @@ async function submitClustering() {
     @click="toggleModal"
   >
     {{ currentAlgorithm ? 'Re-create Clusters' : 'Create Clusters' }}
+  </button>
+  <button
+    v-if="canCreateClustering && clustersExist"
+    class="btn btn-danger"
+    data-testid="delete-clusters-btn"
+    style="margin-left: 10px;"
+    @click="deleteClustering"
+  >
+    Delete Clusters
   </button>
 
   <Teleport to="body">
