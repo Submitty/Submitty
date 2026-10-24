@@ -33,6 +33,8 @@ declare global {
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
+        zoomFile(delta: number): void;
+        triggerPDFScale?(delta: number): void;
         uploadAttachment(): void;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         registerKeyHandler(parameters: object, fn: Function): void;
@@ -251,7 +253,7 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     let open_files_array: string[] = [];
     if (!clear_open_files) {
         // keep open files persistent across cookie updates
-        const prev_open_files = window.Cookies.get('open_files') || '[]';
+        const prev_open_files = localStorage.getItem('open_files') || '[]';
         const prev_open_files_array = JSON.parse(prev_open_files) as string[];
         open_files_array = open_files_array.concat(prev_open_files_array);
         // search for and add open files to our array, then remove closed files
@@ -270,7 +272,10 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     // remove duplicates from the auto-open list
     open_files_array = open_files_array.filter((item, index) => open_files_array.indexOf(item) === index);
 
-    window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
+    localStorage.setItem('open_files', JSON.stringify(open_files_array));
+
+    // The list used to live in a cookie that grew large enough to break websocket handshakes.
+    window.Cookies.remove('open_files', { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 // expand all files in Submissions and Results section
@@ -807,7 +812,8 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
     $(fileFullPanelOptions[panel]['imageRotateBar']).hide();
 
     const promise = loadFileForFullView(name, path, page_num, panel);
-    $(fileFullPanelOptions[panel]['fileView']).show();
+    // .show() would set display: block and undo the column layout in electronic.css
+    $(fileFullPanelOptions[panel]['fileView']).css('display', 'flex');
     $(fileFullPanelOptions[panel]['gradingFileName']).text(name);
     const precision
         = $(fileFullPanelOptions[panel]['panel']).width()!
@@ -895,6 +901,9 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
                     // Clear previous image content before appending new content
                     $(fileFullPanelOptions[panel]['fileContent']).empty();
                     $(fileFullPanelOptions[panel]['fileContent']).append(data);
+                    if (panel === 'submission') {
+                        $('#file-zoom-display').text('100%');
+                    }
                 },
             });
         }
@@ -928,6 +937,14 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
         }
     }
 }
+
+// The zoom controls in FileView.twig serve both the image and PDF viewers.
+// PDFEmbedded.js defines triggerPDFScale only after a PDF has been opened.
+window.zoomFile = function (delta: number) {
+    if (!window.zoomImage(delta)) {
+        window.triggerPDFScale?.(delta);
+    }
+};
 
 window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;

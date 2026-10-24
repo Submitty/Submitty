@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 
-DEFAULT_DATABASE_DRIVER = 'psql'
+DEFAULT_DATABASE_DRIVER = "psql"
 
 
 class Config:
@@ -24,18 +24,18 @@ class Config:
         """
         self.config_path = Path(config_path)
 
-        self.database = self._get_data('database')
-        if 'database_driver' not in self.database:
-            self.database['database_driver'] = DEFAULT_DATABASE_DRIVER
+        self.database = self._get_data("database")
+        if "database_driver" not in self.database:
+            self.database["database_driver"] = DEFAULT_DATABASE_DRIVER
 
-        self.submitty = self._get_data('submitty')
-        self.submitty_users = self._get_data('submitty_users')
+        self.submitty = self._get_data("submitty")
+        self.submitty_users = self._get_data("submitty_users")
 
-        self.authentication = self._get_data('authentication')
+        self.authentication = self._get_data("authentication")
 
     def _get_data(self, filename):
-        path = self.config_path / (filename + '.json')
+        path = self.config_path / (filename + ".json")
         if not path.exists():
             return {}
-        with path.open('r') as open_file:
+        with path.open("r") as open_file:
             return json.load(open_file, object_pairs_hook=OrderedDict)
