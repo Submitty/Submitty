@@ -90,10 +90,10 @@ base_boxes = Hash[]
 
 # Should all be base Ubuntu boxes that use the same version
 base_boxes.default         = "SubmittyBot/ubuntu22-dev"
-base_boxes[:base]          = "bento/ubuntu-22.04"
-base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
-base_boxes[:libvirt]       = "generic/ubuntu2204"
-base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
+base_boxes[:base]          = "bento/ubuntu-24.04"
+base_boxes[:arm_bento]     = "bento/ubuntu-24.04-arm64"
+base_boxes[:libvirt]       = "generic/ubuntu2404"
+base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2404-arm64"
 
 def mount_folders(config, mount_options, type = nil, host = '10.0.2.2')
  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
@@ -183,7 +183,7 @@ Vagrant.configure(2) do |config|
       end
     end
   else
-    vm_name = 'ubuntu-22.04'
+    vm_name = 'ubuntu-24.04'
     config.vm.define vm_name, primary: true do |ubuntu|
       ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
       ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
