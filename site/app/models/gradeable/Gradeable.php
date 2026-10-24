@@ -567,50 +567,52 @@ class Gradeable extends AbstractModel {
         }
     }
     public function setPeerGradersList($input) {
-        $bad_rows = [];
-        $self_grade_rows = [];
-        foreach ($input as $row_num => $vals) {
-            if ($this->core->getQueries()->getUserById($vals["student"]) === null) {
-                array_push($bad_rows, ($vals["student"]));
+        if (!is_array($input) || count($input) === 0) {
+            throw new \InvalidArgumentException('Peer grading assignment CSV must contain at least one grader/student pair.');
+        }
+
+        $assignments = [];
+        $user_ids = [];
+        $row_number = 2;
+        foreach ($input as $values) {
+            if (
+                !is_array($values)
+                || !isset($values['grader'], $values['student'])
+                || !is_string($values['grader'])
+                || !is_string($values['student'])
+            ) {
+                throw new \InvalidArgumentException("Invalid peer grading assignment on CSV row {$row_number}.");
             }
-            if ($this->core->getQueries()->getUserById($vals["grader"]) === null) {
-                array_push($bad_rows, ($vals["grader"]));
+
+            $grader = trim($values['grader']);
+            $student = trim($values['student']);
+            if ($grader === '' || $student === '') {
+                throw new \InvalidArgumentException("Grader and student IDs are required on CSV row {$row_number}.");
             }
-            if ($vals["grader"] === $vals["student"]) {
-                array_push($self_grade_rows, ($vals["grader"]));
+            if ($grader === $student) {
+                throw new \InvalidArgumentException("A student cannot grade themselves (CSV row {$row_number}).");
+            }
+
+            $assignments[] = [$grader, $student];
+            $user_ids[] = $grader;
+            $user_ids[] = $student;
+            $row_number++;
+        }
+
+        $valid_users = [];
+        foreach (array_chunk(array_values(array_unique($user_ids)), 1000) as $user_id_chunk) {
+            $valid_users += $this->core->getQueries()->getUsersById($user_id_chunk);
+        }
+        foreach ($assignments as $index => [$grader, $student]) {
+            if (!array_key_exists($grader, $valid_users) || !array_key_exists($student, $valid_users)) {
+                $row_number = $index + 2;
+                throw new \InvalidArgumentException("Unknown grader or student ID on CSV row {$row_number}.");
             }
         }
-        if (!empty($bad_rows) || !empty($self_grade_rows)) {
-            if (!empty($bad_rows)) {
-                $bad_row_msg = "The given user id is not valid: ";
-                array_walk($bad_rows, function ($val) use (&$bad_row_msg) {
-                    $bad_row_msg .= " {$val}";
-                });
-                $this->core->addErrorMessage($bad_row_msg);
-            }
-            if (!empty($self_grade_rows)) {
-                $self_grade_msg = "The given users have self gradings: ";
-                array_walk($self_grade_rows, function ($val) use (&$self_grade_msg) {
-                    $self_grade_msg .= " {$val}";
-                });
-                $this->core->addErrorMessage($self_grade_msg);
-            }
-        }
-        else {
-            $query_string = "";
-            $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
-            $g_id = $this->getId();
-            foreach ($input as $row_num => $vals) {
-                $grader = $vals["grader"];
-                $peer = $vals["student"];
-                $query_string .= " ('$grader', '$peer','$g_id'),";
-            }
-            $query_string = chop($query_string, ',');
-            $query_string .= ";";
-            $this->core->getQueries()->insertBulkPeerGradingAssignment($query_string);
-            $this->modified = true;
-            $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
-        }
+
+        $this->core->getQueries()->replacePeerGradingAssignments($this->getId(), $assignments);
+        $this->modified = true;
+        $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
     }
 
     public function setPeerFeedback($grader_id, $student_id, $feedback) {
