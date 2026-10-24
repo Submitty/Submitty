@@ -335,6 +335,17 @@ describe('Test cases involving zooming images in the full panel view', () => {
             cy.get('[aria-label="Zoom Out"]').click();
             cy.get('#file-zoom-display').should('have.text', '100%');
             cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth, 2);
+
+            // the zoom is remembered when an image is opened again
+            cy.get('[aria-label="Zoom In"]').click();
+            cy.get('[aria-label="Collapse File"]').click();
+            cy.get('#annotatable-image').should('not.exist');
+            cy.get('a.image-file[data-file_name="blank_QR_numeric_id.png"]').click();
+            cy.get('#annotatable-image').should(($img) => {
+                expect($img[0].naturalWidth).to.be.greaterThan(0);
+            });
+            cy.get('#file-zoom-display').should('have.text', '110%');
+            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth * 1.1, 2);
         });
 
         cy.get('[aria-label="Collapse File"]').click();
