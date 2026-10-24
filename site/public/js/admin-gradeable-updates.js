@@ -944,7 +944,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 if (!container.is(':visible')) {
                     return;
                 }
-                p_values['peer_graders_list'] = jsonFile;
+                p_values['peer_graders_list'] = JSON.stringify(jsonFile);
                 setGradeableUpdateInProgress();
                 $.getJSON({
                     type: 'POST',
