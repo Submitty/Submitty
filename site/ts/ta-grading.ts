@@ -902,7 +902,7 @@ function loadFileForFullView(name: string, path: string, page_num: number, panel
                     $(fileFullPanelOptions[panel]['fileContent']).empty();
                     $(fileFullPanelOptions[panel]['fileContent']).append(data);
                     if (panel === 'submission') {
-                        $('#file-zoom-display').text('100%');
+                        window.initImageZoom();
                     }
                 },
             });

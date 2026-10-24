@@ -15,6 +15,7 @@ declare global {
         generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<AnnotatedView[] | null>;
         popupAnnotatedImage(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
         zoomImage(delta: number): boolean;
+        initImageZoom(): void;
     }
 }
 
@@ -322,12 +323,45 @@ const MIN_IMAGE_ZOOM = 1;
 const MAX_IMAGE_ZOOM = 5;
 
 // The original <img> holds the zoom state because it survives swaps with the MarkerView.
-// Loading a new file creates a new <img>, which resets zoom to 100%.
 // Only the submission panel has zoom controls, so lookups are scoped to its #file-content.
 function getZoomableImage(): { img: HTMLImageElement | null; markerView: MarkerView | null } {
     const markerView = document.querySelector<MarkerView>('#file-content #annotation-marker-view');
     const img = markerView?.targetImage ?? document.querySelector<HTMLImageElement>('#file-content #annotatable-image');
     return { img, markerView };
+}
+
+function getSavedImageZoom(): number {
+    try {
+        const zoom = Number(localStorage.getItem('image-scale'));
+        if (Number.isFinite(zoom) && zoom >= MIN_IMAGE_ZOOM && zoom <= MAX_IMAGE_ZOOM) {
+            return zoom;
+        }
+    }
+    catch {
+        // Use the default when browser storage is unavailable.
+    }
+    return MIN_IMAGE_ZOOM;
+}
+
+function initImageZoom(): void {
+    const { img } = getZoomableImage();
+    if (!img) {
+        return;
+    }
+
+    $('#file-zoom-display').text('100%');
+    const restoreZoom = () => {
+        // A previous image may finish loading after another file has been opened.
+        if (getZoomableImage().img === img) {
+            zoomImage(0);
+        }
+    };
+    if (img.complete && img.naturalWidth) {
+        restoreZoom();
+    }
+    else {
+        img.addEventListener('load', restoreZoom, { once: true });
+    }
 }
 
 // Returns false when no image is open, so the caller can zoom a PDF instead.
@@ -348,9 +382,15 @@ function zoomImage(delta: number): boolean {
         img.dataset.fitHeight = computedStyle.height;
     }
 
-    const zoom = Math.round((parseFloat(img.dataset.zoom ?? '1') + delta) * 100) / 100;
+    const zoom = Math.round((Number(img.dataset.zoom ?? getSavedImageZoom()) + delta) * 100) / 100;
     img.dataset.zoom = `${Math.min(MAX_IMAGE_ZOOM, Math.max(MIN_IMAGE_ZOOM, zoom))}`;
     applyImageZoom();
+    try {
+        localStorage.setItem('image-scale', img.dataset.zoom);
+    }
+    catch {
+        // Zoom still works when browser storage is unavailable.
+    }
     return true;
 }
 
@@ -898,3 +938,4 @@ window.quickDownload = quickDownload;
 window.generateDataURL = generateDataURL;
 window.popupAnnotatedImage = popupAnnotatedImage;
 window.zoomImage = zoomImage;
+window.initImageZoom = initImageZoom;
