@@ -14,9 +14,35 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\Utils;
 use app\models\Config;
 use app\models\Email;
+use app\models\Notification;
+use app\models\User;
 use app\views\admin\EmailRoomSeatingView;
 
 class EmailRoomSeatingControllerTester extends \PHPUnit\Framework\TestCase {
+    private function setInstructor(Core $core): void {
+        $core->setUser(new User($core, [
+            'user_id' => 'instructor',
+            'user_givenname' => 'Quinn',
+            'user_familyname' => 'Instructor',
+            'user_pronouns' => '',
+            'display_pronouns' => false,
+            'user_email' => null,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
+        ]));
+    }
+
+    private function buildNotification(Core $core, string $subject, string $to_user_id): Notification {
+        return Notification::createNotification($core, [
+            'component' => 'grading',
+            'metadata' => json_encode(['url' => $core->buildCourseUrl()]),
+            'subject' => $subject,
+            'sender_id' => 'instructor',
+            'to_user_id' => $to_user_id,
+            'gradeable_id' => 'test'
+        ]);
+    }
+
     public function testRenderEmailTemplate(): void {
         $controller = new EmailRoomSeatingController(new Core());
         $response = $controller->renderEmailTemplate();
@@ -47,8 +73,14 @@ class EmailRoomSeatingControllerTester extends \PHPUnit\Framework\TestCase {
         $config->setCourse('csci1100');
         $config->setRoomSeatingGradeableId('test');
         $core->setConfig($config);
+        $this->setInstructor($core);
         /** @var NotificationFactory&\PHPUnit\Framework\MockObject\MockObject $factory */
         $factory = $this->createMock(NotificationFactory::class);
+        $factory->expects($this->once())->method('sendNotifications')->with($this->equalTo([
+            $this->buildNotification($core, 'Seating Assignment for test', 'user_1'),
+            $this->buildNotification($core, 'Seating Assignment for test', 'user_3'),
+            $this->buildNotification($core, 'Seating Assignment for test', 'user_4'),
+        ]));
         $factory->expects($this->once())->method('sendEmails')->with($this->equalTo([
             new Email($core, [
                 "subject" => "Seating Assignment for test",
@@ -146,8 +178,13 @@ Please email your instructor with any questions or concerns.',
         $config->setCourse('csci1100');
         $config->setRoomSeatingGradeableId('test');
         $core->setConfig($config);
+        $this->setInstructor($core);
         /** @var NotificationFactory&\PHPUnit\Framework\MockObject\MockObject $factory */
         $factory = $this->createMock(NotificationFactory::class);
+        $factory->expects($this->once())->method('sendNotifications')->with($this->equalTo([
+            $this->buildNotification($core, 'Seating Assignment for SEE INSTRUCTOR', 'user_1'),
+            $this->buildNotification($core, 'Seating Assignment for test', 'user_3'),
+        ]));
         $factory->expects($this->once())->method('sendEmails')->with($this->equalTo([
             new Email($core, [
                 "subject" => "Seating Assignment for SEE INSTRUCTOR",
