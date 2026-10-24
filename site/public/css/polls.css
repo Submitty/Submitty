@@ -1,3 +1,7 @@
+#today-table th {
+    padding: 5px;
+}
+
 .dropdown-wrapper h2 {
     display: inline;
     margin: 0;

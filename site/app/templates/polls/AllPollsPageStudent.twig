@@ -10,13 +10,15 @@
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;">
-                <col style="width: 40%">
+                <col style="width: 30%">
                 <col style="width: 35%">
-                <col style="width: 25%">
+                <col style="width: 15%">
+                <col style="width: 20%">
             <thead>
                 <tr>
                     <th scope="col">Name</th>
                     <th scope="col">Your Answer</th>
+                    <th scope="col">Time Remaining</th>
                     <th scope="col">View Poll</th>
                 </tr>
             </thead>
@@ -34,6 +36,11 @@
                                 }
                             } only %}
                         </td>
+                        <td id="poll_{{ poll.getId() }}_timer" class="poll-index-timer"
+                            {% if poll.isOpen() and poll.isTimerEnabled() %}
+                                data-end-time="{{ poll.getEndTime().format('Y-m-d\\TH:i:sP') }}"
+                            {% endif %}
+                        >{{ poll.isEnded() ? 'Poll Ended' : '—' }}</td>
                         <td>
                             <a href="{{ base_url }}/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>

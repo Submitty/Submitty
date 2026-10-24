@@ -5,11 +5,10 @@
  * interfere with the tests.
  */
 
-import { verifyWebSocketStatus } from '../../support/utils';
+import { buildUrl, verifyWebSocketStatus } from '../../support/utils';
 
 const visitPoll = (title, text, wsEnabled = false) => {
-    // 3rd child represents the student view, 7th/8th child represents the instructor view depending on the 'date released' visibility
-    cy.contains(title).siblings(':nth-child(3), :nth-child(7), :nth-child(8)').contains(text).click();
+    cy.contains('td', title).closest('tr').contains('a, button', text).click();
 
     return cy.url().should('match', /\/polls\/\d+$/).then(() => {
         if (wsEnabled) {
@@ -28,7 +27,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#old-table-dropdown').click();
         cy.get('body').then(($body) => {
             if ($body.text().includes('Poll Cypress Test')) {
-                cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
+                cy.contains('td', 'Poll Cypress Test').closest('tr').find('a[title^="delete poll"]').click();
             }
         });
         cy.get('#old-table-dropdown').click();
@@ -122,12 +121,10 @@ describe('Test cases revolving around polls functionality', () => {
 
         // verify that existing polls exist and are in the expected state
         cy.get('#older-table').contains('Poll 1');
-        cy.contains('Poll 1').siblings(':nth-child(3)').children().children().should('have.class', 'btn-primary');
-        cy.contains('Poll 1').siblings(':nth-child(3)').contains('View Poll');
+        cy.contains('td', 'Poll 1').closest('tr').contains('button', 'View Poll').should('have.class', 'btn-primary');
 
         cy.get('#older-table').contains('Poll 2');
-        cy.contains('Poll 2').siblings(':nth-child(3)').children().children().should('have.class', 'btn-primary');
-        cy.contains('Poll 2').siblings(':nth-child(3)').contains('View Poll');
+        cy.contains('td', 'Poll 2').closest('tr').contains('button', 'View Poll').should('have.class', 'btn-primary');
 
         cy.contains('Poll 3').siblings(':nth-child(2)').contains('No Response');
     });
@@ -269,7 +266,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Closed');
+        cy.contains('td', 'Poll Cypress Test').closest('tr').should('contain', 'Closed');
         cy.contains('Poll Cypress Test').parent().find('a').invoke('attr', 'href').then((href) => {
             cy.visit(href);
             cy.get('[data-testid="popup-message"]').should('be.visible').and('contain', 'Poll is not available');
@@ -322,7 +319,7 @@ describe('Test cases revolving around polls functionality', () => {
 
         cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
-        cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
+        visitPoll('Poll Cypress Test', 'View Poll');
         cy.get('[data-testid="timer"]').should('contain', 'Poll Ended');
         cy.go('back');
 
@@ -459,7 +456,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login();
         cy.visit(['sample', 'polls']);
 
-        cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
+        cy.contains('td', 'Poll Cypress Test').closest('tr').contains('a', 'View Poll').click();
         cy.get('[data-testid="timer"]').should('be.visible');
         // this timeout is set to 30 seconds because Cypress needs to wait for the poll to end.
         cy.get('[data-testid="timer"]', { timeout: 30000 }).should('contain', 'Poll Ended');
@@ -518,7 +515,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login();
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(2)').click();
+        cy.contains('td', 'Poll Cypress Test').closest('tr').find('a[title^="delete poll"]').click();
 
         // short wait must be inserted here to support the stability of poll deletion
         // eslint-disable-next-line cypress/no-unnecessary-waiting
@@ -625,11 +622,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#today-table').contains('Poll Tomorrow').should('be.visible');
 
         // delete the new polls
-        cy.contains('Poll Today').siblings(':nth-child(2)').click();
+        cy.contains('td', 'Poll Today').closest('tr').find('a[title^="delete poll"]').click();
         cy.get('Poll Today').should('not.exist');
-        cy.contains('Poll Tomorrow').siblings(':nth-child(2)').click();
+        cy.contains('td', 'Poll Tomorrow').closest('tr').find('a[title^="delete poll"]').click();
         cy.get('Poll Tomorrow').should('not.exist');
-        cy.contains('Poll Future').siblings(':nth-child(2)').click();
+        cy.contains('td', 'Poll Future').closest('tr').find('a[title^="delete poll"]').click();
         cy.get('Poll Future').should('not.exist');
     });
 
@@ -736,8 +733,267 @@ describe('Test cases revolving around polls functionality', () => {
         // Remove the custom poll
         cy.login('instructor');
         cy.visit(['sample', 'polls']);
-        cy.contains('Custom Poll Today').siblings(':nth-child(2)').click();
+        cy.contains('td', 'Custom Poll Today').closest('tr').find('a[title^="delete poll"]').click();
     });
 
     // Done.
+});
+
+describe('Poll index countdowns', () => {
+    const polls = {};
+    const url = `/${buildUrl(['sample', 'polls'])}`;
+    const parsePage = (html) => new DOMParser().parseFromString(html, 'text/html');
+    const timerSelector = (key) => `#poll_${polls[key].id}_timer`;
+    let csrfToken;
+
+    const setState = (key, state) => cy.request({
+        method: 'POST',
+        url: `${url}/set${state}`,
+        form: true,
+        body: { csrf_token: csrfToken, poll_id: polls[key].id },
+    }).then((response) => {
+        polls[key].endTime = parsePage(response.body).querySelector(timerSelector(key))?.dataset.endTime;
+    });
+
+    const readCsrfToken = () => cy.request(url).then((response) => {
+        csrfToken = parsePage(response.body).querySelector('input[name="csrf_token"]').value;
+    });
+
+    before(() => {
+        cy.visit('/');
+        cy.login();
+        readCsrfToken();
+        cy.request('/server_time').then((response) => {
+            const { year, month, day } = JSON.parse(response.body).data;
+            const today = `${year}-${month}-${String(day).padStart(2, '0')}`;
+            for (const [key, hours] of Object.entries({ first: 2, second: 3, untimed: 0, closed: 1, ended: 1, future: 1 })) {
+                const name = `Countdown ${key} ${Date.now()}`;
+                cy.request({
+                    method: 'POST',
+                    url: `${url}/newPoll`,
+                    form: true,
+                    body: {
+                        'csrf_token': csrfToken,
+                        name,
+                        'question': 'Choose an answer',
+                        'question_type': 'single-response-single-correct',
+                        'release_date': key === 'future' ? '9999-12-31' : today,
+                        'release_histogram': 'never',
+                        'release_answer': 'never',
+                        'poll-hours': hours,
+                        'poll-minutes': 0,
+                        'poll-seconds': 0,
+                        'option[0][order]': 0,
+                        'option[0][response]': 'Answer',
+                        'option[0][is_correct]': 'on',
+                    },
+                }).then((created) => {
+                    const editLink = Array.from(parsePage(created.body).querySelectorAll('a[title]'))
+                        .find((link) => link.getAttribute('title') === `edit poll ${name}`);
+                    const errors = Array.from(parsePage(created.body).querySelectorAll('[data-testid="popup-message"]')).map((el) => el.textContent).join('; ');
+                    expect(Boolean(editLink), `created ${key} poll (${today}): ${errors}`).to.eq(true);
+                    polls[key] = { id: editLink.getAttribute('href').split('/').pop(), name };
+                });
+            }
+        });
+    });
+
+    beforeEach(() => {
+        cy.visit('/');
+        cy.login();
+        readCsrfToken();
+        cy.then(() => {
+            setState('first', 'Open');
+            setState('second', 'Open');
+            setState('untimed', 'Open');
+            // A closed poll may retain a future deadline from its last opening.
+            setState('closed', 'Open');
+            setState('closed', 'Closed');
+            setState('ended', 'Ended');
+            setState('future', 'Open');
+        });
+    });
+
+    after(() => {
+        cy.visit('/');
+        cy.login();
+        readCsrfToken();
+        cy.then(() => {
+            for (const poll of Object.values(polls)) {
+                cy.request({ method: 'POST', url: `${url}/deletePoll`, form: true, body: { csrf_token: csrfToken, poll_id: poll.id } });
+            }
+        });
+    });
+
+    const visitWithClock = (now, path = url) => {
+        cy.clock(now, ['Date', 'setInterval', 'clearInterval']);
+        cy.visit(path);
+        cy.get('#today-table-dropdown').then(($dropdown) => {
+            if ($dropdown.length && !$dropdown.find('.dropdown-arrow').hasClass('down')) {
+                cy.wrap($dropdown).click();
+            }
+        });
+    };
+
+    const checkInactivePolls = () => {
+        cy.get(timerSelector('untimed')).should('have.text', '—').and('not.have.attr', 'data-end-time');
+        cy.get(timerSelector('closed')).should('have.text', '—').and('not.have.attr', 'data-end-time');
+        cy.get(timerSelector('ended')).should('have.text', 'Poll Ended').and('not.have.attr', 'data-end-time');
+        cy.get(timerSelector('future')).should('not.exist');
+    };
+
+    it('renders independent instructor countdowns immediately and expires from the deadline', () => {
+        cy.then(() => visitWithClock(Date.parse(polls.first.endTime) - 7200000));
+        cy.get('#today-table th').should('contain', 'Time Remaining');
+        cy.get(timerSelector('first')).should('have.text', '02:00:00');
+        cy.get(timerSelector('second')).invoke('text').should('match', /^03:00:\d{2}$/);
+        cy.get(timerSelector('first')).invoke('attr', 'data-end-time').should('match', /T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
+        checkInactivePolls();
+        cy.tick(1000);
+        cy.get(timerSelector('first')).should('have.text', '01:59:59');
+        // Simulate a suspended tab: elapsed ticks must not determine the countdown.
+        cy.clock().then((clock) => clock.setSystemTime(Date.parse(polls.first.endTime) - 1000));
+        cy.tick(1000);
+        cy.get(timerSelector('first')).should('have.text', 'Poll Ended').and('not.have.attr', 'data-end-time');
+        // The server still considers this poll open when only the client clock advances.
+        cy.get(`#poll_${polls.first.id}_view_results`).should('be.checked');
+        cy.get(`#poll_${polls.first.id}_visible`).should('be.checked');
+        cy.request(url).then((response) => {
+            expect(parsePage(response.body).querySelector(`#poll_${polls.first.id}_view_results`).checked).to.eq(true);
+        });
+        cy.get(timerSelector('second')).invoke('text').should('match', /^01:00:\d{2}$/);
+        cy.clock().then((clock) => clock.setSystemTime(Date.parse(polls.second.endTime)));
+        cy.tick(1000);
+        cy.get(timerSelector('second')).should('have.text', 'Poll Ended');
+        cy.get(`#poll_${polls.second.id}_view_results`).should('be.checked');
+        cy.screenshot('poll-index-instructor-expiration');
+    });
+
+    it('renders student countdowns without response counts or instructor socket authorization', () => {
+        cy.logout();
+        cy.login('student');
+        cy.then(() => {
+            cy.clock(Date.parse(polls.first.endTime) - 7200000, ['Date', 'setInterval', 'clearInterval']);
+        });
+        cy.visit(url);
+        cy.get('#today-table th').should('contain', 'Time Remaining').and('not.contain', 'Responses');
+        cy.get(timerSelector('first')).should('have.text', '02:00:00');
+        cy.get(timerSelector('second')).invoke('text').should('match', /^03:00:\d{2}$/);
+        checkInactivePolls();
+        cy.tick(1000);
+        cy.get(timerSelector('first')).should('have.text', '01:59:59');
+        cy.get('[id$="_responses"]').should('not.exist');
+        cy.window().its('socketClient').should('not.exist');
+        cy.getCookie('submitty_websocket_token').then((cookie) => {
+            if (cookie) {
+                const claims = JSON.parse(atob(cookie.value.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                expect(Object.keys(claims.authorized_pages).some((page) => page.endsWith('-polls_index'))).to.eq(false);
+            }
+        });
+        cy.contains('td', polls.future.name).should('not.exist');
+        cy.request(`${url}/${polls.future.id}`).its('body').should('contain', 'Invalid Poll ID');
+        cy.request(url).then((response) => {
+            const studentCsrfToken = parsePage(response.body).querySelector('input[name="csrf_token"]').value;
+            cy.request({
+                method: 'POST', url: `${url}/setOpen`, form: true, failOnStatusCode: false,
+                body: { csrf_token: studentCsrfToken, poll_id: polls.closed.id },
+            });
+        });
+        cy.request(url).then((response) => {
+            const row = parsePage(response.body).querySelector(timerSelector('closed')).closest('tr');
+            expect(row.textContent).to.contain('Closed');
+            expect(row.querySelector('[data-end-time]')).to.be.null;
+        });
+        cy.screenshot('poll-index-student-countdowns');
+    });
+
+    it('updates instructor timers after AJAX open, end and close without navigation', () => {
+        cy.then(() => visitWithClock(Date.parse(polls.first.endTime) - 7200000));
+        cy.document().as('indexDocument');
+        cy.intercept('POST', `${url}/setEnded`).as('endPoll');
+        cy.intercept('POST', `${url}/setClosed`).as('closePoll');
+        cy.intercept('POST', `${url}/setOpen`).as('openPoll');
+        cy.get(`#poll_${polls.first.id}_view_results`).uncheck();
+        cy.wait('@endPoll');
+        cy.get(timerSelector('first')).should('have.text', 'Poll Ended').and('not.have.attr', 'data-end-time');
+        cy.get(`#poll_${polls.first.id}_view_results`).should('not.be.checked');
+        cy.get(`#poll_${polls.first.id}_visible`).uncheck();
+        cy.wait('@closePoll');
+        cy.get(timerSelector('first')).should('have.text', '—').and('not.have.attr', 'data-end-time');
+        cy.get(`#poll_${polls.first.id}_visible`).check();
+        cy.wait('@endPoll');
+        cy.get(timerSelector('first')).should('have.text', 'Poll Ended');
+        cy.get(`#poll_${polls.first.id}_view_results`).check();
+        cy.wait('@openPoll');
+        cy.get(timerSelector('first')).invoke('text').should('match', /^02:00:\d{2}$/);
+        cy.get(`#poll_${polls.first.id}_view_results`).should('be.checked');
+        cy.tick(1000);
+        cy.get(timerSelector('second')).invoke('text').should('match', /^0[23]:[05]\d:\d{2}$/);
+        cy.get('@indexDocument').then((document) => cy.document().should('eq', document));
+        cy.screenshot('poll-index-instructor-reopened');
+    });
+
+    it('preserves the individual poll countdown', () => {
+        cy.then(() => {
+            cy.clock(Date.parse(polls.first.endTime) - 60000, ['Date', 'setInterval', 'clearInterval']);
+            cy.visit(`${url}/${polls.first.id}`);
+        });
+        verifyWebSocketStatus();
+        cy.tick(500);
+        cy.get('#timerDisplay').should('have.text', '00:00:59');
+        cy.clock().then((clock) => clock.setSystemTime(Date.parse(polls.first.endTime)));
+        cy.tick(500);
+        cy.get('[data-testid="timer"]').should('have.text', 'Poll Ended');
+    });
+
+    it('keeps instructor response counts updating while index timers run', () => {
+        cy.visit(url);
+        verifyWebSocketStatus();
+        cy.get(`#poll_${polls.first.id}_responses`).should('contain', '0');
+        // Authenticate API requests as a student while the instructor page stays open.
+        cy.request('POST', '/authentication/logout');
+        cy.request({
+            method: 'POST', url: '/authentication/check_login', form: true,
+            body: { user_id: 'student', password: 'student', __csrf: 'student' },
+        });
+        cy.request(`${url}/${polls.first.id}`).then((response) => {
+            const page = parsePage(response.body);
+            cy.request({
+                method: 'POST', url: `${url}/submitResponse`, form: true,
+                body: {
+                    'csrf_token': page.querySelector('input[name="csrf_token"]').value,
+                    'poll_id': polls.first.id,
+                    'answers[]': page.querySelector('#answer-0').value,
+                },
+            });
+        });
+        cy.get(`#poll_${polls.first.id}_responses`).should('contain', '1');
+        cy.get(timerSelector('first')).invoke('text').should('match', /^\d{2}:\d{2}:\d{2}$/);
+        cy.screenshot('poll-index-live-response-count');
+    });
+
+    it('keeps instructor headings separated at desktop and narrower widths', () => {
+        for (const width of [1280, 1000, 800]) {
+            cy.viewport(width, 900);
+            cy.visit(url);
+            cy.get('#today-table-dropdown').then(($dropdown) => {
+                if (!$dropdown.find('.dropdown-arrow').hasClass('down')) {
+                    cy.wrap($dropdown).click();
+                }
+            });
+            cy.get('#today-table th').each(($header) => {
+                const header = $header[0];
+                if (header.textContent.trim()) {
+                    const range = header.ownerDocument.createRange();
+                    range.selectNodeContents(header);
+                    const text = range.getBoundingClientRect();
+                    const cell = header.getBoundingClientRect();
+                    expect(text.left, `${header.textContent} left spacing at ${width}px`).to.be.at.least(cell.left + 4);
+                    expect(text.right, `${header.textContent} right spacing at ${width}px`).to.be.at.most(cell.right - 4);
+                }
+            });
+            cy.get(timerSelector('first')).invoke('text').should('match', /^\d{2}:\d{2}:\d{2}$/);
+            cy.screenshot(`poll-index-headings-${width}`, { capture: 'viewport' });
+        }
+    });
 });
