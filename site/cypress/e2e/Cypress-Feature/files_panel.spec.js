@@ -313,6 +313,8 @@ describe('Test cases involving zooming images in the full panel view', () => {
         cy.login('instructor');
         cy.get('[data-testid="view-sections"]').uncheck();
         cy.get('#details-table').contains('tr', 'bitdiddle').find('[data-testid="grade-button"]').click();
+        // the page reloads when autograding finishes, which would close the image mid-test
+        cy.get('.auto-results-queue-msg', { timeout: 60000 }).should('not.exist');
         cy.get('#submission_browser_btn').click();
         cy.get('#submissions').click();
         assertSubmissionsBrowserOpen();
