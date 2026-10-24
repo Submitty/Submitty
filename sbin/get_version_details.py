@@ -18,11 +18,11 @@ from datetime import datetime
 import json
 import os
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config")
 
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+with open(os.path.join(CONFIG_PATH, "submitty.json")) as open_file:
     JSON = json.load(open_file)
-DATA_PATH = os.path.join(JSON['submitty_data_dir'], "courses")
+DATA_PATH = os.path.join(JSON["submitty_data_dir"], "courses")
 
 
 def get_all_versions(semester, course):
@@ -52,91 +52,67 @@ def get_all_versions(semester, course):
         if os.path.isfile(buildfile):
             with open(buildfile) as open_file:
                 parsed = json.load(open_file)
-                if parsed['testcases']:
-                    for testcase in parsed['testcases']:
-                        testcases.append({
-                            "title": testcase['title'],
-                            "points": testcase['points'],
-                            "extra_credit": testcase['extra_credit'],
-                            "hidden": testcase['hidden']
-                        })
+                if parsed["testcases"]:
+                    for testcase in parsed["testcases"]:
+                        testcases.append(
+                            {
+                                "title": testcase["title"],
+                                "points": testcase["points"],
+                                "extra_credit": testcase["extra_credit"],
+                                "hidden": testcase["hidden"],
+                            }
+                        )
         homework_path = os.path.join(submission_path, homework)
         for student in os.listdir(homework_path):
             if student not in versions:
                 versions[student] = {}
             versions[student][homework] = {}
-            with open(os.path.join(
-                homework_path,
-                student,
-                "user_assignment_settings.json"
-            ), "r") as read_file:
+            with open(
+                os.path.join(homework_path, student, "user_assignment_settings.json"), "r"
+            ) as read_file:
                 json_file = json.load(read_file)
                 active = int(json_file["active_version"])
             results_student = os.path.join(results_path, homework, student)
             for version in sorted(os.listdir(results_student)):
                 versions[student][homework][version] = get_version_details(
-                    semester,
-                    course,
-                    homework,
-                    student,
-                    version,
-                    testcases,
-                    active
+                    semester, course, homework, student, version, testcases, active
                 )
     return versions
 
 
-def get_version_details(
-    semester,
-    course,
-    homework,
-    student,
-    version,
-    testcases,
-    active_version
-):
-    results_path = os.path.join(
-        DATA_PATH,
-        semester,
-        course,
-        "results",
-        homework,
-        student,
-        version
-    )
+def get_version_details(semester, course, homework, student, version, testcases, active_version):
+    results_path = os.path.join(DATA_PATH, semester, course, "results", homework, student, version)
     entry = {
-        'autograding_non_hidden_non_extra_credit': 0,
-        'autograding_non_hidden_extra_credit': 0,
-        'autograding_hidden_non_extra_credit': 0,
-        'autograding_hidden_extra_credit': 0,
-        'submission_time': None,
-        'active': False
+        "autograding_non_hidden_non_extra_credit": 0,
+        "autograding_non_hidden_extra_credit": 0,
+        "autograding_hidden_non_extra_credit": 0,
+        "autograding_hidden_extra_credit": 0,
+        "submission_time": None,
+        "active": False,
     }
     if int(version) == active_version:
-        entry['active'] = True
+        entry["active"] = True
     results_json = os.path.join(results_path, "results.json")
     if not os.path.isfile(results_json):
         return False
     with open(results_json) as open_file:
         open_file = json.load(open_file)
         if testcases:
-            if len(testcases) != len(open_file['testcases']):
+            if len(testcases) != len(open_file["testcases"]):
                 return False
-            for i in range(len(open_file['testcases'])):
+            for i in range(len(open_file["testcases"])):
                 testcase = testcases[i]
-                points = float(open_file['testcases'][i]['points_awarded'])
-                hidden = "hidden" if testcase['hidden'] else "non_hidden"
-                ec = "extra_credit" if testcase['extra_credit'] else "non_extra_credit"
-                entry['autograding_' + hidden + "_" + ec] += points
+                points = float(open_file["testcases"][i]["points_awarded"])
+                hidden = "hidden" if testcase["hidden"] else "non_hidden"
+                ec = "extra_credit" if testcase["extra_credit"] else "non_extra_credit"
+                entry["autograding_" + hidden + "_" + ec] += points
         with open(os.path.join(results_path, "history.json")) as open_file:
             json_file = json.load(open_file)
         if isinstance(json_file, list):
-            a = datetime.strptime(
-                json_file[-1]['submission_time'],
-                "%a %b  %d %H:%M:%S %Z %Y"
+            a = datetime.strptime(json_file[-1]["submission_time"], "%a %b  %d %H:%M:%S %Z %Y")
+            entry["submission_time"] = "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
+                a.year, a.month, a.day, a.hour, a.minute, a.second
             )
-            entry['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \
-                .format(a.year, a.month, a.day, a.hour, a.minute, a.second)
     return entry
 
 
@@ -146,18 +122,11 @@ def main():
     their active versions
     """
     parser = argparse.ArgumentParser(
-        description="Generate a list of students and their version "
-                    "details for all assignments"
+        description="Generate a list of students and their version details for all assignments"
     )
     parser.add_argument("semester", type=str, help="What semester to look at?")
     parser.add_argument("course", type=str, help="What course to look at?")
-    parser.add_argument(
-        "-n",
-        "--no-indent",
-        dest="no_indent",
-        action="store_true",
-        default=False
-    )
+    parser.add_argument("-n", "--no-indent", dest="no_indent", action="store_true", default=False)
     parser.add_argument("-o", "--outfile", dest="outfile", type=str, default=None)
     args = parser.parse_args()
     versions = get_all_versions(args.semester, args.course)
@@ -165,7 +134,7 @@ def main():
     if not args.no_indent:
         indent = 4
     if args.outfile:
-        with open(args.outfile, 'w') as open_file:
+        with open(args.outfile, "w") as open_file:
             json.dump(versions, open_file, indent=indent)
     else:
         print(json.dumps(versions, indent=indent))

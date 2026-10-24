@@ -2,13 +2,10 @@
 
 import { getCurrentSemester } from '../../support/utils.js';
 
-import vnu from 'vnu-jar';
-
 const semester = getCurrentSemester();
 const course = 'sample';
 
-// Remove command is different on Windows.
-const rm_command = Cypress.platform === 'win32' ? 'rd /s /q cypress\\tmp' : 'rm -r cypress/tmp';
+const tmp_dir = 'cypress/tmp';
 
 const urls = [
     '/home',
@@ -63,7 +60,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
             baseline = new Map(Object.entries(data));
         });
 
-        cy.exec(rm_command, { failOnNonZeroExit: false });
+        cy.task('removePath', tmp_dir);
     });
 
     beforeEach(() => {
@@ -71,15 +68,15 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
     });
 
     afterEach(() => {
-        cy.exec(rm_command);
+        cy.task('removePath', tmp_dir);
     });
 
     for (const url of urls) {
         it(`Path: "${url}"`, () => {
             cy.visit(url.replace('{}/{}', `${semester}/${course}`));
             cy.get('html:root').eq(0).invoke('prop', 'outerHTML').then((content) => {
-                cy.writeFile('cypress/tmp/doc.html', `<!DOCTYPE html>\n${content}`, 'utf8').then(() => {
-                    cy.exec(`java -jar "${vnu}" --format json cypress/tmp/doc.html`, { failOnNonZeroExit: false }).then((result) => {
+                cy.writeFile(`${tmp_dir}/doc.html`, `<!DOCTYPE html>\n${content}`, 'utf8').then(() => {
+                    cy.task('validateHtml', `${tmp_dir}/doc.html`).then((result) => {
                         console.log(result.stderr);
                         const output = JSON.parse(result.stderr);
 
