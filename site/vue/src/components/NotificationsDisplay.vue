@@ -7,7 +7,7 @@ has conditionals based on the course boolean to determine functionality.
 import { ref, computed, onMounted } from 'vue';
 import type { Notification } from '@/types/Notification';
 import SingleNotification from '@/components/Notification.vue';
-import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
+import { buildCourseUrl } from '../../../ts/utils/server';
 import MarkSeenPopup from './MarkSeenPopup.vue';
 
 const props = defineProps<{
@@ -72,7 +72,7 @@ function markSeen() {
             url: buildCourseUrl(['notifications', 'seen']),
             type: 'POST',
             data: {
-                csrf_token: window.csrfToken || getCsrfToken(),
+                csrf_token: window.csrfToken,
             },
             success: function () {
                 for (const n of localNotifications.value) {

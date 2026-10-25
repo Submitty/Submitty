@@ -43,8 +43,8 @@ describe('MarkSeenPopup', () => {
 
         // Popup should be visible with course counts
         cy.get('[data-testid="popup-window"]').should('be.visible');
-        cy.contains('Sample Course').should('exist');
-        cy.contains('Math Course').should('exist');
+        cy.get('[data-testid="course-name"]').should('contain.text', 'Sample Course');
+        cy.get('[data-testid="course-name"]').should('contain.text', 'Math Course');
 
         // Select All button selects all checkboxes
         cy.get('[data-testid="select-all-button"]').click();

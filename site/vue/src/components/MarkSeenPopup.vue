@@ -124,9 +124,9 @@ function markSeen() {
             data-testid="course-count-checkbox"
             @click.stop
           />
-          <span>{{ n.title }}</span>
-          <span>{{ n.name }}</span>
-          <span><b>{{ n.count }}</b></span>
+          <span data-testid="course-title">{{ n.title }}</span>
+          <span data-testid="course-name">{{ n.name }}</span>
+          <span data-testid="course-count"><b>{{ n.count }}</b></span>
         </div>
         <hr />
       </div>
