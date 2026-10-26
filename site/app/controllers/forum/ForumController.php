@@ -299,7 +299,7 @@ class ForumController extends AbstractController {
         }
         if (!empty($_POST["category_color"])) {
             $category_color = $_POST["category_color"];
-            if (!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
+            if (!in_array($category_color, $this->getAllowedCategoryColor())) {
                 return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }
@@ -1296,10 +1296,10 @@ class ForumController extends AbstractController {
 
     private function getAllowedCategoryColor() {
         $colors = [];
-        $colors["RED"]    = "#c40233";
-        $colors["GREEN"]  = "#008000";
-        $colors["PURPLE"] = "#800080";
-        $colors["BLUE"]   = "#0000ff";
+        $colors["RED"]    = "var(--colorblind-friendly-red)";
+        $colors["GREEN"]  = "var(--colorblind-friendly-green)";
+        $colors["PURPLE"] = "var(--colorblind-friendly-purple)";
+        $colors["BLUE"]   = "var(--colorblind-friendly-blue)";
         return $colors;
     }
 
