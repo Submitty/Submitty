@@ -5124,16 +5124,30 @@ SQL;
      *
      * @param string $grader_id
      * @param string $gradeable_id
-     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: string, comment: string}>}>
+     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: ?float, max: float}>}>
      */
     public function getPeerParticipationForGrader(string $grader_id, string $gradeable_id): array {
         $result = [];
         $this->course_db->query(
-            "SELECT gd.gd_user_id, gc.gc_title, gcd.gcd_score, gcd.gcd_component_comment
+            "SELECT gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, 
+                CASE
+                    WHEN COUNT(gcm.gcm_id) = 0 AND gcd.gcd_score = 0 THEN NULL
+                    ELSE LEAST(GREATEST(
+                    gc.gc_default + COALESCE(SUM(gcm.gcm_points), 0) + gcd.gcd_score,
+                    gc.gc_lower_clamp), gc.gc_upper_clamp)
+                END AS total_score
             FROM gradeable_component_data gcd
             JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
             JOIN gradeable_component gc ON gc.gc_id = gcd.gc_id
-            WHERE gcd.gcd_grader_id = ? AND gd.g_id = ? AND gc.gc_is_peer = true AND gd.gd_user_id IS NOT NULL
+            LEFT JOIN gradeable_component_mark_data gcmd
+                ON gcmd.gc_id = gcd.gc_id AND gcmd.gd_id = gcd.gd_id
+                AND gcmd.gcd_grader_id = gcd.gcd_grader_id
+            LEFT JOIN gradeable_component_mark gcm ON gcm.gcm_id = gcmd.gcm_id
+            WHERE gcd.gcd_grader_id = ? AND gd.g_id = ? AND gc.gc_is_peer = true
+                AND gd.gd_user_id IS NOT NULL
+            GROUP BY gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, gc.gc_order,
+                gc.gc_default, gc.gc_lower_clamp, gc.gc_upper_clamp,
+                gcd.gcd_score
             ORDER BY gd.gd_user_id, gc.gc_order",
             [$grader_id, $gradeable_id]
         );
@@ -5142,8 +5156,8 @@ SQL;
             $result[$row['gd_user_id']]['overall_comment'] ??= null;
             $result[$row['gd_user_id']]['components'][] = [
                 'title' => $row['gc_title'],
-                'score' => $row['gcd_score'],
-                'comment' => $row['gcd_component_comment']
+                'score' => $row['total_score'] !== null ? (float) $row['total_score'] : null,
+                'max' => (float) $row['gc_max_value'],
             ];
         }
 
