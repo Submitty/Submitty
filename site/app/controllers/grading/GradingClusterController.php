@@ -46,11 +46,17 @@ class GradingClusterController extends AbstractController {
         if ($cluster === null || $cluster->getConfig()->getGradeableId() !== $gradeable->getId()) {
             return JsonResponse::getErrorResponse("Invalid cluster.");
         }
-        if ($cluster_name === 'Unclustered') {
+        if (
+            strcasecmp($cluster_name, 'Unclustered') === 0
+            || strcasecmp($cluster_name, 'NULL') === 0
+        ) {
             return JsonResponse::getErrorResponse("This cluster name is reserved.");
         }
         foreach ($cluster->getConfig()->getClusters() as $other_cluster) {
-            if ($other_cluster->getId() !== $cluster->getId() && $other_cluster->getClusterName() === $cluster_name) {
+            if (
+                $other_cluster->getId() !== $cluster->getId()
+                && strcasecmp((string) $other_cluster->getClusterName(), $cluster_name) === 0
+            ) {
                 return JsonResponse::getErrorResponse("Another cluster already uses this name.");
             }
         }
