@@ -121,30 +121,32 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         registration_section,
                         registration_type,
                         manual_registration,
-                        display_name_order
+                        display_name_order,
+                        date_registered
                     ) VALUES ('
                         || quote_literal(user_row.user_id) || ', '
-                        || quote_nullable(user_row.user_numeric_id) || ', ' 
-                        || quote_literal(user_row.user_pronouns) || ', ' 
+                        || quote_nullable(user_row.user_numeric_id) || ', '
+                        || quote_literal(user_row.user_pronouns) || ', '
                         || quote_literal(user_row.display_pronouns) || ', '
-                        || quote_literal(user_row.user_givenname) || ', ' 
-                        || quote_nullable(user_row.user_preferred_givenname) || ', ' 
+                        || quote_literal(user_row.user_givenname) || ', '
+                        || quote_nullable(user_row.user_preferred_givenname) || ', '
                         || quote_literal(user_row.user_familyname) || ', '
-                        || quote_nullable(user_row.user_preferred_familyname) || ', ' 
-                        || quote_literal(user_row.user_last_initial_format) || ', ' 
-                        || quote_literal(user_row.user_email) || ', ' 
-                        || quote_literal(user_row.user_email_secondary) || ', ' 
-                        || quote_literal(user_row.user_email_secondary_notify) || ', ' 
+                        || quote_nullable(user_row.user_preferred_familyname) || ', '
+                        || quote_literal(user_row.user_last_initial_format) || ', '
+                        || quote_literal(user_row.user_email) || ', '
+                        || quote_literal(user_row.user_email_secondary) || ', '
+                        || quote_literal(user_row.user_email_secondary_notify) || ', '
                         || quote_literal(user_row.time_zone) || ', '
                         || quote_nullable(user_row.user_preferred_locale) || ', '
                         || quote_literal(user_row.display_image_state) || ', '
                         || quote_literal(user_row.user_updated) || ', '
                         || quote_literal(user_row.instructor_updated) || ', '
-                        || NEW.user_group || ', ' 
-                        || quote_nullable(NEW.registration_section) || ', ' 
+                        || NEW.user_group || ', '
+                        || quote_nullable(NEW.registration_section) || ', '
                         || quote_literal(NEW.registration_type) || ', '
                         || NEW.manual_registration || ', '
-                        || quote_literal(user_row.display_name_order)
+                        || quote_literal(user_row.display_name_order) || ', '
+                        || quote_nullable(user_row.date_registered)
                     || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
@@ -160,6 +162,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         || 'rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', '
                         || 'registration_type=' || quote_literal(NEW.registration_type) || ', '
                         || 'manual_registration=' || NEW.manual_registration
+                        || 'date_registered=' || quote_nullable(NEW.date_registered) || ', '
                     || ' WHERE user_id=' || quote_literal(NEW.user_id);
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
@@ -476,6 +479,7 @@ CREATE TABLE public.courses_users (
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
     previous_registration_section character varying(255),
+    date_registered timestamp without time zone DEFAULT now(),
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
 );
