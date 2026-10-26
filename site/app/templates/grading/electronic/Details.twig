@@ -258,18 +258,20 @@
                                 {% if is_group_by_clusters %}
                                     Students in Cluster {{ section.title }}
                                     {% if section.cluster_id is defined and section.cluster_id is not null %}
-                                        <button
-                                            type="button"
-                                            class="btn btn-link btn-xs rename-cluster-btn"
-                                            title="Rename Cluster"
-                                            aria-label="Rename Cluster"
-                                            data-cluster-id="{{ section.cluster_id }}"
-                                            data-cluster-name="{{ section.title }}"
-                                            data-rename-url="{{ core.buildCourseUrl(['gradeable', gradeable.getId(), 'clustering', section.cluster_id, 'rename']) }}"
-                                            onclick="renameCluster(this)"
-                                        >
-                                            <i class="fas fa-pencil-alt"></i>
-                                        </button>
+                                        {% include 'Vue.twig' with {
+                                            'type': 'component',
+                                            'name': 'ta_grading/RenameClusterModal',
+                                            'style': 'display: inline-block;',
+                                            'args': {
+                                                'clusterId': section.cluster_id,
+                                                'clusterName': section.title,
+                                                'renameUrl': core.buildCourseUrl(['gradeable', gradeable.getId(), 'clustering', section.cluster_id, 'rename']),
+                                                'csrfToken': core.getCsrfToken()
+                                            },
+                                            'events': {
+                                                'renamed': '() => { window.location.reload(); }'
+                                            }
+                                        } %}
                                     {% endif %}
                                 {% elseif gradeable.isGradeByRegistration()%}
                                     Students Enrolled in Registration Section {{ section.title }}
