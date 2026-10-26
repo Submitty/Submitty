@@ -1229,7 +1229,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($config->getClusters() as $cluster) {
                 foreach ($cluster->getValidMembers($active_versions) as $member) {
                     $id = $member->getSubmitterId();
-                    $cluster_map[$id] = $cluster->getClusterName();
+                    $cluster_map[$id] = $cluster->getClusterName() ?? ("Cluster " . $cluster->getId());
                     $cluster_id_map[$id] = $cluster->getId();
                 }
             }
