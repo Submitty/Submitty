@@ -93,11 +93,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
             {# Peer Component boxes #}
             <div id="normal_peer_wrapper">
                 {% for component in peer_components %}
-                    {% if component.peer_ids | length <= 5 %}
-                        {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded, anon_grader_id_mapping) }}
-                    {% else %}
-                        {{ self.renderManyPeerResults(component, num_decimals, active_same_as_graded) }}
-                    {% endif %}
+                    {{ self.renderPeerSummary(component, num_decimals, active_same_as_graded) }}
                 {% endfor %}
             </div>
             {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
@@ -124,7 +120,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
 {% endif %}
 
 
-{%- macro renderManyPeerResults(component, num_decimals, active_same_as_graded) -%}
+{%- macro renderPeerSummary(component, num_decimals, active_same_as_graded) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
             {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
@@ -170,64 +166,6 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
     </div>
 {%- endmacro -%}
 
-
-{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded, anon_grader_id_mapping) -%}
-    <div class="box grade-results">
-        <div class="no-border-box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
-        </div>
-        <div class="no-border-box-info" style="width:100%">
-            <h4>
-                {{ component.title|escape }}
-            </h4>
-            <div style="float:left; width:100%;">
-                <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
-                <p>
-
-                {# This is a layout table #}
-                <table class="mobile-table" style="border-color:white;">
-                     <thead>
-                        <tr>
-                            {% for grader in ordered_graders|filter(grader => anon_grader_id_mapping[grader] in component.peer_ids) %}
-                                <th class="peer-table-header">
-                                    {{ peer_aliases[grader] }}
-                                </th>
-                            {% endfor %}
-                            <th> Points </th>
-                            <th class="peer-table-title-data"> Title  </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mark in component.marks|filter((mark) => mark.show_mark) %}
-                            <tr>
-                                {% for grader in ordered_graders|filter(grader => anon_grader_id_mapping[grader] in component.peer_ids) %}
-                                    <td class="peer-table-data">
-                                        {% if mark.earned[anon_grader_id_mapping[grader]] %}
-                                            <div class="col-no-gutters indicator">
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            </div>
-                                        {% else %}
-                                            <div class="col-no-gutters indicator">
-                                                <i class="far fa-square fa-1g"></i>
-                                            </div>
-                                        {% endif %}
-                                    </td>
-                                {% endfor %}
-                                <td class="peer-table-data">
-                                    {{ mark.points|round(num_decimals) }}
-                                </td>
-                                <td class="peer-table-title-data">
-                                    {{ mark.title|nl2br }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                </p>
-            </div>
-        </div>
-    </div>
-{%- endmacro -%}
 
 {%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
