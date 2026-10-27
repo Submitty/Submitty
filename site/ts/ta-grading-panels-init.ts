@@ -1,5 +1,5 @@
 import { initializeResizablePanels } from './resizable-panels';
-import { viewFileFullPanel } from './ta-grading';
+import { getFileTreePath, viewFileFullPanel } from './ta-grading';
 import {
     taLayoutDet,
     resetSinglePanelLayout,
@@ -315,8 +315,19 @@ function readCookies() {
         });
     }
 
+    // Reopen the file last shown in the full panel if this student has a file at the same path
+    let full_panel_restored = false;
+    const full_panel_file = localStorage.getItem('ta-grading-auto-open-full-panel-file');
+    if (autoscroll === 'on' && full_panel_file !== null) {
+        const elem = $('#file-container a[file-url]').toArray().find((file_link) => getFileTreePath(file_link) === full_panel_file);
+        if (elem !== undefined) {
+            viewFileFullPanel(encodeURIComponent(elem.dataset.file_name!), elem.getAttribute('file-url')!);
+            full_panel_restored = true;
+        }
+    }
+
     // If autoscroll is on, no files were opened from saved state, and there's exactly one file, auto-open it
-    if (autoscroll === 'on') {
+    if (autoscroll === 'on' && !full_panel_restored) {
         // the number of files and folders that are open in the submissions and results browser
         const numOpenFiles = $('#file-container div[id^=file_viewer_].open').length + $('#file-container div[id^=div_viewer_].open').length;
         // the number of files that the student submitted (excluding files like .submit.timestamp that generate on submission)
@@ -325,8 +336,8 @@ function readCookies() {
         );
         if (numOpenFiles === 0 && SubmissionFiles.length === 1) {
             const elem = SubmissionFiles[0];
-            const fileName = elem.dataset.file_name!;
-            const fileUrl = decodeURIComponent(elem.getAttribute('file-url')!);
+            const fileName = encodeURIComponent(elem.dataset.file_name!);
+            const fileUrl = elem.getAttribute('file-url')!;
             if (elem.classList.contains('image-file')) {
                 // single submitted image file fills up the whole screen
                 viewFileFullPanel(fileName, fileUrl);

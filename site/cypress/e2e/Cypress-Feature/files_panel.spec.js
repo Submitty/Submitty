@@ -153,6 +153,87 @@ describe('Test cases involving the files panel', () => {
         cy.get('[aria-label="Collapse File"]').click();
         cy.get('#file_viewer_full_panel_iframe').should('not.exist');
     });
+
+    it('test the auto open checkbox with the full panel view', () => {
+        cy.get('#autoscroll_id').click();
+        cy.get('#autoscroll_id').should('be.checked');
+
+        // every student has a .submit.timestamp, so it should reopen on the next student
+        cy.get('#submissions').click();
+        cy.get('i[title="Show file in full panel"]').first().click();
+        cy.get('#grading_file_name').should('contain', '.submit.timestamp');
+
+        cy.get('#next-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
+        cy.get('#grading_file_name').should('contain', '.submit.timestamp');
+        cy.get('#file_viewer_full_panel_iframe').should('be.visible');
+
+        // collapsing the file stops it from reopening
+        cy.get('[aria-label="Collapse File"]').click();
+        cy.get('#prev-student').click();
+        cy.get('#grading-panel-student-name').should('contain.text', 'hamile');
+        cy.get('#file_viewer_full_panel_iframe').should('not.exist');
+
+        cy.get('#autoscroll_id').click();
+        cy.get('#autoscroll_id').should('not.be.checked');
+    });
+});
+
+describe('Test cases involving auto opening PDFs in the full panel view', () => {
+    const pdfName = 'words_249.pdf';
+
+    function submitPdf(user) {
+        cy.login(user);
+        cy.visit(['sample', 'gradeable', 'open_homework']);
+        cy.get('#startnew').then(($clearBtn) => {
+            if (!$clearBtn.is(':disabled')) {
+                $clearBtn.click();
+            }
+        });
+        // a second file keeps the single file auto open from opening the PDF instead
+        cy.get('#upload1').selectFile([`cypress/fixtures/${pdfName}`, 'cypress/fixtures/file1.txt'], { action: 'drag-drop' });
+        cy.waitPageChange(() => {
+            cy.get('#submit').click();
+        });
+        cy.get('#submitted-files > div').should('contain', pdfName);
+        cy.logout();
+    }
+
+    function gradeStudent(user) {
+        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
+        cy.get('[data-testid="view-sections"]').uncheck();
+        cy.get('#details-table').contains('tr', user).find('[data-testid="grade-button"]').click();
+    }
+
+    it('test the auto open checkbox with a PDF at the same path', () => {
+        submitPdf('bitdiddle');
+        submitPdf('joness');
+
+        // wait for each PDF to fully load, or an error will occur when it's interrupted
+        cy.intercept(`/courses/${getCurrentSemester()}/sample/gradeable/open_homework/encode_pdf`).as('pdf');
+
+        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
+        cy.login('instructor');
+        gradeStudent('bitdiddle');
+        cy.get('#submission_browser_btn').click();
+        cy.get('#autoscroll_id').click();
+        cy.get('#autoscroll_id').should('be.checked');
+        cy.get('#submissions').click();
+        assertSubmissionsBrowserOpen();
+        cy.get(`[data-file-name="${pdfName}"] [aria-label="Show file in full panel"]`).click();
+        cy.get('#grading_file_name').should('contain', pdfName);
+        cy.wait('@pdf');
+
+        // another student with a PDF at the same path gets it reopened
+        gradeStudent('joness');
+        cy.get('#grading_file_name').should('contain', pdfName);
+        cy.get('#file-view[style^="display: block;"]').should('exist');
+        cy.wait('@pdf');
+
+        cy.get('[aria-label="Collapse File"]').click();
+        cy.get('#autoscroll_id').click();
+        cy.get('#autoscroll_id').should('not.be.checked');
+    });
 });
 
 describe('Test cases involving auto opening single file submissions', () => {
