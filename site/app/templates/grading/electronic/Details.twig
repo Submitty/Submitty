@@ -146,6 +146,9 @@
                 'forced': [
                     'grading'
                 ],
+                'hiddenColumns': [
+                    'ta_time'
+                ],
                 'cookie': 'grading_details_columns',
                 'format': 'json',
             },
@@ -393,6 +396,8 @@
                 {{ _self.render_column_user_family(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.header_key == "viewed_grade" %}
                 {{ _self.render_column_viewed_grade(context, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
+            {% elseif column.header_key == "ta_time" %}
+                {{ _self.render_ta_time() }}
             {% endif %}
         {% endfor %}
     </tr>
@@ -451,6 +456,8 @@
             {% elseif column.header_key == "user_family" %}
                 <td></td>
             {% elseif column.header_key == "viewed_grade" %}
+                <td></td>
+            {% elseif column.header_key == "ta_time" %}
                 <td></td>
             {% endif %}
         {% endfor %}
@@ -892,6 +899,11 @@
     {% else %}
         <td></td>
     {% endif %}
+{% endmacro %}
+
+{# TA Time #}
+{% macro render_ta_time() %}
+    <td style = "text-align: center;"> 0 </td>
 {% endmacro %}
 
 {# /Column functions #}
