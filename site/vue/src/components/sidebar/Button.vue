@@ -50,6 +50,7 @@ function getButtonId(button: Button): string | undefined {
           <span
             v-if="button.badge && button.badge > 0"
             class="notification-badge"
+            data-testid="sidebar-notification-badge"
           >
             {{ button.badge }}
           </span>
@@ -73,6 +74,7 @@ function getButtonId(button: Button): string | undefined {
           <span
             v-if="button.badge && button.badge > 0"
             class="notification-badge"
+            data-testid="sidebar-notification-badge"
           >
             {{ button.badge }}
           </span>
