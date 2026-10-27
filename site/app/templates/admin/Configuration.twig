@@ -131,14 +131,14 @@
         </label>
         <input class="config-row" type="text" name="private_repository" id="private-repository" value="{{ fields['private_repository'] }}" />
         <fieldset class="config-row">
-            <legend id="vcs-legend">
+            <legend id="vcs-legend" data-saveindicator="vcs-legend">
                 <span class="option-title">Version Control System (VCS) Type</span>
                 <br>
                 <span class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</span>
             </legend>
             <div id="vcs-options" class="option-input flex-row">
                 <label for="vcs-type-git">
-                    <input type="radio" name="vcs_type" id="vcs-type-git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/>
+                    <input type="radio" name="vcs_type" id="vcs-type-git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }} data-usesaveindicator="vcs-legend"/>
                     Git
                 </label>
                 {#
@@ -298,7 +298,7 @@
             </select>
             <label id="seating-only-label" class="option-alt" for="seating-only-for-instructor">
                 Visible only to Instructors?
-                <input type="checkbox" name="seating_only_for_instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
+                <input type="checkbox" name="seating_only_for_instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} data-usesaveindicator="room-seating-gradeable-id" />
             </label>
         </div>
 
@@ -350,7 +350,7 @@
                         </span>
                         <br/>
                         <span class="option-title">Default Section</span>
-                        <select name="default_section_id" id="default-section-id" data-testid="default-section-id" >
+                        <select name="default_section_id" id="default-section-id" data-testid="default-section-id" data-usesaveindicator="all-self-registration" >
                             {% if fields['default_section'] is null %}
                                 <option value="" selected> NULL </option>
                             {% endif %}
