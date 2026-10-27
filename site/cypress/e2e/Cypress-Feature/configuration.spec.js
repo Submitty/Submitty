@@ -1,3 +1,10 @@
+/*
+TODO
+Actually test course settings saving when fields
+in the Course Settings page are changed.
+Right now, this spec only tests save indicators appearing on the page.
+*/
+
 const IndicatorType = {
     NotVisible: 1,
     Saving: 2,

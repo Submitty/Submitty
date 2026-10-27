@@ -144,9 +144,13 @@ function confirmSelfRegistration(element, needs_reg_sections) {
 }
 
 function addLabelsForSaveIndicators(elementId){
-    //This marks field titles & input fields to create save indicators for them.
-    //This misses some weirder fields like VCS type and fields that share an indicator
-    //with other fields. Those have to be defined manually in Configuration.twig.
+    /*
+    This adds 'data-saveindicator="fieldId"' to the title of a field,
+    and 'data-usesaveindicator="fieldId"' to the actual input field.
+    This ends up missing fields that share an indicator with something else,
+    or fields that don't use "for='fieldId'" in their title span.
+    Those have to be labelled manually in Configuration.twig.
+    */
     let title = $(`label[for='${elementId}'] .option-title`);
     if (title.length === 0 && elementId) {
         title = $(`#${elementId} .option-title`);
