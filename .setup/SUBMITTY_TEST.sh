@@ -21,12 +21,16 @@ HELP_MESSAGE="
     phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
     phpcs     : php CodeSniffer [option: --fix]
     php-lint  : phpcs & phpstan (with default options only)
+    twig-lint : lint all Twig templates, or pass arguments for specific files
+                usage: twig-lint [--format FORMAT] [--show-deprecations] [--] [<filename>...]
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
+    js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
-    py-flake8 : run flake8 [option: specific_file.py]
-    py-pylint : run pylint [option: specific_file.py]
-    py-lint   : py-flake8 & py-pylint [option: specific_file.py]
+    shell-lint: run ShellCheck
+    yaml-lint : run yamllint
+    py-lint   : run ruff check [option: --fix, specific_file.py]
+    py-format : run ruff format, check-only by default [option: --fix, specific_file.py]
     py-unit   : run all python unit tests except migration
     py-unit-utils      : run the 'utils' python unit tests [option: module, class, function ...]
     py-unit-migration  : run the 'migration' python unit tests [option: module, class, function ...]
@@ -41,6 +45,18 @@ case "${1:-}" in
         ;;
 esac
 
+# determine the OS to set Docker run command network opts, as well as Jest env variables
+# this is necessary for javascript unit testing with the --api option
+OS_NAME="$(uname -s)"
+if [[ "$OS_NAME" == *"Linux"* ]]; then
+    DOCKER_NET_ARGS="--network=host"
+    API_BASE_URL="http://127.0.0.1:1511"
+else
+    # For macOS and Windows
+    DOCKER_NET_ARGS=""
+    API_BASE_URL="http://host.docker.internal:1511"
+fi
+
 # build docker image using SUBMITTY_ROOT
 echo "Setting up Docker image '$IMAGE_NAME'..."
 docker build -t "$IMAGE_NAME" -f "$SCRIPT_DIR/Dockerfile" "$SUBMITTY_ROOT"
@@ -52,7 +68,11 @@ run_in_container() {
     # check if the environment supports -t (in this case, just used for color output)
     local terminal_flag=""
     [ -t 0 ] && terminal_flag="-t"
-    docker run --rm $terminal_flag -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
+
+    # $DOCKER_NET_ARGS and $terminal_flag unquoted so they expand their contents
+    # (including if they have no contents)
+    # shellcheck disable=SC2086
+    docker run --rm $terminal_flag $DOCKER_NET_ARGS -u "$SCRIPT_UID:$SCRIPT_GID" -e HOME=/tmp \
         --mount type=bind,source="$SUBMITTY_ROOT",target=/home/submitty \
         --mount type=volume,target=/home/submitty/site/vendor \
         --mount type=volume,target=/home/submitty/site/node_modules \
@@ -86,8 +106,8 @@ run_php_stan() {
 
 run_php_cs() {
     parse_args "${@:2}"
-    script=lint
-    $FIX && script=lint:fix
+    script="lint"
+    $FIX && script="lint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site composer run-script "$script" -- "${ARGS[@]}"
@@ -96,22 +116,43 @@ run_php_cs() {
     fi
 }
 
+run_twig_lint() {
+    local ARGS=("${@:2}")
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /home/submitty/site composer run-script lint:twig-specific-file -- "${ARGS[@]}"
+    else
+        run_in_container /home/submitty/site composer run-script lint:twig
+    fi
+}
+
 run_js_es() {
     parse_args "${@:2}"
-    script=eslint
-    $FIX && script=eslint:fix
+    script="eslint"
+    $FIX && script="eslint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
     else
+        run_in_container /home/submitty/site npm run "$script"
+    fi
+}
+
+run_js_unit() {
+    parse_args "${@:2}"
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        script="test:api"
+        # see site/test/api/utils.ts for more info about env BASE_URL
+        run_in_container /home/submitty/site env BASE_URL="$API_BASE_URL" npm run "$script"
+    else
+        script="test"
         run_in_container /home/submitty/site npm run "$script"
     fi
 }
 
 run_css_style() {
     parse_args "${@:2}"
-    script=css-stylelint
-    $FIX && script=css-stylelint:fix
+    script="css-stylelint"
+    $FIX && script="css-stylelint:fix"
 
     if [ ${#ARGS[@]} -gt 0 ]; then
         run_in_container /home/submitty/site npm run "$script" -- "${ARGS[@]}"
@@ -120,47 +161,61 @@ run_css_style() {
     fi
 }
 
-run_php_unit() {
-    parse_args "${@:2}"
-    run_in_container /home/submitty/site php vendor/bin/phpunit "${ARGS[@]}"
+run_shell_lint() {
+    run_in_container /home/submitty python3 run_shellcheck.py
 }
 
-run_py_flake8() {
+run_yaml_lint() {
+    run_in_container /home/submitty yamllint .
+}
+
+run_php_unit() {
     parse_args "${@:2}"
-    if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty python3 -m flake8 "${ARGS[@]}"
+    run_in_container /home/submitty/site php vendor/bin/phpunit ${ARGS[@]+"${ARGS[@]}"}
+}
+
+run_py_lint() {
+    parse_args "${@:2}"
+    if [ ${#ARGS[@]} -eq 0 ]; then
+        ARGS=(".")
+    fi
+    if $FIX; then
+        run_in_container /home/submitty ruff check --fix "${ARGS[@]}"
     else
-        run_in_container /home/submitty python3 -m flake8
+        run_in_container /home/submitty ruff check "${ARGS[@]}"
     fi
 }
 
-run_py_pylint() {
+run_py_format() {
     parse_args "${@:2}"
-    if [ ${#ARGS[@]} -gt 0 ]; then
-        run_in_container /home/submitty python3 -m pylint "${ARGS[@]}"
+    if [ ${#ARGS[@]} -eq 0 ]; then
+        ARGS=(".")
+    fi
+    if $FIX; then
+        run_in_container /home/submitty ruff format "${ARGS[@]}"
     else
-        run_in_container /home/submitty python3 -m pylint --recursive=y .
+        run_in_container /home/submitty ruff format --check --diff "${ARGS[@]}"
     fi
 }
 
 run_py_unit_utils() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/python_submitty_utils python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/python_submitty_utils python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_migration() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/migration python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/migration python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_autograder() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/autograder python3 -m unittest discover "${ARGS[@]}"
+    run_in_container /home/submitty/autograder python3 -m unittest discover ${ARGS[@]+"${ARGS[@]}"}
 }
 
 run_py_unit_daemon() {
     parse_args "${@:2}"
-    run_in_container /home/submitty/sbin/submitty_daemon_jobs python3 -m unittest discover tests -t . "${ARGS[@]}"
+    run_in_container /home/submitty/sbin/submitty_daemon_jobs python3 -m unittest discover tests -t . ${ARGS[@]+"${ARGS[@]}"}
 }
 
 # process input arguments
@@ -175,26 +230,32 @@ case "${1:-}" in
         run_php_cs
         run_php_stan
         ;;
+    twig-lint)
+        run_twig_lint "$@"
+        ;;
     php-unit)
         run_php_unit "$@"
         ;;
     js-lint)
         run_js_es "$@"
         ;;
+    js-unit)
+        run_js_unit "$@"
+        ;;
     css-lint)
         run_css_style "$@"
         ;;
-    py-flake8)
-        run_py_flake8 "$@"
+    shell-lint)
+        run_shell_lint
         ;;
-    py-pylint)
-        run_py_pylint "$@"
+    yaml-lint)
+        run_yaml_lint
         ;;
     py-lint)
-        echo "Running pylint..."
-        run_py_pylint "$@"
-        echo "Running flake8..."
-        run_py_flake8 "$@"
+        run_py_lint "$@"
+        ;;
+    py-format)
+        run_py_format "$@"
         ;;
     py-unit-utils)
         run_py_unit_utils "$@"

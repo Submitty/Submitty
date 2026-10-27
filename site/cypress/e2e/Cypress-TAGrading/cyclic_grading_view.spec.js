@@ -7,8 +7,8 @@ describe('Cyclic grading View Test', () => {
             if (user === 'ta') {
                 cy.get('[data-testid="popup-window"]').should('exist');
                 cy.get('[data-testid="close-button"]').should('exist');
-                cy.get('[data-testid="close-hidden-button"]').should('exist');
-                cy.get('[data-testid="agree-popup-btn"]').click();
+                cy.get('[data-testid="popup-save-button"]').should('exist');
+                cy.get('[data-testid="popup-save-button"]').click();
             }
             cy.get('[data-testid="view-sections"]').click();
             cy.get('[data-testid="grade-button"]').eq(4).click();
@@ -31,8 +31,8 @@ describe('Cyclic grading View Test', () => {
             if (user === 'ta') {
                 cy.get('[data-testid="popup-window"]').should('exist');
                 cy.get('[data-testid="close-button"]').should('exist');
-                cy.get('[data-testid="close-hidden-button"]').should('exist');
-                cy.get('[data-testid="agree-popup-btn"]').click();
+                cy.get('[data-testid="popup-save-button"]').should('exist');
+                cy.get('[data-testid="popup-save-button"]').click();
             }
             cy.get('[data-testid="view-sections"]').click();
             cy.get('[data-testid="grade-button"]').eq(1).click();

@@ -111,8 +111,8 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
 
         cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details'], { timeout: 10000 });
 
-        cy.get('[data-testid="agree-popup-btn"]').scrollIntoView();
-        cy.get('[data-testid="agree-popup-btn"]').click();
+        cy.get('[data-testid="popup-save-button"]').scrollIntoView();
+        cy.get('[data-testid="popup-save-button"]').click();
 
         cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-testid="grade-table"]')

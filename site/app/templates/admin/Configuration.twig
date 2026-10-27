@@ -230,6 +230,17 @@
         </label>
         <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="4">{{ fields['grade_inquiry_message'] }}</textarea>
 
+        <div class="config-row checkbox-row">
+            <input type="checkbox" name="submission_clustering_enabled" id="submission-clustering-enabled" value="true" {{ fields['submission_clustering_enabled'] ? 'checked' : '' }} data-testid="submission-clustering-enabled"/>
+            <label for="submission-clustering-enabled">
+                <span class="option-title">Enable Submission Clustering</span>
+                <br>
+                <span class="option-alt">
+                    Allow instructors to use the Submission Clustering feature to group similar submissions for cluster-wide grading.
+                </span>
+            </label>
+        </div>
+
         {# TODO: Not sure what this is
             <label for="zero_rubric_grades">
                 <div class="option-title">Zero Rubric Grading</div>

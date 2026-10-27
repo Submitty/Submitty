@@ -12,7 +12,7 @@ describe('Rubric Access Test', () => {
         cy.login('ta');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.get('[data-testid="popup-window"]').should('exist');
-        cy.get('#agree-button').click();
+        cy.get('[data-testid="popup-save-button"]').click();
         cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="grade-button"]').eq(3).click();
         cy.get('[data-testid="grading-rubric-btn"]').click();

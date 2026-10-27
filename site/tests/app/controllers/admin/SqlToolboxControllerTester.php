@@ -56,7 +56,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         unset($_POST['sql']);
     }
 
-    public function toolboxInstructorQueriesProvider() {
+    public static function toolboxInstructorQueriesProvider() {
         return [
             [[]],
             [['query' => 'SELECT * FROM foo', 'description' => 'Test Query']],
