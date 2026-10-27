@@ -152,3 +152,90 @@ describe('Test cases revolving around notification/email settings', () => {
             .each(($el) => verifyIndividualNotificationUpdates($el.attr('name')));
     });
 });
+
+describe('Test cases revolving around course notifications and sidebar badge count', () => {
+    const threadAnnouncement1 = 'Cypress Announcement Badge 1';
+    const threadAnnouncement2 = 'Cypress Announcement Badge 2';
+    const threadContent = 'Cypress notification test body';
+
+    const createAnnouncement = (title) => {
+        cy.visit(['sample', 'forum', 'threads', 'new']);
+        cy.get('[data-testid="title"]').type(title);
+        cy.get('[data-testid="reply_box_1"]').type(threadContent);
+        cy.get('[data-testid="categories-pick-list"] .cat-buttons').first().click({ force: true });
+        cy.get('#Announcement').click();
+        cy.get('[data-testid="forum-publish-thread"]').click({ force: true });
+        cy.url().should('not.include', '/sample/forum/threads/new');
+    };
+
+    const cleanupThread = (title) => {
+        cy.visit(['sample', 'forum', 'threads']).then(() => {
+            cy.get('body').then(($body) => {
+                if ($body.find(`[data-testid="thread-list-item"]:contains("${title}")`).length > 0) {
+                    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+                    cy.get('[data-testid="thread-dropdown"]').first().click();
+                    cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
+                }
+            });
+        });
+    };
+
+    before(() => {
+        // Ensure student starts with clean state (all existing notifications marked seen)
+        cy.login('student');
+        cy.visit(buildUrl(['sample', 'notifications']));
+        cy.get('body').then(($body) => {
+            if ($body.find('[data-testid="mark-seen-button"]').length > 0) {
+                cy.get('[data-testid="mark-seen-button"]').click();
+            }
+        });
+        cy.logout();
+
+        // Create two announcements as instructor to trigger unseen notifications
+        cy.login('instructor');
+        createAnnouncement(threadAnnouncement1);
+        createAnnouncement(threadAnnouncement2);
+        cy.logout();
+    });
+
+    after(() => {
+        // Clean up both announcement threads
+        cy.login('instructor');
+        cleanupThread(threadAnnouncement1);
+        cleanupThread(threadAnnouncement2);
+        cy.logout();
+    });
+
+    it('Should display sidebar badge count, update badge on individual mark seen, and remove badge on mark all seen', () => {
+        cy.login('student');
+        cy.visit(buildUrl(['sample']));
+
+        // Verify sidebar notification badge exists on the course page
+        cy.get('[data-testid="sidebar-notification-badge"]')
+            .should('exist')
+            .and('contain.text', '2');
+
+        // Navigate to course notifications page
+        cy.get('[data-testid="nav-sidebar-notifications"]').click();
+        cy.get('[data-testid="course-notifications-page"]').should('exist');
+        cy.get('[data-testid="sidebar-notification-badge"]')
+            .should('exist')
+            .and('contain.text', '2');
+
+        // Mark first individual notification as seen and verify badge count decrements dynamically
+        cy.get('[data-testid="notification-seen-button"]').first().click();
+        cy.get('[data-testid="sidebar-notification-badge"]')
+            .should('exist')
+            .and('contain.text', '1');
+
+        // Mark remaining notification(s) as seen via mark-seen-button and verify badge is removed dynamically
+        cy.get('[data-testid="mark-seen-button"]').click();
+        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
+        cy.get('[data-testid="no-unseen-notifications-message"]').should('exist');
+
+        // Reload the page and verify badge remains removed
+        cy.reload();
+        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
+        cy.get('[data-testid="no-unseen-notifications-message"]').should('exist');
+    });
+});

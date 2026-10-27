@@ -228,7 +228,7 @@
                     <button id="menu-button" class="black-btn">
                         MENU
                         {% if total_notifications %}
-                            <span class="notification-badge">{{  total_notifications }}</span>
+                            <span class="notification-badge" data-testid="menu-notification-badge">{{  total_notifications }}</span>
                         {% endif %}
                     </button>
                 {% elseif sidebar_buttons|length %}

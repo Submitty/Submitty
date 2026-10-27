@@ -35,7 +35,7 @@ function getSampleNotifications() {
 
 function updateBadgeDOM(count) {
     const badges = document.querySelectorAll(
-        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
+        '[data-testid="sidebar-notification-badge"], [data-testid="mobile-sidebar-notification-badge"], [data-testid="menu-notification-badge"], #nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
     );
     if (count <= 0) {
         badges.forEach((el) => el.remove());
@@ -81,20 +81,20 @@ describe('NotificationsDisplay', () => {
         document.querySelectorAll('#nav-sidebar-notifications, #mobile-nav-sidebar-notifications, #menu-button')
             .forEach((el) => el.remove());
 
-        // Setup DOM sidebar badge elements
+        // Setup DOM sidebar badge elements with data-testid attributes
         sidebarEl = document.createElement('div');
         sidebarEl.id = 'nav-sidebar-notifications';
-        sidebarEl.innerHTML = '<span class="notification-badge">2</span>';
+        sidebarEl.innerHTML = '<span class="notification-badge" data-testid="sidebar-notification-badge">2</span>';
         document.body.appendChild(sidebarEl);
 
         mobileSidebarEl = document.createElement('div');
         mobileSidebarEl.id = 'mobile-nav-sidebar-notifications';
-        mobileSidebarEl.innerHTML = '<span class="notification-badge">2</span>';
+        mobileSidebarEl.innerHTML = '<span class="notification-badge" data-testid="mobile-sidebar-notification-badge">2</span>';
         document.body.appendChild(mobileSidebarEl);
 
         menuBtnEl = document.createElement('button');
         menuBtnEl.id = 'menu-button';
-        menuBtnEl.innerHTML = '<span class="notification-badge">2</span>';
+        menuBtnEl.innerHTML = '<span class="notification-badge" data-testid="menu-notification-badge">2</span>';
         document.body.appendChild(menuBtnEl);
     });
 
@@ -125,12 +125,12 @@ describe('NotificationsDisplay', () => {
         // Click mark seen on first individual notification
         cy.get('[data-testid="notification-seen-button"]').first().click();
         cy.get('@badgeSpy').should('have.been.calledWith', 1);
-        cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '1');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('have.text', '1');
 
         // Click Mark as seen button
         cy.get('[data-testid="mark-seen-button"]').click();
         cy.get('@badgeSpy').should('have.been.calledWith', 0);
-        cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
     });
 
     it('removes sidebar badge and marks notifications as seen when markSeen request succeeds', () => {
@@ -141,16 +141,16 @@ describe('NotificationsDisplay', () => {
         });
 
         // Initially sidebar badge exists and 2 unseen mark buttons exist
-        cy.get('#nav-sidebar-notifications .notification-badge').should('exist').and('have.text', '2');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('exist').and('have.text', '2');
         cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
 
         // Click Mark as seen button
         cy.get('[data-testid="mark-seen-button"]').click();
 
         // Badge should be removed on success and no unseen buttons remain
-        cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
-        cy.get('#mobile-nav-sidebar-notifications .notification-badge').should('not.exist');
-        cy.get('#menu-button .notification-badge').should('not.exist');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
+        cy.get('[data-testid="mobile-sidebar-notification-badge"]').should('not.exist');
+        cy.get('[data-testid="menu-notification-badge"]').should('not.exist');
         cy.get('[data-testid="notification-seen-button"]').should('have.length', 0);
     });
 
@@ -170,14 +170,14 @@ describe('NotificationsDisplay', () => {
         });
 
         // Initially sidebar badge exists and 2 unseen buttons exist
-        cy.get('#nav-sidebar-notifications .notification-badge').should('exist').and('have.text', '2');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('exist').and('have.text', '2');
         cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
 
         // Click Mark as seen button
         cy.get('[data-testid="mark-seen-button"]').click();
 
         // Badge should NOT be removed on failure and unseen buttons should remain
-        cy.get('#nav-sidebar-notifications .notification-badge').should('exist').and('have.text', '2');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('exist').and('have.text', '2');
         cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
     });
 
@@ -192,21 +192,21 @@ describe('NotificationsDisplay', () => {
         });
 
         // The derived count is 2; badge should show 2
-        cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '2');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('have.text', '2');
         cy.get('[data-testid="notification-seen-button"]').should('have.length', 2);
 
         // Mark one notification individually
         cy.get('[data-testid="notification-seen-button"]').first().click();
 
         // Badge must show 1 and one unseen notification remains
-        cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '1');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('have.text', '1');
         cy.get('[data-testid="notification-seen-button"]').should('have.length', 1);
 
         // Click Mark as seen to clear all
         cy.get('[data-testid="mark-seen-button"]').click();
 
         // Badge should be completely removed and no unseen items remain
-        cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
         cy.get('[data-testid="notification-seen-button"]').should('have.length', 0);
     });
 
@@ -220,7 +220,7 @@ describe('NotificationsDisplay', () => {
         });
 
         // DOM badge should have been cleaned up on mount
-        cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
         cy.get('[data-testid="no-unseen-notifications-message"]').should('exist');
     });
 
@@ -412,7 +412,7 @@ describe('NotificationsDisplay', () => {
         });
 
         // Initially badge is 2
-        cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '2');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('have.text', '2');
 
         // Button should exist for Mark as seen (triggering popup on home page)
         cy.get('[data-testid="mark-seen-trigger-button"]').click();
@@ -423,7 +423,7 @@ describe('NotificationsDisplay', () => {
         cy.get('[data-testid="popup-save-button"]').click();
 
         // Badge should be removed after markAllSeen
-        cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
     });
 
     it('handles markAllSeen with mixed courses where other courses remain unseen', () => {
@@ -473,6 +473,6 @@ describe('NotificationsDisplay', () => {
         cy.get('[data-testid="popup-save-button"]').click();
 
         // 2 sample notifications marked seen, 1 other_course remains unseen
-        cy.get('#nav-sidebar-notifications .notification-badge').should('have.text', '1');
+        cy.get('[data-testid="sidebar-notification-badge"]').should('have.text', '1');
     });
 });
