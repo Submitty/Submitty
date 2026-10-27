@@ -160,6 +160,12 @@ class Gradeable extends AbstractModel {
      * @var int The number of peers each student will be graded by */
     protected $peer_grade_set = 0;
     /** @prop
+     * @var bool if this gradeable uses a custom grading order */
+    protected $custom_sort = false;
+    /** @prop
+     * @var bool if admin enables custom grading order */
+    protected $enable_custom_sort = false;
+    /** @prop
      * @var bool if graders will be allowed to use custom marks */
     protected $allow_custom_marks = true;
     /** @prop
@@ -255,6 +261,12 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders access the files panel*/
     protected $peer_files = true;
     /** @prop
+     * @var bool whether peer graders are restricted to specific files */
+    protected bool $peer_files_restricted = false;
+    /** @prop
+     * @var array<string> file patterns visible to peer graders */
+    protected array $peer_file_patterns = [];
+    /** @prop
      * @var bool will peer graders access the solution/notes panel*/
     protected $peer_solutions = true;
     /** @prop
@@ -290,6 +302,8 @@ class Gradeable extends AbstractModel {
         $this->setGraderAssignmentMethod($details['grader_assignment_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
+        $this->setCustomSort($details['custom_sort'] ?? false);
+        $this->setEnableCustomSort($details['enable_custom_sort'] ?? false);
         $this->setTaInstructions($details['ta_instructions']);
         if (array_key_exists('any_manual_grades', $details)) {
             $this->setAnyManualGrades($details['any_manual_grades']);
@@ -304,16 +318,18 @@ class Gradeable extends AbstractModel {
         }
 
         $mapping = [
-            'autograding' => 'setPeerAutograding',
-            'rubric' => 'setPeerRubric',
-            'files' => 'setPeerFiles',
-            'solution_notes' => 'setPeerSolutions',
-            'discussion' => 'setPeerDiscussion'
+            'autograding' => ['setPeerAutograding', true],
+            'rubric' => ['setPeerRubric', true],
+            'files' => ['setPeerFiles', true],
+            'peer_files_restricted' => ['setPeerFilesRestricted', false],
+            'peer_file_patterns' => ['setPeerFilePatterns', []],
+            'solution_notes' => ['setPeerSolutions', true],
+            'discussion' => ['setPeerDiscussion', true],
         ];
 
-        foreach ($mapping as $key => $method) {
+        foreach ($mapping as $key => [$method, $default]) {
             if (array_key_exists($key, $details)) {
-                call_user_func([$this, $method], $details[$key] ?? true);
+                call_user_func([$this, $method], $details[$key] ?? $default);
             }
         }
 
@@ -2306,6 +2322,14 @@ class Gradeable extends AbstractModel {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
             $dependent_gradeable_points = strval($this->depends_on_points);
+            $autograding_config = $dependent_gradeable->getAutogradingConfig();
+            $max_possible_points = -1;
+            if ($autograding_config !== null) {
+                $max_possible_points = $autograding_config->getTotalHiddenNonExtraCredit() + $autograding_config->getTotalNonHiddenNonExtraCredit();
+            }
+            if ($max_possible_points !== -1 && $dependent_gradeable_points < $max_possible_points) {
+                return ($dependent_gradeable->getTitle() . " first with a score of " . $dependent_gradeable_points . " or more points");
+            }
             return ($dependent_gradeable->getTitle() . " first with a score of " . $dependent_gradeable_points . " point(s)");
         }
         else {
@@ -2588,6 +2612,9 @@ class Gradeable extends AbstractModel {
 
     public function setDiscussionBased(bool $discussion_based): void {
         $this->discussion_based = $discussion_based;
+        if (!$discussion_based) {
+            $this->discussion_thread_id = [];
+        }
         $this->modified = true;
     }
 
@@ -2692,6 +2719,91 @@ class Gradeable extends AbstractModel {
         return $this->peer_files;
     }
 
+    public function setPeerFilesRestricted(bool $peer_files_restricted): void {
+        $this->peer_files_restricted = $peer_files_restricted;
+        $this->modified = true;
+    }
+
+    public function getPeerFilesRestricted(): bool {
+        return $this->peer_files_restricted;
+    }
+
+    /**
+     * @param array<string>|string $peer_file_patterns
+     */
+    public function setPeerFilePatterns(array|string|null $peer_file_patterns): void {
+        if ($peer_file_patterns === null || $peer_file_patterns === '') {
+            $peer_file_patterns = [];
+        }
+        elseif (is_string($peer_file_patterns)) {
+            // Handle an empty PostgreSQL array if the column was previously
+            // created or returned as an array type.
+            if ($peer_file_patterns === '{}') {
+                $peer_file_patterns = [];
+            }
+            else {
+                try {
+                    $decoded_patterns = json_decode($peer_file_patterns, true, 512, JSON_THROW_ON_ERROR);
+                }
+                catch (\JsonException $e) {
+                    throw new \InvalidArgumentException('Peer file patterns must be a valid JSON array.', 0, $e);
+                }
+                if (!is_array($decoded_patterns)) {
+                    throw new \InvalidArgumentException(
+                        'Peer file patterns must be a valid JSON array.'
+                    );
+                }
+                $peer_file_patterns = $decoded_patterns;
+            }
+        }
+        $cleaned_patterns = [];
+        foreach ($peer_file_patterns as $pattern) {
+            if (!is_string($pattern)) {
+                throw new \InvalidArgumentException(
+                    'Each peer file pattern must be a string.'
+                );
+            }
+            $pattern = trim($pattern);
+            if ($pattern === '') {
+                continue;
+            }
+            if (str_contains($pattern, "\0")) {
+                throw new \InvalidArgumentException(
+                    'Peer file patterns cannot contain null bytes.'
+                );
+            }
+            if (@preg_match($pattern, '') === false) {
+                throw new \InvalidArgumentException(
+                    "Invalid peer file regular expression: {$pattern}"
+                );
+            }
+            $cleaned_patterns[] = $pattern;
+        }
+        $this->peer_file_patterns = array_values(array_unique($cleaned_patterns));
+        $this->modified = true;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getPeerFilePatterns(): array {
+        return $this->peer_file_patterns;
+    }
+
+    public function canPeerViewFile(string $relative_path): bool {
+        if (!$this->getPeerFilesRestricted()) {
+            return true;
+        }
+        $relative_path = ltrim(str_replace('\\', '/', $relative_path), '/');
+        $file_name = basename($relative_path);
+        foreach ($this->getPeerFilePatterns() as $pattern) {
+            if (preg_match($pattern, $relative_path) === 1 || preg_match($pattern, $file_name) === 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function setPeerSolutions(bool $peer_solutions): void {
         $this->peer_solutions = $peer_solutions;
         $this->modified = true;
@@ -2717,6 +2829,24 @@ class Gradeable extends AbstractModel {
 
     public function getInstructorBlind(): ?int {
         return $this->instructor_blind;
+    }
+
+    public function getCustomSort(): bool {
+        return $this->custom_sort;
+    }
+
+    public function setCustomSort(bool $custom_sort): void {
+        $this->custom_sort = $custom_sort;
+        $this->modified = true;
+    }
+
+    public function getEnableCustomSort(): bool {
+        return $this->enable_custom_sort;
+    }
+
+    public function setEnableCustomSort(bool $enable_custom_sort): void {
+        $this->enable_custom_sort = $enable_custom_sort;
+        $this->modified = true;
     }
 
     public function getAllowCustomMarks(): bool {
@@ -2752,6 +2882,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the redactions for this gradeable
+     *
      * @return array<Redaction>
      */
     public function getRedactions(): array {

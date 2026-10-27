@@ -4,6 +4,7 @@ namespace app\controllers\image_submission_files;
 
 use app\libraries\Core;
 use app\controllers\AbstractController;
+use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -61,14 +62,9 @@ class PDFController extends AbstractController {
         $is_anon = filter_var($_POST['is_anon'] ?? false, FILTER_VALIDATE_BOOL);
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
-        $real_path = $is_anon ? "" : $file_path;
 
         if ($is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
-            $real_path = $this->getSubmittedFilePath($file_path, $id, true);
-            if (!file_exists($real_path)) {
-                return JsonResponse::getErrorResponse('The PDF file could not be found');
-            }
         }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -83,6 +79,11 @@ class PDFController extends AbstractController {
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             return JsonResponse::getErrorResponse('You do not have permission to grade this student');
+        }
+
+        $real_path = $is_anon ? $this->getSubmittedFilePath($file_path, $id, true) : $file_path;
+        if (!FileUtils::isInSubmitterDirectory($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id)) {
+            return JsonResponse::getErrorResponse('The PDF file could not be found');
         }
 
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $file_path, $page_num, false);

@@ -307,6 +307,7 @@ $(document).ready(() => {
         const button_action = items[3];
         const field_id = `#short_answer_${index_num}`;
 
+        // eslint-disable-next-line no-useless-assignment
         let data_to_set = '';
 
         // Collect data from the data-* attribute of the text box

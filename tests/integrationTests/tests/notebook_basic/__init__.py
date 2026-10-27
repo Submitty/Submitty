@@ -12,6 +12,7 @@ import traceback
 
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/notebook_basic/config"
 
+
 @prebuild
 def initialize(test):
     try:
@@ -19,9 +20,14 @@ def initialize(test):
     except OSError:
         pass
 
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-                     os.path.join(test.testcase_path, "assignment_config")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+            os.path.join(test.testcase_path, "assignment_config"),
+        ]
+    )
+
 
 ############################################################################
 
@@ -30,11 +36,10 @@ def cleanup(test):
     pass
 
 
-
 @testcase
 def test_schema(test):
     cleanup(test)
-    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    config_path = os.path.join(test.testcase_path, "assignment_config", "complete_config.json")
     try:
         test.validate_complete_config(config_path)
     except Exception:

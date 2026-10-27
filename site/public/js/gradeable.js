@@ -1,5 +1,5 @@
 /* exported loadTemplates renderGradingGradeable renderPeerGradeable renderGradingComponent
-   renderGradingComponentHeader renderInstructorEditGradeable renderConflictMarks renderRubricTotalBox
+   renderGradingComponentHeader renderInstructorEditGradeable renderRubricTotalBox
    renderTotalScoreBox renderOverallComment renderEditComponentHeader renderEditComponent ajaxUploadGradeable */
 /* global Twig showVerifyComponent buildCourseUrl displayErrorMessage closePopup getItempoolOptions isItempoolAvailable csrfToken */
 
@@ -38,7 +38,6 @@ function loadTemplates() {
         { id: 'OverallComment', href: '/templates/grading/OverallComment.twig' },
         { id: 'TotalScoreBox', href: '/templates/grading/TotalScoreBox.twig' },
         { id: 'TotalPeerScoreBox', href: '/templates/grading/TotalPeerScoreBox.twig' },
-        { id: 'ConflictMarks', href: '/templates/grading/ConflictMarks.twig' },
         { id: 'RubricTotalBox', href: '/templates/grading/RubricTotalBox.twig' },
         { id: 'Redactions', href: '/templates/admin/Redactions.twig' },
     ];
@@ -434,21 +433,6 @@ function renderRubricTotalBox(scores) {
         scores.decimal_precision = DECIMAL_PRECISION;
         // TODO: i don't think this is async
         resolve(Twig.twig({ ref: 'RubricTotalBox' }).render(scores));
-    });
-}
-
-/**
- *
- * @param conflict_marks
- * @return {Promise<string>}
- */
-function renderConflictMarks(conflict_marks) {
-    return new Promise((resolve) => {
-        // TODO: i don't think this is async
-        resolve(Twig.twig({ ref: 'ConflictMarks' }).render({
-            conflict_marks: conflict_marks,
-            decimal_precision: DECIMAL_PRECISION,
-        }));
     });
 }
 

@@ -164,7 +164,7 @@
                         <legend>Is there a discussion component for this assignment?</legend>
                         <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related" data-testid="yes-discussion"
                                 {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
-                        <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
+                        <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related" data-testid="no-discussion"
                                 {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
 
                         <div class="discussion_id_wrapper">

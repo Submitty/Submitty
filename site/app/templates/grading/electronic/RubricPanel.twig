@@ -1,8 +1,9 @@
-<div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}" data-testid="grading-rubric">
+<div id="grading_rubric" class="rubric_panel {{ is_ta_grading ? "" : "empty" }}" data-testid="grading-rubric" data-cluster-grading="{{ ta_grading_cluster_mode ? 'true' : 'false' }}">
     <div id="allow_custom_marks" data-gradeable_custom_marks="{{ allow_custom_marks }}"></div>
     <div>
         {% if is_ta_grading %}
             <div id="rubric-container" class="container">
+                <div class="rubric-header-sticky">
                 <div class="row row-wrap vertical-center">
                     <span id="gradeable-version-container" data-gradeable_version="{{ display_version }}" hidden></span>
                     <span class="col grading_label" data-testid="grading-rubric-label">Grading Rubric</span>
@@ -50,9 +51,10 @@
                     {% endif %}
 
                     {# Silent Edit Checkbox #}
-                    {% if show_silent_edit %}
+                    {% if show_silent_edit and not ta_grading_cluster_mode %}
                         <div class="col-no-gutters">
-                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/><label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
+                            <input id="silent-edit-id" class="key_to_click" tabindex="0" type="checkbox" title="Edit assigned marks without changing 'Graded By'" onclick="updateCookies()"/>
+                            <label for="silent-edit-id">Silent Regrade (don't change who graded)</label>
                         </div>
                     {% endif %}
                     {# Edit Mode Checkbox #}
@@ -61,6 +63,19 @@
                         <input id="edit-mode-enabled" class="key_to_click" tabindex="0" type="checkbox" title="Allows editing of mark point values, descriptions, and order" onclick="onToggleEditMode()"/><label for="edit-mode-enabled">Edit Rubric</label>
                     </div>
                     {% endif %}
+                </div>
+                {% if ta_grading_cluster_mode %}
+                    {% set entity = gradeable.isTeamAssignment() ? "team" : "student" %}
+                    {% if not is_clustered %}
+                        <div class="system-message danger">
+                            Cluster Grading Enabled: This {{ entity }} is in the "Unclustered" group and will be graded normally as an individual.
+                        </div>
+                    {% else %}
+                        <div class="system-message danger">
+                            Cluster Grading Enabled: Any edits you made to this {{ entity }}'s marks will automatically be applied to all {{ cluster_student_count }} {{ entity }}s within this {{ entity }}'s cluster.
+                        </div>
+                    {% endif %}
+                {% endif %}
                 </div>
                 <div id="grader-info" data-grader_id="{{ grader_id }}" data-verifier_id = "{{ verifier_id }}" data-can_verify="{{ can_verify }}" hidden></div>
                 <div id="student-grader" is-student-grader="{{ student_grader }}" hidden></div>

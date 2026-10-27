@@ -19,17 +19,16 @@
 			<form id="forum-search-form" action="javascript:void(0);" data-ays-ignore="true">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<div class="search-input-wrapper">
-					<input type="text" placeholder="Search here..." name="search-content" id="search-content" data-testid="search-content-input" onchange="$(this).val($(this).val().trim()).trigger('input')" required aria-label="Forum Search Input Box" data-ays-ignore="true" />
-					<button type="button" title="Clear search" id="search-clear" aria-label="Clear search" data-ays-ignore="true">
-						<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
-					</button>
-				</div>
+				{% include "Vue.twig" with {
+					'type': 'component',
+					'name': 'forum/SearchBar',
+					'args': { 'searchQuery': '' },
+					'class': 'search-bar-wrapper',
+					'events': {
+						'search': '(query) => onSearchChange(query)'
+					}
+				} %}
 				<div class="search-actions">
-					<button type="button" name="search" title="Submit search" class="btn btn-primary" id="search-submit" data-testid="search-submit">
-						Search
-					</button>
-
 					{% for button in forum_bar_buttons_left %}
 						{% if user_group <= button.required_rank %}
 							{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
@@ -45,13 +44,17 @@
 							{% endif %}
 						{% endif %}
 					{% endfor %}
-					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();updateThreads(true,saveFilterState);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="btn btn-default" tabindex="0" title="Clear Filters" onclick="clearForumFilter();">&times; Clear Filters</a>
 				</div>
 			</form>
 			{% endif %}
 		</div>
 		<div class="toolbar-right">
-			{% include "Vue.twig" with { 'type': 'component', 'name': 'FullScreenButton' } %}
+			{% include "Vue.twig" with {
+				'type': 'component',
+				'name': 'FullScreenButton',
+				'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
+			} %}
 			{% if show_more is defined and show_more %}
 			<div data-testid="more-dropdown" class="dropdown more-dropdown">
 				<div class="btn-group">
@@ -136,26 +139,36 @@
 				}
 			{% endfor %}
 		</style>
-		<div id="forum_filter_bar">
-			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
-			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
-				{% for category in categories %}
-					{% if category.visibleDate is null or category.diff >= 0 %}
-						<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.id }}" data-cat_id="{{ category.id }}" data-btn-selected="false">{{ category.description }}</button>
-					{% endif %}
-				{% endfor %}
-			</div>
-			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="0" data-btn-selected="false">Comment</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="-1" data-btn-selected="false">Unresolved</button>
-				<button class="btn btn-sm btn-default inline-block filter-inactive" data-sel_id="1" data-btn-selected="false">Resolved</button>
-			</div>
-		</div>
+		{% set forum_filter_categories = [] %}
+		{% for category in categories %}
+			{% set forum_filter_categories = forum_filter_categories | merge([{
+				id: category.id,
+				description: category.description,
+				visibleDate: category.visibleDate is not null ? category.visibleDate|date('c') : null,
+				diff: category.diff,
+			}]) %}
+		{% endfor %}
+		{% include "Vue.twig" with {
+			type: "component",
+			name: "forum/ForumFilterBar",
+			class: "js-filter-bar",
+			args: {
+				categories: forum_filter_categories,
+				initialSelectedCategoryIds: cookie_selected_categories|default([]),
+				initialSelectedThreadStatuses: cookie_selected_thread_status|default([]),
+				initialUnreadChecked: cookie_selected_unread_value|default(false) == 'true',
+			},
+			events: {
+				'filter-change': '(state) => onFilterChange(state)',
+			}
+		} only %}
 	{% endif %}
 </div>
 <hr/>
 {% if thread_exists and show_filter %}
 <script>
+	var forumFilterCategories = {{ forum_filter_categories|json_encode()|raw() }};
+
 	function updateThreads(loadFirstPage, success_callback) {
 		{% if thread_exists %}
 		modifyThreadList({{ current_thread }}, '{{ current_category_ids|join("|") }}', '{{ current_course }}', loadFirstPage, success_callback);
@@ -163,31 +176,21 @@
 	}
 
 	$( document ).ready(function() {
-		loadFilterHandlers();
+		seedFilterState(
+			{{ cookie_selected_categories|default([])|json_encode()|raw() }},
+			{{ cookie_selected_thread_status|default([])|json_encode()|raw() }},
+			{{ cookie_selected_unread_value|default(false) == 'true' }}
+		);
 		updateThreads(true, null);
 		saveFilterState();
 
 		$('#num_filtered').text({{ display_thread_count }});
 
-		{% for category in cookie_selected_categories %}
-		$('#thread_category button[data-cat_id="{{ category }}"]').data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
-		filters_applied.toggleElement($('#thread_category button[data-cat_id="{{ category }}"]').text(), function(e) {
-			return e === $('#thread_category button[data-cat_id="{{ category }}"]').text();
-		});
-		{% endfor %}
-		{% for status in cookie_selected_thread_status %}
-		$('#thread_status_select button[data-sel_id="{{ status }}"]').data('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
-		filters_applied.toggleElement($('#thread_status_select button[data-cat_id="{{ status }}"]').text(), function(e) {
-			return e === $('#thread_status_select button[data-sel_id="{{ status }}"]').text();
-		});
-		{% endfor %}
-
-		var unread_marked = false;
-
-		$('#unread').prop("checked", {{cookie_selected_unread_value}});
-
-		unread_marked = checkUnread();
 		updateClearFilterButton();
+
+		window.onpopstate = function (e) {
+			setFilterState(e.state);
+		};
 
 		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}
 			$("#{{display_option }}_label").addClass('active');

@@ -25,47 +25,47 @@ import getpass
 
 # Print an error message without a traceback and exit non-zero.
 def error_exit(message):
-    print(f'ERROR: {message}', file=sys.stderr, flush=True)
+    print(f"ERROR: {message}", file=sys.stderr, flush=True)
     sys.exit(1)
 
 
 # Print an a non fatal warning that should be surfaced to the UI
 def warn(message):
-    print(f'WARNING: {message}', flush=True)
+    print(f"WARNING: {message}", flush=True)
 
 
 # Verify correct number of command line arguments
 if len(sys.argv) != 4:
-    raise Exception('You must pass 3 command line arguments - semester, course, and source')
+    raise Exception("You must pass 3 command line arguments - semester, course, and source")
 
 # Get path to current file directory
 current_dir = os.path.dirname(__file__)
 
 # Collect other path information from configuration file
-config_file = os.path.join(current_dir, '..', 'config', 'submitty.json')
+config_file = os.path.join(current_dir, "..", "config", "submitty.json")
 
 if not os.path.exists(config_file):
-    raise Exception('Unable to locate submitty.json configuration file')
+    raise Exception("Unable to locate submitty.json configuration file")
 
-with open(config_file, 'r') as file:
+with open(config_file, "r") as file:
     data = json.load(file)
-    install_dir = data['submitty_install_dir']
-    data_dir = data['submitty_data_dir']
+    install_dir = data["submitty_install_dir"]
+    data_dir = data["submitty_data_dir"]
 
 # Collect user information from configuration file
-users_config_file = os.path.join(install_dir, 'config', 'submitty_users.json')
+users_config_file = os.path.join(install_dir, "config", "submitty_users.json")
 
 if not os.path.exists(users_config_file):
-    raise Exception('Unable to locate submitty_users.json configuration file')
+    raise Exception("Unable to locate submitty_users.json configuration file")
 
-with open(users_config_file, 'r') as file:
+with open(users_config_file, "r") as file:
     data = json.load(file)
-    daemon_user = data['daemon_user']
+    daemon_user = data["daemon_user"]
 
 
 # Confirm that submitty_daemon user is running this script
-if data['daemon_user'] != getpass.getuser():
-    raise Exception('ERROR: This script must be run by the submitty_daemon user')
+if data["daemon_user"] != getpass.getuser():
+    raise Exception("ERROR: This script must be run by the submitty_daemon user")
 
 
 # Configure variables
@@ -77,19 +77,21 @@ if source not in ["submitty_gui", "submitty_daemon"]:
     raise Exception('ERROR: Source must be either "submitty_gui" or "submitty_daemon"')
 
 user = daemon_user
-rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
-courses_path = os.path.join(data_dir, 'courses')
+rainbow_grades_path = os.path.join(install_dir, "GIT_CHECKOUT", "RainbowGrades")
+courses_path = os.path.join(data_dir, "courses")
 
 
 def log_message(message):
     """Global log message about rainbow grades."""
     today = datetime.datetime.now()
-    log_file_path = Path(data_dir, 'logs', 'rainbow_grades',
-                         "{:04d}{:02d}{:02d}.txt".format(today.year,
-                                                         today.month,
-                                                         today.day))
+    log_file_path = Path(
+        data_dir,
+        "logs",
+        "rainbow_grades",
+        "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day),
+    )
     # append to the file
-    with open(log_file_path, 'a') as file:
+    with open(log_file_path, "a") as file:
         timestring = today.strftime("%Y-%m-%d %H:%M:%S%z")
         file.write(timestring + " " + message + "\n")
 
@@ -107,167 +109,159 @@ for item in users:
         user_found = True
 
 if user_found is False:
-    raise Exception('Unable to locate the specified user {}'.format(user))
+    raise Exception("Unable to locate the specified user {}".format(user))
 
-print('Started build at {}'.format(datetime.datetime.now()), flush=True)
+print("Started build at {}".format(datetime.datetime.now()), flush=True)
 
 # Generate path information
-rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
+rg_course_path = os.path.join(courses_path, semester, course, "rainbow_grades")
 
 # Verify that customization.json exist
-if os.path.exists(rg_course_path + '/customization.json'):
+if os.path.exists(rg_course_path + "/customization.json"):
     pass
 
 else:
-    raise Exception('Unable to find a customization file')
+    raise Exception("Unable to find a customization file")
 
 # If makefile does not exist then copy and configure one from the main rainbow grades
 # repo
-if not os.path.exists(rg_course_path + '/Makefile'):
-
+if not os.path.exists(rg_course_path + "/Makefile"):
     # Copy Makefile from master rainbow grades directory
     # to course specific directory
-    print('Copying initial files', flush=True)
-    shutil.copyfile(rainbow_grades_path + '/SAMPLE_Makefile',
-                    rg_course_path + '/Makefile')
+    print("Copying initial files", flush=True)
+    shutil.copyfile(rainbow_grades_path + "/SAMPLE_Makefile", rg_course_path + "/Makefile")
 
     # Setup Makefile path
-    print('Configuring Makefile', flush=True)
-    makefile_path = os.path.join(rg_course_path, 'Makefile')
+    print("Configuring Makefile", flush=True)
+    makefile_path = os.path.join(rg_course_path, "Makefile")
 
     # Read in the file
-    with open(makefile_path, 'r') as file:
+    with open(makefile_path, "r") as file:
         filedata = file.read()
 
     # Replace the target strings
-    filedata = filedata.replace('username', user)
-    filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades',
-                                rainbow_grades_path)
-    filedata = filedata.replace('submitty.cs.rpi.edu', 'localhost')
-    filedata = filedata.replace('<SEMESTER>/<COURSE>', '{}/{}'.format(semester, course))
+    filedata = filedata.replace("username", user)
+    filedata = filedata.replace("/<PATH_TO_SUBMITTY_REPO>/RainbowGrades", rainbow_grades_path)
+    filedata = filedata.replace("submitty.cs.rpi.edu", "localhost")
+    filedata = filedata.replace("<SEMESTER>/<COURSE>", "{}/{}".format(semester, course))
 
     # Write the file out again
-    with open(makefile_path, 'w') as file:
+    with open(makefile_path, "w") as file:
         file.write(filedata)
 
 else:
-
-    print('Previously configured Makefile detected', flush=True)
+    print("Previously configured Makefile detected", flush=True)
 
 
 # Change directory to course specific directory
 os.chdir(rg_course_path)
 
 # Verify submitty_admin file exists
-creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
+creds_file = os.path.join(install_dir, "config", "submitty_admin.json")
 
 if not os.path.exists(creds_file):
-    error_exit(f'Unable to locate the submitty_admin.json credentials file at '
-               f'{creds_file}')
+    error_exit(f"Unable to locate the submitty_admin.json credentials file at {creds_file}")
 
 # Load credentials out of admin file
 try:
-    with open(creds_file, 'r') as file:
+    with open(creds_file, "r") as file:
         creds = json.load(file)
 except PermissionError as e:
-    error_exit(f'Error opening submitty_admin.json: {e}')
+    error_exit(f"Error opening submitty_admin.json: {e}")
 
 # Take this path if we DID NOT get an auth token
-if 'token' not in creds or not creds['token']:
-
+if "token" not in creds or not creds["token"]:
     # Distinguish a missing key from a present-but-empty token in the output
-    if 'token' not in creds:
-        warn('No token field found in submitty_admin.json, attempting to '
-             'continue with previously generated grade summaries.')
+    if "token" not in creds:
+        warn(
+            "No token field found in submitty_admin.json, attempting to "
+            "continue with previously generated grade summaries."
+        )
     else:
-        warn('The auth token in submitty_admin.json is empty, attempting to '
-             'continue with previously generated grade summaries.')
+        warn(
+            "The auth token in submitty_admin.json is empty, attempting to "
+            "continue with previously generated grade summaries."
+        )
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
-    reports_path = os.path.join(courses_path, semester, course, 'reports', 'all_grades')
+    reports_path = os.path.join(courses_path, semester, course, "reports", "all_grades")
     file_count = sum([len(files) for r, d, files in os.walk(reports_path)])
 
     if file_count == 0:
-        error_exit(f'Failure: No usable auth token in submitty_admin.json and the '
-                   f'grade summaries directory is empty ({reports_path})')
+        error_exit(
+            f"Failure: No usable auth token in submitty_admin.json and the "
+            f"grade summaries directory is empty ({reports_path})"
+        )
 
 # Take this path if we DID get an auth token
 else:
-
     # Construct cmd string
-    cmd = [
-        f'{install_dir}/sbin/generate_grade_summaries.py',
-        semester,
-        course,
-        source
-    ]
+    cmd = [f"{install_dir}/sbin/generate_grade_summaries.py", semester, course, source]
 
     # Call generate_grade_summaries.py script to generate grade summaries for the
     # course
-    print('Generating grade summaries', flush=True)
+    print("Generating grade summaries", flush=True)
     cmd_return_code = subprocess.call(cmd)
 
     # Check return code of generate_grade_summaries.py execution
     if cmd_return_code != 0:
-        error_exit(f'Failure generating grade summaries, the auth token in '
-                   f'submitty_admin.json may be invalid or expired '
-                   f'(generate_grade_summaries.py exited with code {cmd_return_code})')
+        error_exit(
+            f"Failure generating grade summaries, the auth token in "
+            f"submitty_admin.json may be invalid or expired "
+            f"(generate_grade_summaries.py exited with code {cmd_return_code})"
+        )
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
-print('Pulling in grade summaries', flush=True)
-cmd_output = os.popen('make pull_test').read()
+print("Pulling in grade summaries", flush=True)
+cmd_output = os.popen("make pull_test").read()
 
 # Sorted summaries to build. Each Makefile target runs ./process_grades.out by_<x>
 # and writes output.html / output.csv, so we copy each result to
 # output-by-<order>.html / .csv before the next build overwrites it. 'overall' keeps
 # the output.html name, build it first, stash it, and restore it at the end.
-SORT_ORDERS = ['section', 'hw', 'lab', 'test', 'exam']
+SORT_ORDERS = ["section", "hw", "lab", "test", "exam"]
 
 # Remove stale tables so a sort order that no longer applies doesn't linger.
-print('Removing previous rainbow grades tables', flush=True)
-for stale in glob.glob('output-by-*.html') + glob.glob('output-by-*.csv'):
+print("Removing previous rainbow grades tables", flush=True)
+for stale in glob.glob("output-by-*.html") + glob.glob("output-by-*.csv"):
     os.remove(stale)
 
 
 def build_table(order):
-    print('Compiling rainbow grades table by {}'.format(order), flush=True)
+    print("Compiling rainbow grades table by {}".format(order), flush=True)
     result = subprocess.run(
-        ['make', order], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+        ["make", order], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
     )
     if result.returncode != 0:
         print(result.stdout, flush=True)
-        raise Exception('Failure building rainbow grades table: {}'.format(order))
+        raise Exception("Failure building rainbow grades table: {}".format(order))
 
 
 # Build overall first and preserve it; the per-sort builds below overwrite output.html/.csv.
-build_table('overall')
-shutil.copyfile('output.html', 'overall-summary.html')
-shutil.copyfile('output.csv', 'overall-summary.csv')
+build_table("overall")
+shutil.copyfile("output.html", "overall-summary.html")
+shutil.copyfile("output.csv", "overall-summary.csv")
 
 for order in SORT_ORDERS:
     build_table(order)
-    shutil.copyfile('output.html', 'output-by-{}.html'.format(order))
-    shutil.copyfile('output.csv', 'output-by-{}.csv'.format(order))
+    shutil.copyfile("output.html", "output-by-{}.html".format(order))
+    shutil.copyfile("output.csv", "output-by-{}.csv".format(order))
 
 # Restore the overall table as the canonical output.html / output.csv.
-shutil.move('overall-summary.html', 'output.html')
-shutil.move('overall-summary.csv', 'output.csv')
+shutil.move("overall-summary.html", "output.html")
+shutil.move("overall-summary.csv", "output.csv")
 # Run make push_test
-print('Exporting to summary_html', flush=True)
-cmd_output = os.popen('make push_test').read()
+print("Exporting to summary_html", flush=True)
+cmd_output = os.popen("make push_test").read()
 
 # Recursively update permissions for all files in the rainbow_grades directory
-print('Updating permissions', flush=True)
-cmd_output = os.popen('chmod -R --silent o-rwx ' + rg_course_path).read()
+print("Updating permissions", flush=True)
+cmd_output = os.popen("chmod -R --silent o-rwx " + rg_course_path).read()
 
-summary_html_path = os.path.join(courses_path,
-                                 semester,
-                                 course,
-                                 'reports',
-                                 'summary_html')
-cmd_output = os.popen('chmod -R --silent o-rwx ' + summary_html_path).read()
+summary_html_path = os.path.join(courses_path, semester, course, "reports", "summary_html")
+cmd_output = os.popen("chmod -R --silent o-rwx " + summary_html_path).read()
 
-print('Done', flush=True)
+print("Done", flush=True)
 
 log_message("Finished         " + semester + " " + course)
