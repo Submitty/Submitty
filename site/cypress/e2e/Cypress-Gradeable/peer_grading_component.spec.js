@@ -114,6 +114,26 @@ describe('Peer Grading Component testing', () => {
             cy.wait('@uploadPeerAssignments').then(({ response }) => {
                 expect(getResponseStatus(response)).to.equal('success');
             });
+
+            cy.get('[data-testid="upload-peer-graders-list"]').selectFile({
+                contents: Cypress.Buffer.from('grader,student\nstudent,unknown_user\n'),
+                fileName: 'unknown_peer_assignment.csv',
+                mimeType: 'text/csv',
+            }, { force: true });
+            cy.wait('@uploadPeerAssignments').then(({ response }) => {
+                expect(getResponseStatus(response)).to.equal('error');
+            });
+            cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
+
+            cy.get('[data-testid="upload-peer-graders-list"]').selectFile({
+                contents: Cypress.Buffer.from('grader,student\nritcha,gutmal\nritcha,gutmal\n'),
+                fileName: 'duplicate_peer_assignment.csv',
+                mimeType: 'text/csv',
+            }, { force: true });
+            cy.wait('@uploadPeerAssignments').then(({ response }) => {
+                expect(getResponseStatus(response)).to.equal('error');
+            });
+            cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
         });
     });
 });

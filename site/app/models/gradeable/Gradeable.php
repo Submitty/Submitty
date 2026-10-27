@@ -573,8 +573,8 @@ class Gradeable extends AbstractModel {
 
         $assignments = [];
         $user_ids = [];
-        $row_number = 2;
-        foreach ($input as $values) {
+        foreach ($input as $index => $values) {
+            $row_number = $index + 2;
             if (
                 !is_array($values)
                 || !isset($values['grader'], $values['student'])
@@ -592,15 +592,13 @@ class Gradeable extends AbstractModel {
             if ($grader === $student) {
                 throw new \InvalidArgumentException("A student cannot grade themselves (CSV row {$row_number}).");
             }
-
             $assignments[] = [$grader, $student];
-            $user_ids[] = $grader;
-            $user_ids[] = $student;
-            $row_number++;
+            $user_ids[$grader] = $grader;
+            $user_ids[$student] = $student;
         }
 
         $valid_users = [];
-        foreach (array_chunk(array_values(array_unique($user_ids)), 1000) as $user_id_chunk) {
+        foreach (array_chunk(array_values($user_ids), 1000) as $user_id_chunk) {
             $valid_users += $this->core->getQueries()->getUsersById($user_id_chunk);
         }
         foreach ($assignments as $index => [$grader, $student]) {
