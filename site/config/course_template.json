@@ -25,6 +25,7 @@
         "queue_message": "",
         "queue_announcement_message": "",
         "polls_enabled": false,
+        "submission_clustering_enabled": false,
         "polls_pts_for_correct": 1.0,
         "polls_pts_for_incorrect": 0.0,
         "seek_message_enabled": false,

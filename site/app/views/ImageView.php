@@ -33,6 +33,7 @@ class ImageView extends AbstractView {
             'annotation_jsons' => $annotation_jsons,
             'student_popup' => $is_student,
             'can_download' => !$is_peer_grader,
+            'is_peer_grader' => $is_peer_grader, // temporary, see ImageAnnotationEmbedded.twig
             'display_file_url' => $display_file_url,
             'directory' => $this->getDirectoryFromPath($file_path),
             'csrfToken' => $this->core->getCsrfToken(),

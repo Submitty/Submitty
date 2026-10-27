@@ -24,81 +24,6 @@ use WebSocket;
 class SimpleGraderController extends AbstractController {
     /**
      * @param string $gradeable_id
-     * @param int|string|null $section
-     * @param string|null $section_type
-     * @param string $sort
-     *
-     * @return ResponseInterface
-     */
-    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods:["GET"])]
-    public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id") {
-        //convert from id --> u.user_id etc for use by the database.
-        if ($sort === "id") {
-            $sort_by = "u.user_id";
-        }
-        elseif ($sort === "first") {
-            $sort_by = "coalesce(u.user_preferred_givenname, u.user_givenname)";
-        }
-        else {
-            $sort_by = "coalesce(u.user_preferred_familyname, u.user_familyname)";
-        }
-
-        //Figure out what section we are supposed to print
-        if (is_null($section)) {
-            $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        }
-        catch (\InvalidArgumentException $e) {
-            return new WebResponse('Error', 'noGradeable', $gradeable_id);
-        }
-
-        // Make sure this gradeable is an electronic file gradeable
-        if ($gradeable->getType() !== GradeableType::NUMERIC_TEXT && $gradeable->getType() !== GradeableType::CHECKPOINTS) {
-            $this->core->addErrorMessage('This gradeable is not a checkpoint or numeric text gradeable');
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
-            $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        //Figure out if we are getting users by rotating or registration section.
-        if (is_null($section_type)) {
-            return new WebResponse('Error', 'genericError', ['Got null section type']);
-        }
-
-        //Grab the students in section, sectiontype.
-        if ($section_type === "rotating_section") {
-            $students = $this->core->getQueries()->getUsersByRotatingSections([$section], $sort_by);
-        }
-        elseif ($section_type === "registration_section") {
-            $students = $this->core->getQueries()->getUsersByRegistrationSections([$section], $sort_by);
-        }
-        else {
-            $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
-            return new RedirectResponse($this->core->buildCourseUrl());
-        }
-
-        //Turn off header/footer so that we are using simple html.
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        //display the lab to be printed (in SimpleGraderView's displayPrintLab function)
-        return new WebResponse(
-            ['grading', 'SimpleGrader'],
-            'displayPrintLab',
-            $gradeable,
-            $section,
-            $students
-        );
-    }
-
-    /**
-     * @param string $gradeable_id
      * @param null|string $view
      * @param string $sort
      *
@@ -200,7 +125,6 @@ class SimpleGraderController extends AbstractController {
             $rows,
             $student_full,
             $graders,
-            $section_key,
             $show_all_sections_button,
             $anon_ids
         );

@@ -3,7 +3,6 @@
 namespace tests\app\controllers\grading;
 
 use app\controllers\grading\GradingClusterController;
-use app\entities\grading_cluster\GradingClusterAlgorithm;
 use tests\BaseUnitTest;
 
 class GradingClusterControllerTester extends BaseUnitTest {
@@ -30,33 +29,23 @@ class GradingClusterControllerTester extends BaseUnitTest {
 
     public function testMissingAlgorithm(): void {
         $core = $this->createMockCore();
+        $core->method('checkCsrfToken')->willReturn(true);
         $_POST['csrf_token'] = 'valid';
         // Omitting algorithm from $_POST
 
-        $controller = new GradingClusterController($core);
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
+        $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('test_gradeable');
+        $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
+
         $response = $controller->createClustering('test_gradeable');
 
         $this->assertEquals('error', $response->json['status']);
         $this->assertEquals('Invalid or missing algorithm parameter.', $response->json['message']);
-    }
-
-    public function testNoActiveSubmitters(): void {
-        $core = $this->createMockCore();
-        $_POST['csrf_token'] = 'valid';
-        $_POST['algorithm'] = GradingClusterAlgorithm::DummySplit->value;
-
-        $queries = $this->createMock(\app\libraries\database\DatabaseQueries::class);
-        $queries->method('getActiveSubmittersForGradeable')->willReturn([]);
-        $core->method('getQueries')->willReturn($queries);
-
-        $em = $this->createMock(\Doctrine\ORM\EntityManager::class);
-        $core->method('getCourseEntityManager')->willReturn($em);
-
-        $controller = new GradingClusterController($core);
-        $response = $controller->createClustering('test_gradeable');
-
-        $this->assertEquals('error', $response->json['status']);
-        $this->assertEquals('No active submissions found for this gradeable.', $response->json['message']);
     }
 
     public function testGetClustersEmptyConfig(): void {
@@ -64,16 +53,151 @@ class GradingClusterControllerTester extends BaseUnitTest {
 
         $em = $this->createMock(\Doctrine\ORM\EntityManager::class);
         $repository = $this->createMock(\app\repositories\grading_cluster\GradingClusterConfigRepository::class);
-        $repository->method('findOneBy')->willReturn(null);
+        $repository->method('findWithClustersAndMembers')->willReturn(null);
         $em->method('getRepository')->willReturn($repository);
 
         $core->method('getCourseEntityManager')->willReturn($em);
 
-        $controller = new GradingClusterController($core);
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
+        $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('test_gradeable');
+        $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
+
         $response = $controller->getClusters('test_gradeable');
 
         $this->assertEquals('success', $response->json['status']);
         $this->assertEquals('test_gradeable', $response->json['data']['gradeable_id']);
         $this->assertEmpty($response->json['data']['clusters']);
+    }
+
+    public function testCheckClusteringStatusDone(): void {
+        $core = $this->createMockCore();
+        $core->method('getConfig')->willReturn($this->createMockModel(\app\models\Config::class));
+        $core->getConfig()->method('getTerm')->willReturn('f22');
+        $core->getConfig()->method('getCourse')->willReturn('sample');
+        $core->getConfig()->method('getSubmittyPath')->willReturn('/var/local/submitty');
+
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(true);
+        $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('non_existent_gradeable_status');
+        $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
+
+        // Use a non-existent gradeable ID so files definitely don't exist
+        $response = $controller->checkClusteringStatus('non_existent_gradeable_status');
+
+        $this->assertEquals('success', $response->json['status']);
+        $this->assertEquals('done', $response->json['data']['status']);
+    }
+
+    public function testCheckClusteringStatusInvalidGradeable(): void {
+        $core = $this->createMockCore();
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $controller->method('tryGetGradeable')->willReturn(false);
+
+        $response = $controller->checkClusteringStatus('invalid_gradeable');
+
+        $this->assertEquals('error', $response->json['status']);
+        $this->assertEquals('Invalid gradeable_id parameter.', $response->json['message']);
+    }
+
+    public function testCreateClusteringClusteringDisabled(): void {
+        $core = $this->createMockCore();
+        $core->method('checkCsrfToken')->willReturn(true);
+        $_POST['csrf_token'] = 'valid';
+
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('test_gradeable');
+        $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
+
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(false);
+
+        $response = $controller->createClustering('test_gradeable');
+
+        $this->assertEquals('error', $response->json['status']);
+        $this->assertEquals('Clustering is not enabled for this gradeable.', $response->json['message']);
+    }
+
+    public function testGetClustersClusteringDisabled(): void {
+        $core = $this->createMockCore();
+
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('test_gradeable');
+        $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
+
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(false);
+
+        $response = $controller->getClusters('test_gradeable');
+
+        $this->assertEquals('error', $response->json['status']);
+        $this->assertEquals('Clustering is not enabled for this gradeable.', $response->json['message']);
+    }
+
+    public function testCheckClusteringStatusClusteringDisabled(): void {
+        $core = $this->createMockCore();
+
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $mock_gradeable = $this->createMock(\app\models\gradeable\Gradeable::class);
+        $mock_gradeable->method('getId')->willReturn('test_gradeable');
+        $controller->method('tryGetGradeable')->willReturn($mock_gradeable);
+
+        $core->getConfig()->method('isSubmissionClusteringEnabled')->willReturn(false);
+
+        $response = $controller->checkClusteringStatus('test_gradeable');
+
+        $this->assertEquals('error', $response->json['status']);
+        $this->assertEquals('Clustering is not enabled for this gradeable.', $response->json['message']);
+    }
+
+    public function testCreateClusteringInvalidGradeable(): void {
+        $core = $this->createMockCore();
+        $core->method('checkCsrfToken')->willReturn(true);
+        $_POST['csrf_token'] = 'valid';
+
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $controller->method('tryGetGradeable')->willReturn(false);
+
+        $response = $controller->createClustering('invalid_gradeable');
+
+        $this->assertEquals('error', $response->json['status']);
+        $this->assertEquals('Invalid gradeable_id parameter.', $response->json['message']);
+    }
+
+    public function testGetClustersInvalidGradeable(): void {
+        $core = $this->createMockCore();
+        $controller = $this->getMockBuilder(GradingClusterController::class)
+            ->setConstructorArgs([$core])
+            ->onlyMethods(['tryGetGradeable'])
+            ->getMock();
+        $controller->method('tryGetGradeable')->willReturn(false);
+
+        $response = $controller->getClusters('invalid_gradeable');
+
+        $this->assertEquals('error', $response->json['status']);
+        $this->assertEquals('Invalid gradeable_id parameter.', $response->json['message']);
     }
 }

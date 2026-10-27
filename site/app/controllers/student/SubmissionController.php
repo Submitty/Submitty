@@ -198,7 +198,8 @@ class SubmissionController extends AbstractController {
             if ($graded_gradeable != null) {
                 $show_hidden = (!$gradeable->isTaGrading() || $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false)) && $gradeable->isTaGradeReleased();
                 // can this user access grade inquiries for this graded_gradeable
-                $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+                $can_inquiry = $graded_gradeable->getSubmitter()->hasUser($this->core->getUser())
+                    || $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 if ($can_inquiry) {
                     $this->core->authorizeWebSocketToken([
                         'page' => 'grade_inquiry',
@@ -969,10 +970,25 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
+        // Acquire lock to prevent race conditions when creating new versions (e.g., bulk upload race condition)
+        $lock_file = FileUtils::joinPaths($user_path, "submission.lock");
+        $lock_fp = fopen($lock_file, "c");
+        if (!$lock_fp || !flock($lock_fp, LOCK_EX)) {
+            return $this->uploadResult("Failed to acquire lock for submission.", false);
+        }
+
+        // Re-fetch the graded gradeable to ensure we have the most up-to-date version number
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
+        if ($gradeable->isTeamAssignment()) {
+            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $leader);
+        }
+
         $new_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() + 1;
         $version_path = FileUtils::joinPaths($user_path, $new_version);
 
         if (!FileUtils::createDir($version_path)) {
+            flock($lock_fp, LOCK_UN);
+            fclose($lock_fp);
             return $this->uploadResult("Failed to make folder for the current version.", false);
         }
 
@@ -1166,9 +1182,13 @@ class SubmissionController extends AbstractController {
         //add new job to queue
         if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
             $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
+            flock($lock_fp, LOCK_UN);
+            fclose($lock_fp);
             return $this->uploadResult("Failed to write GeneratePdfImages job", false);
         }
 
+        flock($lock_fp, LOCK_UN);
+        fclose($lock_fp);
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
     }
 
@@ -1747,6 +1767,20 @@ class SubmissionController extends AbstractController {
             if (!empty($tmp)) {
                 for ($i = 0; $i < $num_parts; $i++) {
                     if (count($tmp[$i]) > 0) {
+                        foreach ($tmp[$i] as $prev_filename) {
+                            if (!is_string($prev_filename)) {
+                                return $this->uploadResult("Invalid previous file name.", false);
+                            }
+                            if (
+                                $prev_filename === ''
+                                || $prev_filename === '.'
+                                || $prev_filename === '..'
+                                || $prev_filename !== basename($prev_filename)
+                                || !FileUtils::isValidFileName($prev_filename)
+                            ) {
+                                return $this->uploadResult("Invalid previous file name '{$prev_filename}'.", false);
+                            }
+                        }
                         $previous_files_src[$i + 1] = $tmp[$i];
                         $previous_files_dst[$i + 1] = $tmp[$i];
                     }
@@ -2289,6 +2323,17 @@ class SubmissionController extends AbstractController {
                 );
             }
             $ta = true;
+        }
+
+        // Students may only change their own version. Their user id resolves to their team on team gradeables.
+        if (!$ta && $who !== null && $who !== $this->core->getUser()->getId()) {
+            $msg = "You do not have access to that submission.";
+            $this->core->addErrorMessage($msg);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildCourseUrl())
+            );
         }
 
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);

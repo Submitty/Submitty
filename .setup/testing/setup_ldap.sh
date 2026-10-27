@@ -4,6 +4,7 @@ set -ev
 
 CUR_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# shellcheck disable=SC1091
 source "$CUR_DIR/../vagrant/setup_ldap.sh"
 
 sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' /usr/local/submitty/config/authentication.json

@@ -152,7 +152,6 @@ function initializeTaLayout() {
         }
     }
     updateLayoutDimensions();
-    updatePanelOptions();
     readCookies();
 }
 
@@ -242,7 +241,7 @@ function readCookies() {
     const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
 
     const autoscroll = window.Cookies.get('autoscroll') || '';
-    const open_files = window.Cookies.get('open_files') || '';
+    const open_files = localStorage.getItem('open_files') || '[]';
 
     /*
         FIX ME! testcases cookie is currently never set, so opened test
@@ -358,6 +357,7 @@ function openAutoGrading(num: string) {
 
 $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+    updatePanelOptions();
 
     // Check initially if its the mobile screen view or not
     changeMobileView();
@@ -425,18 +425,6 @@ $(() => {
             else {
                 selectEle.show();
             }
-        }
-    });
-
-    // panel position selector change event
-    $('.grade-panel .panel-position-cont').change(function () {
-        const panelSpanId = $(this).parent().attr('id');
-        const position = $(this).val() as string;
-        if (panelSpanId) {
-            const panelId = panelSpanId.split(/(_|-)btn/)[0];
-            setPanelsVisibilities(panelId, null, position);
-            $(`select#${panelId}_select`).hide();
-            checkNotebookScroll();
         }
     });
 

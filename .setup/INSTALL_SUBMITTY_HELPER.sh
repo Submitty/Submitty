@@ -109,16 +109,23 @@ EOF
 
 preserve_files_backup
 
-# check optional argument
-if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
-       && "$1" != "skip_web_restart" && "$1" != "disable_shipper_worker" ]]; then
+# check optional arguments
+CLEAN=0
+QUICK=0
+TEST=0
+TEST_RAINBOW=0
+SKIP_WEB_RESTART=0
+DISABLE_SHIPPER_WORKER=0
+TEST_CASES=()
+
+print_usage() {
     echo -e "Usage:"
     echo -e "   ./INSTALL_SUBMITTY.sh"
     echo -e "   ./INSTALL_SUBMITTY.sh clean quick"
     echo -e "   ./INSTALL_SUBMITTY.sh clean test"
     echo -e "   ./INSTALL_SUBMITTY.sh clean skip_web_restart"
-    echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1>"
-    echo -e "   ./INSTALL_SUBMITTY.sh clear test  <test_case_1> ... <test_case_n>"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean test  <test_case_1>"
+    echo -e "   ./INSTALL_SUBMITTY.sh clean test  <test_case_1> ... <test_case_n>"
     echo -e "   ./INSTALL_SUBMITTY.sh test"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
     echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1> ... <test_case_n>"
@@ -126,7 +133,32 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     echo -e "   ./INSTALL_SUBMITTY.sh skip_web_restart"
     echo -e "   ./INSTALL_SUBMITTY.sh disable_shipper_worker"
     exit 1
-fi
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        clean)
+            CLEAN=1 ;;
+        quick)
+            QUICK=1 ;;
+        test)
+            TEST=1 ;;
+        test_rainbow)
+            TEST_RAINBOW=1 ;;
+        skip_web_restart)
+            SKIP_WEB_RESTART=1 ;;
+        disable_shipper_worker)
+            DISABLE_SHIPPER_WORKER=1 ;;
+        *)
+            # check for test case names after "test"
+            if [[ "${TEST}" -eq 1 ]]; then
+                TEST_CASES+=("$arg")
+            else
+                print_usage
+            fi
+            ;;
+    esac
+done
 
 ########################################################################################################################
 ########################################################################################################################
@@ -185,7 +217,25 @@ popd > /dev/null
 
 echo -e "\nBeginning installation of Submitty\n"
 
-/bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh" "$@" "config=${SUBMITTY_CONFIG_DIR:?}"
+COMMAND=""
+if [ ${IS_WORKER} == 1 ]; then
+    COMMAND=--worker
+fi
+
+python3 "${SUBMITTY_REPOSITORY}/.setup/generate_configs.py" ${COMMAND}
+python3 "${SUBMITTY_REPOSITORY}/.setup/set_config_permissions.py" ${COMMAND}
+python3 "${SUBMITTY_REPOSITORY}/.setup/validate_configs.py" ${COMMAND}
+
+SETUP_ARGS=()
+if [[ "${CLEAN}" -eq 1 ]]; then
+    SETUP_ARGS+=("clean")
+    if [[ "${QUICK}" -eq 1 ]]; then
+        SETUP_ARGS+=("quick")
+    fi
+fi
+
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_directories.sh" \
+    "${SETUP_ARGS[@]}" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -206,12 +256,18 @@ echo -e "\nBeginning installation of Submitty\n"
 
 nlohmann_dir="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor/nlohmann/json"
 
-# If we don't already have a copy of this repository, check it out
-if [ ! -d "${nlohmann_dir}" ]; then
-    git clone --depth 1 "https://github.com/nlohmann/json.git" "${nlohmann_dir}"
+# Fetch a pinned release of the nlohmann C++ JSON library.
+# Re-fetch only when the pinned version (.setup/bin/versions.sh) changes.
+mkdir -p "${nlohmann_dir}"
+pushd "${nlohmann_dir}" > /dev/null
+if [[ ! -f VERSION || $(< VERSION) != "${nlohmann_json_Version}" ]]; then
+    rm -rf include single_include
+    wget -nv "https://github.com/nlohmann/json/releases/download/${nlohmann_json_Version}/include.zip" -O nlohmann_json.zip
+    unzip -o -q nlohmann_json.zip "include/*"
+    rm -f nlohmann_json.zip
+    echo "${nlohmann_json_Version}" > VERSION
 fi
-
-# TODO: We aren't checking / enforcing a specific/minimum version of this library...
+popd > /dev/null
 
 # Add read & traverse permissions for RainbowGrades and vendor repos
 find "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor" -type d -exec chmod o+rx {} \;
@@ -242,7 +298,7 @@ rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_default.j
 # replace filling variables
 sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 
-# # change permissions of allowed_autograding_commands_default.json
+# change permissions of allowed_autograding_commands_default.json
 chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
 
@@ -713,7 +769,7 @@ fi
 
 # Restart php-fpm and apache
 if [ "${IS_WORKER}" == 0 ]; then
-    if [[ "$#" == 0 || ("$#" == 1 && "$1" != "skip_web_restart") || ("$#" -ge 2  && ("$1" != "skip_web_restart" && "$2" != "skip_web_restart")) ]]; then
+    if [[ "${SKIP_WEB_RESTART}" -eq 0 ]]; then
         PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
         echo -n "restarting php${PHP_VERSION}-fpm..."
         systemctl restart "php${PHP_VERSION}-fpm"
@@ -750,7 +806,7 @@ done
 # INSTALL TEST SUITE if not in worker mode
 if [ "${IS_WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
-    if [[ "$#" -ge 1 && "$1" == "test" ]]; then
+    if [[ "${TEST}" -eq 1 ]]; then
 
         # copy the directory tree and replace variables
         echo -e "Install Autograding Test Suite..."
@@ -762,10 +818,8 @@ if [ "${IS_WORKER}" == 0 ]; then
 
         echo -e "\nRun Autograding Test Suite...\n"
 
-        # pop the first argument from the list of command args
-        shift
         # pass any additional command line arguments to the run test suite
-        python3 "${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py" "$@"
+        python3 "${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py" "${TEST_CASES[@]}"
 
         echo -e "\nCompleted Autograding Test Suite\n"
     fi
@@ -777,7 +831,7 @@ fi
 # INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
 if [ "${IS_WORKER}" == 0 ]; then
     # one optional argument installs & runs test suite
-    if [[ "$#" -ge 1 && "$1" == "test_rainbow" ]]; then
+    if [[ "${TEST_RAINBOW}" -eq 1 ]]; then
 
         # copy the directory tree and replace variables
         echo -e "Install Rainbow Grades Test Suite..."
@@ -790,12 +844,9 @@ if [ "${IS_WORKER}" == 0 ]; then
         rainbow_counter=0
         rainbow_total=0
 
-        # pop the first argument from the list of command args
-        shift
-        # pass any additional command line arguments to the run test suite
         rainbow_total=$((rainbow_total+1))
         set +e
-        python3 "${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py"  "$@"
+        python3 "${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py"
 
         if [[ "$?" -ne 0 ]]; then
             echo -e "\n[ FAILED ] sample test\n"
@@ -813,10 +864,12 @@ fi
 ################################################################################################################
 # confirm permissions on the repository (to allow push updates from primary to worker)
 if [ "${IS_WORKER}" == 1 ]; then
-    # the supervisor user/group must have write access on the worker machine
-    echo -e -n "Update/confirm worker repository permissions"
-    chgrp -R "${SUPERVISOR_USER}" "${SUBMITTY_REPOSITORY}"
-    chmod -R g+rw "${SUBMITTY_REPOSITORY}"
+    if [ "${IS_VAGRANT}" == 0 ]; then
+        # the supervisor user/group must have write access on the worker machine
+        echo -e -n "Update/confirm worker repository permissions"
+        chgrp -R "${SUPERVISOR_USER}" "${SUBMITTY_REPOSITORY}"
+        chmod -R g+rw "${SUBMITTY_REPOSITORY}"
+    fi
 else
     if [ "${IS_VAGRANT}" == 0 ]; then
         # in order to update the submitty source files on the worker machines
@@ -833,7 +886,7 @@ else
     sudo -H -u "${DAEMON_USER}" python3 -u "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py"
     echo -e -n "Done updating workers and installing docker images\n\n"
 
-    if [[ "$#" -ge 1 && "$1" == "disable_shipper_worker" ]]; then
+    if [[ "${DISABLE_SHIPPER_WORKER}" -eq 1 ]]; then
         echo -e -n "WARNING: Autograding shipper and worker are disabled\n\n"
     else
         # Restart the shipper & workers

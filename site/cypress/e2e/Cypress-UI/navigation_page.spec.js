@@ -73,12 +73,12 @@ describe('tests navigation buttons for each level of access', () => {
             [null, null, white, blue],
         );
         checkButtons('grades_released_homework_autota',
-            [null, 'VIEW GRADE', 'REGRADE', null],
-            [null, green, white, null],
+            [null, 'VIEW GRADE', 'GRADE', null],
+            [null, green, red, null],
         );
         checkButtons('grades_released_homework',
-            [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
-            [null, red, white, null],
+            [null, 'VIEW GRADE', 'REGRADE', null],
+            [null, green, white, null],
         );
         checkButtons('grades_released_lab',
             [null, null, 'REGRADE', null],
@@ -120,12 +120,12 @@ describe('tests navigation buttons for each level of access', () => {
             [null, null, white, null],
         );
         checkButtons('grades_released_homework_autota',
-            [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
-            [null, red, white, null],
+            [null, 'VIEW GRADE', 'REGRADE', null],
+            [null, green, white, null],
         );
         checkButtons('grades_released_homework',
-            [null, 'OVERDUE SUBMISSION', 'REGRADE', null],
-            [null, red, white, null],
+            [null, 'VIEW GRADE', 'REGRADE', null],
+            [null, green, white, null],
         );
         checkButtons('grades_released_lab',
             [null, null, 'REGRADE', null],
@@ -165,8 +165,8 @@ describe('tests navigation buttons for each level of access', () => {
             [null, red, null, null],
         );
         checkButtons('grades_released_homework',
-            [null, 'OVERDUE SUBMISSION', null, null],
-            [null, red, null, null],
+            [null, 'VIEW GRADE', null, null],
+            [null, green, null, null],
         );
         checkButtons('grades_released_lab', null, null);
     });

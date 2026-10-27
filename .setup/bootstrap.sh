@@ -19,13 +19,13 @@ as root.
 
 if [ $UID -ne 0 ]; then
     echo "This script requires root to run. Restarting the script under root."
-    exec sudo $0 "$@"
+    exec sudo "$0" "$@"
     exit $?
 fi
 
 set -e
 
-if [ ! $(command -v git ) ]; then
+if ! command -v git &> /dev/null; then
     echo "Installing git..."
     apt-get install -y git
 fi
@@ -36,10 +36,17 @@ if [ ! -d /usr/local/submitty/GIT_CHECKOUT/Submitty ]; then
     git clone https://github.com/Submitty/Submitty /usr/local/submitty/GIT_CHECKOUT/Submitty
 fi
 
-if [ ! $(command -v lsb_release) ]; then
+if ! command -v lsb_release &> /dev/null; then
     echo "Installing lsb-release..."
     apt-get install -y lsb-release
 fi
+
+python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/generate_configs.py
+DB_PASSWORD=$(head /dev/urandom | tr -dc 'A-Za-z0-9!@#$%&*()' | head -c 16)
+DB_COURSE_PASSWORD=$(head /dev/urandom | tr -dc 'A-Za-z0-9!@#$%&*()' | head -c 16)
+
+tmp=$(mktemp) && jq --arg v "$DB_PASSWORD" '.database_password = $v' "/usr/local/submitty/config/database.json" > "$tmp" && mv "$tmp" "/usr/local/submitty/config/database.json"
+tmp=$(mktemp) && jq --arg v "$DB_COURSE_PASSWORD" '.database_course_password = $v' "/usr/local/submitty/config/database.json" > "$tmp" && mv "$tmp" "/usr/local/submitty/config/database.json"
 
 echo "Running install_system.sh..."
 bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/install_system.sh

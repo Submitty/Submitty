@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: \app\repositories\grading_cluster\GradingClusterRepository::class)]
 #[ORM\Table(name: "ta_grading_clusters")]
 class GradingCluster {
     #[ORM\Id]
@@ -62,6 +62,21 @@ class GradingCluster {
 
     public function getMemberCount(): int {
         return $this->members->count();
+    }
+
+    /**
+     * @param array<string, int> $active_versions
+     * @return GradingClusterMember[]
+     */
+    public function getValidMembers(array $active_versions): array {
+        $valid = [];
+        foreach ($this->members as $m) {
+            $id = $m->getSubmitterId();
+            if (isset($active_versions[$id]) && $active_versions[$id] === $m->getActiveVersion()) {
+                $valid[] = $m;
+            }
+        }
+        return $valid;
     }
 
     public function addMember(GradingClusterMember $member): void {

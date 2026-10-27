@@ -8,6 +8,7 @@ use app\models\gradeable\Submitter;
 use app\models\GradingSection;
 use app\models\User;
 use app\entities\poll\Poll;
+use app\libraries\FileUtils;
 use InvalidArgumentException;
 
 class Access {
@@ -165,7 +166,7 @@ class Access {
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.export_components"] = self::ALLOW_MIN_INSTRUCTOR; // this doesn't need to be instructor, but they're the only ones who will do this
-        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE | self::ALLOW_LIMITED_ACCESS_GRADER;
+        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
         $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE;
@@ -251,14 +252,6 @@ class Access {
             //Extra permissions checking to be done when doing various actions. When canUserAccessFile is
             // called with a key from this array, canUser will be called with the value. Any parsed args from
             // the subparts array will be passed.
-            "permissions" => [
-                "path.read" => "path.read.submissions",
-                "path.write" => "path.write.submissions",
-            ]
-        ];
-        $this->directories["annotated_pdfs"] = [
-            "base" => $this->core->getConfig()->getCoursePath() . "/annotated_pdfs",
-            "subparts" => ["gradeable", "submitter", "version"],
             "permissions" => [
                 "path.read" => "path.read.submissions",
                 "path.write" => "path.write.submissions",
@@ -496,7 +489,7 @@ class Access {
             }
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
-                if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() <= 0) {
+                if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() <= 0) {
                     $grading_checks = false;
                 }
             }
@@ -519,10 +512,28 @@ class Access {
                 }
             }
 
-            if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
+            if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && ($group === User::GROUP_STUDENT || $peer_only_staff_grader)) {
                 //Check their peer assignment
                 if (!$this->isGradedGradeableInPeerAssignment($gradeable, $graded_gradeable, $user)) {
                     $grading_checks = false;
+                }
+                if ($grading_checks && ($args['dir'] ?? null) === 'submissions' && isset($args['path']) && $gradeable->getPeerFilesRestricted()) {
+                    $submission_base = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions', $gradeable->getId(), $graded_gradeable->getSubmitter()->getId());
+                    $normalized_path = str_replace('\\', '/', $args['path']);
+                    $normalized_base = rtrim(str_replace('\\', '/', $submission_base), '/');
+                    if (!str_starts_with($normalized_path, $normalized_base . '/')) {
+                        $grading_checks = false;
+                    }
+                    else {
+                        $relative_path = ltrim(substr($normalized_path, strlen($normalized_base)), '/');
+                        // The first path section is the submission version.
+                        $relative_parts = explode('/', $relative_path);
+                        array_shift($relative_parts);
+                        $relative_path = implode('/', $relative_parts);
+                        if (!$gradeable->canPeerViewFile($relative_path)) {
+                            $grading_checks = false;
+                        }
+                    }
                 }
                 if (self::checkBits($checks, self::CHECK_STUDENT_VIEW) && !$gradeable->getPeerFiles()) {
                     $grading_checks = false;

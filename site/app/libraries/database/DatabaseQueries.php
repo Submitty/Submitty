@@ -1094,6 +1094,7 @@ WHERE term=? AND course=? AND user_id=?",
                 "UPDATE users SET rotating_section=?, registration_subsection=?{$date_registered_sql} WHERE user_id=?",
                 $params
             );
+            $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
         }
     }
 
@@ -5080,6 +5081,65 @@ SQL;
     }
 
     /**
+     * Get the peer feedback from a student left for others on a gradeable, grouped by the student they graded
+     *
+     * @param string $grader_id
+     * @param string $gradeable_id
+     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: ?float, max: float}>}>
+     */
+    public function getPeerParticipationForGrader(string $grader_id, string $gradeable_id): array {
+        $result = [];
+        $this->course_db->query(
+            "SELECT gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, 
+                CASE
+                    WHEN COUNT(gcm.gcm_id) = 0 AND gcd.gcd_score = 0 THEN NULL
+                    ELSE LEAST(GREATEST(
+                    gc.gc_default + COALESCE(SUM(gcm.gcm_points), 0) + gcd.gcd_score,
+                    gc.gc_lower_clamp), gc.gc_upper_clamp)
+                END AS total_score
+            FROM gradeable_component_data gcd
+            JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
+            JOIN gradeable_component gc ON gc.gc_id = gcd.gc_id
+            LEFT JOIN gradeable_component_mark_data gcmd
+                ON gcmd.gc_id = gcd.gc_id AND gcmd.gd_id = gcd.gd_id
+                AND gcmd.gcd_grader_id = gcd.gcd_grader_id
+            LEFT JOIN gradeable_component_mark gcm ON gcm.gcm_id = gcmd.gcm_id
+            WHERE gcd.gcd_grader_id = ? AND gd.g_id = ? AND gc.gc_is_peer = true
+                AND gd.gd_user_id IS NOT NULL
+            GROUP BY gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, gc.gc_order,
+                gc.gc_default, gc.gc_lower_clamp, gc.gc_upper_clamp,
+                gcd.gcd_score
+            ORDER BY gd.gd_user_id, gc.gc_order",
+            [$grader_id, $gradeable_id]
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['gd_user_id']]['overall_comment'] ??= null;
+            $result[$row['gd_user_id']]['components'][] = [
+                'title' => $row['gc_title'],
+                'score' => $row['total_score'] !== null ? (float) $row['total_score'] : null,
+                'max' => (float) $row['gc_max_value'],
+            ];
+        }
+
+        $this->course_db->query(
+            "SELECT goc_user_id, goc_overall_comment
+            FROM gradeable_data_overall_comment
+            WHERE goc_grader_id = ? AND g_id = ? AND goc_user_id IS NOT NULL
+            ORDER BY goc_user_id",
+            [$grader_id, $gradeable_id]
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['goc_user_id']]['overall_comment'] = $row['goc_overall_comment'];
+            $result[$row['goc_user_id']]['components'] ??= [];
+        }
+
+        ksort($result);
+        return $result;
+    }
+
+    /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
      * If the $archived parameter is false, then we run the check:
@@ -5429,8 +5489,9 @@ AND gc_id IN (
         return $return;
     }
 
-    public function existsThread($thread_id) {
-        $this->course_db->query("SELECT 1 FROM threads where deleted = false AND id = ?", [$thread_id]);
+    public function existsThread($thread_id, bool $show_deleted = false) {
+        $query = "SELECT 1 FROM threads WHERE id = ?" . ($show_deleted ? "" : " AND deleted = false");
+        $this->course_db->query($query, [$thread_id]);
         $result = $this->course_db->rows();
         return count($result) > 0;
     }
@@ -6556,6 +6617,8 @@ AND gc_id IN (
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
+              g_use_custom_grading_order AS custom_sort,
+              g_enable_custom_sort AS enable_custom_sort,
               g_allowed_minutes AS allowed_minutes,
               eg.*,
               gamo.*,
@@ -6632,6 +6695,8 @@ AND gc_id IN (
                   autograding,
                   rubric,
                   files,
+                  peer_files_restricted,
+                  peer_file_patterns,
                   solution_notes,
                   discussion
                 FROM peer_grading_panel
@@ -7307,7 +7372,9 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : null,
             $gradeable->getMinGradingGroup(),
             $gradeable->getSyllabusBucket(),
-            $gradeable->getAllowCustomMarks()
+            $gradeable->getAllowCustomMarks(),
+            $gradeable->getCustomSort(),
+            $gradeable->getEnableCustomSort()
         ];
         $this->course_db->query(
             "
@@ -7324,8 +7391,10 @@ AND gc_id IN (
               g_grade_released_date,
               g_min_grading_group,
               g_syllabus_bucket,
-              g_allow_custom_marks)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+              g_allow_custom_marks,
+              g_use_custom_grading_order,
+              g_enable_custom_sort)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             $params
         );
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -7408,6 +7477,8 @@ AND gc_id IN (
                 $gradeable->getPeerAutograding(),
                 $gradeable->getPeerRubric(),
                 $gradeable->getPeerFiles(),
+                $gradeable->getPeerFilesRestricted(),
+                json_encode($gradeable->getPeerFilePatterns(), JSON_THROW_ON_ERROR),
                 $gradeable->getPeerSolutions(),
                 $gradeable->getPeerDiscussion(),
             ];
@@ -7418,10 +7489,12 @@ AND gc_id IN (
                     autograding,
                     rubric,
                     files,
+                    peer_files_restricted,
+                    peer_file_patterns,
                     solution_notes,
                     discussion
                 )
-                VALUES(?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?::jsonb, ?, ?)",
                 $params
             );
         }
@@ -7495,6 +7568,8 @@ AND gc_id IN (
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getAllowCustomMarks(),
+                $gradeable->getCustomSort(),
+                $gradeable->getEnableCustomSort(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
@@ -7511,7 +7586,9 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?
+                  g_allow_custom_marks=?,
+                  g_use_custom_grading_order=?,
+                  g_enable_custom_sort=?
                 WHERE g_id=?",
                 $params
             );
@@ -7600,18 +7677,22 @@ AND gc_id IN (
                     $gradeable->getPeerAutograding(),
                     $gradeable->getPeerRubric(),
                     $gradeable->getPeerFiles(),
+                    $gradeable->getPeerFilesRestricted(),
+                    json_encode($gradeable->getPeerFilePatterns(), JSON_THROW_ON_ERROR),
                     $gradeable->getPeerSolutions(),
                     $gradeable->getPeerDiscussion()
                 ];
                 // Update row if exists, else Insert row
                 $this->course_db->query(
                     "
-                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, solution_notes, discussion)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO peer_grading_panel (g_id, autograding, rubric, files, peer_files_restricted, peer_file_patterns, solution_notes, discussion)
+                    VALUES (?, ?, ?, ?, ?, ?::jsonb, ?, ?)
                     ON CONFLICT (g_id) DO UPDATE
                     SET autograding = EXCLUDED.autograding,
                         rubric = EXCLUDED.rubric,
                         files = EXCLUDED.files,
+                        peer_files_restricted = EXCLUDED.peer_files_restricted,
+                        peer_file_patterns = EXCLUDED.peer_file_patterns,
                         solution_notes = EXCLUDED.solution_notes,
                         discussion = EXCLUDED.discussion
                     ",
@@ -7629,7 +7710,84 @@ AND gc_id IN (
         $this->updateGradeableComponents($gradeable);
     }
 
+    /**
+     * @return array<string, int>
+     */
+    public function getCustomGradingOrder(string $gradeable_id): array {
+        $this->course_db->query(
+            "
+            SELECT user_id, team_id, sort_order
+            FROM gradeable_custom_grading_order
+            WHERE g_id = ?
+            ORDER BY sort_order
+            ",
+            [$gradeable_id]
+        );
 
+        $order = [];
+
+        foreach ($this->course_db->rows() as $row) {
+            $submitter_id = $row['user_id'] ?? $row['team_id'];
+            $order[$submitter_id] = (int) $row['sort_order'];
+        }
+
+        return $order;
+    }
+
+    public function clearCustomGradingOrder(string $gradeable_id): void {
+        $this->course_db->query(
+            "
+            DELETE FROM gradeable_custom_grading_order
+            WHERE g_id = ?
+            ",
+            [$gradeable_id]
+        );
+    }
+
+    /**
+     * @param array<int, string> $ordered_submitter_ids
+     */
+    public function replaceCustomGradingOrder(
+        string $gradeable_id,
+        array $ordered_submitter_ids,
+        bool $is_team
+    ): void {
+        $this->course_db->beginTransaction();
+
+        try {
+            $this->clearCustomGradingOrder($gradeable_id);
+
+            if (count($ordered_submitter_ids) > 0) {
+                $submitter_column = $is_team ? 'team_id' : 'user_id';
+
+                $placeholders = [];
+                $params = [];
+                foreach ($ordered_submitter_ids as $sort_order => $submitter_id) {
+                    $placeholders[] = '(?, ?, ?)';
+                    $params[] = $gradeable_id;
+                    $params[] = $submitter_id;
+                    $params[] = $sort_order;
+                }
+
+                $this->course_db->query(
+                    "
+                    INSERT INTO gradeable_custom_grading_order (
+                        g_id,
+                        {$submitter_column},
+                        sort_order
+                    )
+                    VALUES " . implode(', ', $placeholders),
+                    $params
+                );
+            }
+
+            $this->course_db->commit();
+        }
+        catch (DatabaseException $db_exception) {
+            $this->course_db->rollback();
+            throw $db_exception;
+        }
+    }
     /**
      * Removes the provided mark ids from the marks assigned to a graded component
      *
@@ -7978,18 +8136,45 @@ AND gc_id IN (
      *
      * @param int[] $component_ids
      */
-    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, int $version, array $component_ids): void {
+    public function changeGradedVersionOfComponents(string $gradeable_id, string $submitter_id, string $grader_id, int $version, array $component_ids): void {
         $this->course_db->query(
             'UPDATE gradeable_component_data AS gcd
             SET gcd_graded_version = ?
-            FROM gradeable_data AS gd
+            FROM gradeable_data AS gd,
+                gradeable_component AS gc
             WHERE (
                 gd.g_id = ?
                 AND (gd.gd_user_id = ? OR gd.gd_team_id = ?)
                 AND gcd.gc_id IN ' . $this->createParameterList(count($component_ids)) . '
                 AND gd.gd_id = gcd.gd_id
+                AND gc.gc_id = gcd.gc_id
+                AND (
+                    gc.gc_is_peer = FALSE
+                    OR gcd.gcd_grader_id = ?
+                )
             )',
-            array_merge([$version, $gradeable_id, $submitter_id, $submitter_id], $component_ids)
+            array_merge([$version, $gradeable_id, $submitter_id, $submitter_id], $component_ids, [$grader_id])
+        );
+    }
+    /**
+     * Changes the graded version of a gradeable for all peer components for all peer graders
+     *
+     */
+    public function changeGradedVersionOfAllPeerComponents(string $gradeable_id, string $submitter_id, int $version): void {
+        $this->course_db->query(
+            'UPDATE gradeable_component_data AS gcd
+            SET gcd_graded_version = ?
+            FROM gradeable_data AS gd,
+                gradeable_component AS gc
+            WHERE (
+                gd.g_id = ?
+                AND gd.gd_user_id = ?
+                AND gd.gd_id = gcd.gd_id
+                AND gc.gc_id = gcd.gc_id
+                AND gc.g_id = gd.g_id
+                AND gc.gc_is_peer = TRUE
+            )',
+            [$version, $gradeable_id, $submitter_id]
         );
     }
 
@@ -8049,7 +8234,7 @@ AND gc_id IN (
      *
      * @param  \app\models\gradeable\Gradeable $gradeable
      * @param  string[]                        $submitter_ids
-     * @return bool[] Map of id=>version
+     * @return array<string, int> Map of id=>version
      */
     public function getActiveVersions(Gradeable $gradeable, array $submitter_ids) {
         if (count($submitter_ids) === 0) {
@@ -8254,8 +8439,11 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getPastQueue() {
-
+    /**
+     * @param string|null $user_id only return this user's entries, or everyone's when null
+     */
+    public function getPastQueue(?string $user_id = null) {
+        $user_filter = $user_id === null ? "" : "AND queue.user_id = ?";
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
@@ -8300,11 +8488,15 @@ AND gc_id IN (
             )
             AS h1
             ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
-            WHERE time_in > ? AND current_state IN ('done')
+            WHERE time_in > ? AND current_state IN ('done') {$user_filter}
             ORDER BY row_number
         ";
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
-        $this->course_db->query($query, [$current_date, $current_date, $current_date]);
+        $params = [$current_date, $current_date, $current_date];
+        if ($user_id !== null) {
+            $params[] = $user_id;
+        }
+        $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
 
@@ -8653,7 +8845,8 @@ WHERE current_state IN
             helper.user_email AS helper_email,
             helper.user_email_secondary AS helper_email_secondary,
             helper.user_email_secondary_notify AS helper_email_secondary_notify,
-            helper.user_group AS helper_group
+            helper.user_group AS helper_group,
+            helper.user_pronouns AS helper_pronouns
         FROM queue LEFT JOIN users helper ON helper.user_id = queue.help_started_by
         WHERE queue.user_id = ? AND queue.current_state IN ('waiting','being_helped')
         ";
@@ -8987,6 +9180,7 @@ WHERE current_state IN
               u.course_section_id,
               u.rotating_section,
               u.registration_type,
+              u.date_registered,
               ldeu.late_day_exceptions,
               ldeu.reason_for_exception,
               u.registration_subsection';

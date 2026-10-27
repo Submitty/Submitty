@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeStudentSocketClient */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializeStudentSocketClient */
 /* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
 
 $(document).ready(() => {
@@ -244,7 +244,7 @@ function updateTimer(endDate) {
         timerDisplayElement.text(`${hoursUpdated}:${minutesUpdated}:${secondsUpdated}`);
     }
 
-    const timerId = setInterval(tick, 20);
+    const timerId = setInterval(tick, 500);
 }
 
 function toggle_section(section_id) {
@@ -307,6 +307,21 @@ function initializeInstructorSocketClient(poll_id) {
         instructor: true,
         poll_id: poll_id,
     });
+}
+
+function initializeIndexSocketClient() {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        switch (msg.type) {
+            case 'update_num_responses':
+                $(`#poll_${msg.poll_id}_responses`).text(msg.message);
+                break;
+            default:
+                console.error('Unknown web socket message received:', msg);
+                break;
+        }
+    };
+    window.socketClient.open('polls_index');
 }
 
 function initializeStudentSocketClient(poll_id) {

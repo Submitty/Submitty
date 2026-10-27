@@ -564,6 +564,15 @@ class HomeworkView extends AbstractView {
         $max_submissions = $autograding_config->getMaxSubmissions();
         $penalty_free_submissions = $max_submissions - $highest_version;
         $max_submission_size = $autograding_config->getMaxSubmissionSize();
+        $user_assignment_settings_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'submissions',
+            $gradeable->getId(),
+            $this->core->getUser()->getId(),
+            'user_assignment_settings.json'
+        );
+        $user_assignment_settings_missing = $highest_version > 0 && !file_exists($user_assignment_settings_path);
+        $user_assignment_settings_unreadable = $highest_version > 0 && file_exists($user_assignment_settings_path) && !is_readable($user_assignment_settings_path);
 
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'course' => $this->core->getConfig()->getCourse(),
@@ -604,6 +613,8 @@ class HomeworkView extends AbstractView {
             'penalty_free_submissions' => $penalty_free_submissions,
             'display_version' => $display_version,
             'highest_version' => $highest_version,
+            'user_assignment_settings_missing' => $user_assignment_settings_missing,
+            'user_assignment_settings_unreadable' => $user_assignment_settings_unreadable,
             'student_page' => $student_page,
             'students_full' => $students_full,
             'student_id' => $student_id,

@@ -3,8 +3,15 @@
         <p>Loading...</p>
     </div>
     <div id="rg_web_ui">
+        <div id="rainbow-build-notice" class="rg-build-notice" data-testid="rainbow-build-notice" style="display: none;">
+            <p id="rainbow-build-notice-messages"></p>
+            <p class="rg-build-notice-contact" id="rainbow-build-notice-contact" style="display: none;">
+                Contact your system administrator at
+                <a id="rainbow-build-notice-email" href=""></a>
+                for assistance.
+            </p>
+        </div>
         <h1>Rainbow Grades Configuration</h1>
-
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">
                 <p><strong>Notice:</strong> Rainbow Grades tools are running in limited functionality mode.  This means that grades summaries must be
@@ -638,6 +645,7 @@ To remove a curve simply blank all boxes."></i>
     <script>
         window.manualCustomizationExists = {{ manual_customization_exists ? 'true' : 'false' }};
         window.rainbowGradesGeneratedManually = {{ rainbow_grades_generated_manually ? 'true' : 'false' }};
+        window.rainbowBuildNotice = {{ rainbow_build_notice is null ? 'null' : rainbow_build_notice|json_encode|raw }};
 
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');

@@ -56,6 +56,7 @@ class StrToBoolAction(argparse.Action):
 if os.getuid() != 0:
     raise SystemExit('ERROR: This script must be run by root or sudo')
 
+raise SystemExit('ERROR: This script deprecated and will be removed soon.')
 
 parser = argparse.ArgumentParser(description='Submitty configuration script',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)

@@ -24,17 +24,23 @@ declare global {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
-        clearPeerMarks (submitter_id: string, gradeable_id: string, csrf_token: string): void;
+        peerComponentMarksChanged (peer_id: string, component_id: string): void;
+        clearPeerMarks (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        savePeerComponent (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string): void;
+        resolvePeerVersionConflicts (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string): void;
+        clearAllPeerVersionConflicts (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string): void;
+        reloadPeerRubric (gradeable_id: string, anon_id: string): Promise<void>;
         newEditPeerComponentsForm(): void;
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
+        zoomFile(delta: number): void;
+        triggerPDFScale?(delta: number): void;
         uploadAttachment(): void;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         registerKeyHandler(parameters: object, fn: Function): void;
         updateCookies (): void;
         openFrame(html_file: string, url_file: string, num: string, pdf_full_panel: boolean, panel: string): void;
         rotateImage(url: string | undefined, rotateBy: string): void;
-        loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
     }
     interface JQueryStatic {
@@ -57,6 +63,7 @@ export function changeStudentArrowTooltips(data: string) {
             data = 'default';
         }
     }
+    // eslint-disable-next-line no-useless-assignment
     let component_id = NO_COMPONENT_ID;
     switch (data) {
         case 'ungraded':
@@ -246,7 +253,7 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     let open_files_array: string[] = [];
     if (!clear_open_files) {
         // keep open files persistent across cookie updates
-        const prev_open_files = window.Cookies.get('open_files') || '[]';
+        const prev_open_files = localStorage.getItem('open_files') || '[]';
         const prev_open_files_array = JSON.parse(prev_open_files) as string[];
         open_files_array = open_files_array.concat(prev_open_files_array);
         // search for and add open files to our array, then remove closed files
@@ -265,7 +272,10 @@ window.updateCookies = function (clear_open_files: boolean = false) {
     // remove duplicates from the auto-open list
     open_files_array = open_files_array.filter((item, index) => open_files_array.indexOf(item) === index);
 
-    window.Cookies.set('open_files', JSON.stringify(open_files_array), { path: '/' });
+    localStorage.setItem('open_files', JSON.stringify(open_files_array));
+
+    // The list used to live in a cookie that grew large enough to break websocket handshakes.
+    window.Cookies.remove('open_files', { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 // expand all files in Submissions and Results section
@@ -421,8 +431,15 @@ window.changeCurrentPeer = function () {
     $(`#edit-peer-components-form-${peer}`).show();
 };
 
-window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, csrf_token: string) {
-    const peer_id = $('#edit-peer-select').val();
+window.peerComponentMarksChanged = function (peer_id: string, component_id: string) {
+    $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).addClass('btn-primary');
+};
+
+window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmed = confirm(`Are you sure you want to delete all grading from ${peer_id}?`);
+    if (!confirmed) {
+        return;
+    }
     const url = buildCourseUrl([
         'gradeable',
         gradeable_id,
@@ -442,7 +459,104 @@ window.clearPeerMarks = function (submitter_id: string, gradeable_id: string, cs
             window.location.reload();
         },
         error: function () {
-            console.log('Failed to delete');
+            console.log('Failed to delete peer marks');
+        },
+    });
+};
+
+window.savePeerComponent = function (submitter_id: string, gradeable_id: string, peer_id: string, component_id: string, csrf_token: string) {
+    const mark_ids = $(
+        `.peer-edit-mark[data-component-id="${component_id}"][data-peer-id="${peer_id}"]:checked`,
+    ).map(function () {
+        return $(this).val();
+    }).get();
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'save_peer_component',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+            component_id,
+            mark_ids,
+        },
+        type: 'POST',
+        success: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Saved');
+            $(`.peer-save-component[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).removeClass('btn-primary');
+            $(`.peer-edit-version-warning[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+            setTimeout(() => {
+                save_status.text('');
+            }, 2000);
+        },
+        error: function () {
+            const save_status = $(`.peer-component-save-status[data-component-id="${component_id}"][data-peer-id="${peer_id}"]`);
+            save_status.text('Save failed');
+        },
+    });
+};
+
+window.resolvePeerVersionConflicts = function (submitter_id: string, gradeable_id: string, peer_id: string, csrf_token: string) {
+    const confirmation = confirm('Are you sure you want to update the version for all components without separately inspecting each component?');
+    if (!confirmation) {
+        return;
+    }
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'resolve_peer_version_conflicts',
+    ]);
+
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            peer_id,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            $(`.peer-edit-version-warning[data-peer-id="${peer_id}"]`).remove();
+            $(`.clear-peer-version-conflicts[data-peer-id="${peer_id}"]`).remove();
+            void window.reloadPeerRubric(gradeable_id, getAnonId());
+        },
+        error: function () {
+            console.log('Failed to resolve peer version conflicts');
+        },
+    });
+};
+
+window.clearAllPeerVersionConflicts = function (submitter_id: string, gradeable_id: string, anon_id: string, csrf_token: string) {
+    const confirmation = confirm('Are you sure you want to update the version for all components for all graders without separately inspecting each component?');
+    if (!confirmation) {
+        return;
+    }
+    const url = buildCourseUrl([
+        'gradeable',
+        gradeable_id,
+        'grading',
+        'clear_all_peer_version_conflicts',
+    ]);
+    $.ajax({
+        url,
+        data: {
+            csrf_token,
+            submitter_id,
+        },
+        type: 'POST',
+        success: function () {
+            void window.reloadPeerRubric(gradeable_id, anon_id);
+        },
+        error: function () {
+            console.log('Failed to clear all peer version conflicts');
         },
     });
 };
@@ -620,7 +734,7 @@ function openFrame(
             pdf_full_panel
             && url_file.substring(url_file.length - 3) === 'pdf'
         ) {
-            viewFileFullPanel(html_file, url_file, 0, panel as FileFullPanelOptions);
+            viewFileFullPanel(html_file, url_file, 0, panel);
         }
         else {
             const forceFull
@@ -668,7 +782,6 @@ const fileFullPanelOptions = {
         gradingFileName: '#grading_file_name',
         panel: '#submission_browser',
         innerPanel: '#directory_view',
-        pdfAnnotationBar: '#pdf_annotation_bar',
         saveStatus: '#save_status',
         fileContent: '#file-content',
         fullPanel: 'full_panel',
@@ -682,7 +795,6 @@ const fileFullPanelOptions = {
         gradingFileName: '#notebook_grading_file_name',
         panel: '#notebook_view',
         innerPanel: '#notebook-main-view',
-        pdfAnnotationBar: '#notebook_pdf_annotation_bar', // TODO
         saveStatus: '#notebook_save_status', // TODO
         fileContent: '#notebook-file-content',
         fullPanel: 'notebook_full_panel',
@@ -699,8 +811,9 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 
     $(fileFullPanelOptions[panel]['imageRotateBar']).hide();
 
-    const promise = loadPDF(name, path, page_num, panel);
-    $(fileFullPanelOptions[panel]['fileView']).show();
+    const promise = loadFileForFullView(name, path, page_num, panel);
+    // .show() would set display: block and undo the column layout in electronic.css
+    $(fileFullPanelOptions[panel]['fileView']).css('display', 'flex');
     $(fileFullPanelOptions[panel]['gradingFileName']).text(name);
     const precision
         = $(fileFullPanelOptions[panel]['panel']).width()!
@@ -718,7 +831,7 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 }
 window.viewFileFullPanel = viewFileFullPanel;
 
-function loadPDF(name: string, path: string, page_num: number, panelStr: string = 'submission') {
+function loadFileForFullView(name: string, path: string, page_num: number, panelStr: string = 'submission') {
     const panel = panelStr as FileFullPanelOptions;
     // Store the file name of the last opened file for scrolling when switching between students
     localStorage.setItem('ta-grading-files-full-view-last-opened', name);
@@ -736,7 +849,6 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
         const anon_submitter_id = document.getElementById(
             fileFullPanelOptions[panel]['panel'].substring(1),
         )!.dataset.anonSubmitterId;
-        $('#pdf_annotation_bar').show();
         $('#save_status').show();
         return $.ajax({
             type: 'POST',
@@ -759,7 +871,6 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
     else {
         // Check if the file is an image
         const isImage = isImageFile(name);
-        $(fileFullPanelOptions[panel]['pdfAnnotationBar']).hide();
 
         if (isImage) {
             // For images, use server-side annotation system
@@ -790,6 +901,9 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                     // Clear previous image content before appending new content
                     $(fileFullPanelOptions[panel]['fileContent']).empty();
                     $(fileFullPanelOptions[panel]['fileContent']).append(data);
+                    if (panel === 'submission') {
+                        $('#file-zoom-display').text('100%');
+                    }
                 },
             });
         }
@@ -823,7 +937,14 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
         }
     }
 }
-window.loadPDF = loadPDF;
+
+// The zoom controls in FileView.twig serve both the image and PDF viewers.
+// PDFEmbedded.js defines triggerPDFScale only after a PDF has been opened.
+window.zoomFile = function (delta: number) {
+    if (!window.zoomImage(delta)) {
+        window.triggerPDFScale?.(delta);
+    }
+};
 
 window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
@@ -839,9 +960,6 @@ window.collapseFile = function (rawPanel: string = 'submission') {
 
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
-        if ($('#pdf_annotation_bar').is(':visible')) {
-            $('#pdf_annotation_bar').hide();
-        }
     }
     $(fileFullPanelOptions[panel]['innerPanel']).show();
     const offset1 = $(fileFullPanelOptions[panel]['innerPanel']).css('left');

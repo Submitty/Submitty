@@ -6,15 +6,24 @@
 {% if not active_same_as_graded %}
     $('.peer-results-box').css('background-color', 'var(--standard-light-red)')
 {% endif %}
-{# When the user clicks on a peer tab in peer feedback mode, hide all other peer feedback panels, set all other tabs to unselected, set the clicked peer tab to selected and show the corresponding peer feedback panel #}
+{# Switch between the summary and individual peer feedback panels. #}
+function open_peer_summary_tab() {
+    $('#normal_peer_wrapper').show();
+    $('#comments_wrapper').show();
+    $('#peer_feedback_wrapper').hide();
+    $('[id^="peer_feedback_nav_"]').removeClass('active-btn');
+    $('#peer_summary_nav').addClass('active-btn');
+}
 
-function open_peer_feedback_tab(user, ordered_graders) {
-    $('.page-content').hide();
-    $('#peer-feedback-'+user).show();
-    for (var i = 0 ; i<{{ordered_graders|json_encode|raw}}.length;i++){
-        $('#peer_feedback_nav_'+{{ordered_graders|json_encode|raw}}[i]).removeClass('active-btn');
-    }
-    $('#peer_feedback_nav_'+user).addClass('active-btn');
+function open_peer_feedback_tab(user) {
+    $('#normal_peer_wrapper').hide();
+    $('#comments_wrapper').hide();
+    $('#peer_feedback_wrapper').show();
+    $('#peer_feedback_wrapper .page-content').hide();
+    $('#peer-feedback-' + user).show();
+    $('[id^="peer_feedback_nav_"]').removeClass('active-btn');
+    $('#peer_summary_nav').removeClass('active-btn');
+    $('#peer_feedback_nav_' + user).addClass('active-btn');
 }
 function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
     let peer_feedback_positive = ['no_response', 'thanks', 'helpful', 'detailed'];
@@ -39,20 +48,6 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
         peerFeedbackUpload(grader_id, user_id, g_id, feedback);
     }
 }
-function switch_feedback_modes() {
-    if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
-        $('#switch_feedback_button')[0].textContent = "Switch to Normal Display";
-        $('#peer_feedback_wrapper').show();
-        $('#comments_wrapper').hide();
-        $('#normal_peer_wrapper').hide();
-    }
-    else{
-        $('#switch_feedback_button')[0].textContent = "Switch to Feedback Mode";
-        $('#normal_peer_wrapper').show();
-        $('#comments_wrapper').show();
-        $('#peer_feedback_wrapper').hide();
-    }
-}
 </script>
 
 {% if not been_ta_graded %}
@@ -64,7 +59,6 @@ function switch_feedback_modes() {
 {% else %}
     <div class="sub">
 
-        <button class = 'btn btn-default' id = "switch_feedback_button" onclick='switch_feedback_modes()'>Switch to Feedback Mode</button>
 
         {# /Overview #}
 
@@ -82,7 +76,20 @@ function switch_feedback_modes() {
                     <h4>Peer Grading Total</h4>
                 </div>
             </div>
-
+            <div class="box grade-results peer-results-tabs" id="peer_results_tabs">
+                <button type="button" class="btn btn-default active-btn"
+                        id="peer_summary_nav"
+                        onclick="open_peer_summary_tab();">
+                    SUMMARY
+                </button>
+                {% for grader in ordered_graders %}
+                    <button type="button" class="btn btn-default"
+                            id="peer_feedback_nav_{{grader}}"
+                            onclick="open_peer_feedback_tab('{{grader}}');">
+                        {{ peer_aliases[grader] }}
+                    </button>
+                {% endfor %}
+            </div>
             {# Peer Component boxes #}
             <div id="normal_peer_wrapper">
                 {% for component in peer_components %}
@@ -93,7 +100,7 @@ function switch_feedback_modes() {
                     {% endif %}
                 {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
             {# /Peer Component boxes #}
         {% endif %}
 
@@ -222,13 +229,8 @@ function switch_feedback_modes() {
     </div>
 {%- endmacro -%}
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, uploaded_pdfs, annotated_file_names, student_pdf_view_url, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
-        <div class="box grade-results">
-            {% for grader in ordered_graders %}
-                <a class="nav-bar key_to_click" id="peer_feedback_nav_{{grader}}" onclick="open_peer_feedback_tab('{{grader}}');">{{peer_aliases[grader]}}</a>
-            {% endfor %}
-        </div>
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
@@ -236,20 +238,19 @@ function switch_feedback_modes() {
                     <tbody>
                         {% for component in peer_components %}
                             <div class="box-info">
-                                    <h4>{{ component.title|escape }}
-                                    </h4>
-                                    <p>
-                                        {% for mark in component.marks %}
-                                            {% if mark.earned[anon_grader_id_mapping[grader]] %}
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            {% else %}
-                                                <i class="far fa-square fa-1g"></i>
-                                            {% endif %}
-                                            {{ mark.points|round(num_decimals) }}
-                                            {{ mark.title|nl2br }}
-                                            </br>
-                                        {% endfor %}
-                                    </p>
+                                <h4>{{ component.title|escape }}</h4>
+                                <p>
+                                    {% for mark in component.marks %}
+                                        {% if mark.earned[anon_grader_id_mapping[grader]] %}
+                                            <i class="far fa-check-square fa-1g"></i>
+                                        {% else %}
+                                            <i class="far fa-square fa-1g"></i>
+                                        {% endif %}
+                                        {{ mark.points|round(num_decimals) }}
+                                        {{ mark.title|nl2br }}
+                                        </br>
+                                    {% endfor %}
+                                </p>
                             </div>
                         {% endfor %}
                     </tbody>
@@ -266,38 +267,24 @@ function switch_feedback_modes() {
                         {% endif %}
                     </div>
                 {% endif %}
-
-            {% for file in uploaded_pdfs %}
-                {% if file.encoded_name is defined and file.encoded_name in annotated_file_names and grader in file.graders%}
-                    </br>
-                    <p>
-                        {{file.name}} :
-                    </p>
-                    <p>
-                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&grader={{ grader|url_encode }}')">View in New Tab <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </p>
-                {% endif %}
-
-            {% endfor %}
-            </br>
-            <b>Peer Feedback:</b>
-            <div>
                 </br>
-                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','no_response', '>No Response');">No Response</a>
-                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
-                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
-                <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
-                <a class="btn peer-feedback-negative-unselected" data-color="#800000" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
+                <b>Peer Feedback:</b>
+                <div>
+                    </br>
+                    <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_no_response_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','no_response', '>No Response');">No Response</a>
+                    <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_thanks_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'thanks', 'Thank You!');">Thank You</a>
+                    <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_helpful_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}','helpful', 'This feedback was helpful to me');">This feedback was helpful to me!</a>
+                    <a class="btn peer-feedback-positive-unselected" data-color="#008000" id="peer_feedback_detailed_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'detailed', 'This feedback was detailed, specific, and/or technical');">This feedback was detailed, specific, and/or technical</a>
+                    <a class="btn peer-feedback-negative-unselected" data-color="#800000" id="peer_feedback_inappropriate_{{grader}}" onclick="set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', 'inappropriate', 'This feedback was inaccurate and/or inappropriate');">This feedback was inaccurate and/or inappropriate</a>
+                </div>
+                <script>
+                    var feedbackArray = {{peer_feedback|json_encode|raw}};
+                    if('{{grader}}' in feedbackArray){
+                        var feedback = feedbackArray['{{grader}}']['{{user_id}}']['feedback'];
+                        set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback, false)
+                    }
+                </script>
             </div>
-            <script>
-                var feedbackArray = {{peer_feedback|json_encode|raw}};
-                if('{{grader}}' in feedbackArray){
-                    var feedback = feedbackArray['{{grader}}']['{{user_id}}']['feedback'];
-                    set_peer_feedback('{{grader}}', '{{user_id}}', '{{gradeable_id}}', feedback, false)
-                }
-            </script>
-        </div>
         {% endfor %}
     </div>
 {%- endmacro -%}

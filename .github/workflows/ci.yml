@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.9'
 
@@ -69,11 +69,11 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -94,11 +94,11 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -119,11 +119,11 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -147,11 +147,11 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
@@ -195,7 +195,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -222,7 +222,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -260,7 +260,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - name: Install Composer
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -284,11 +284,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
@@ -296,21 +296,21 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run flake8
-        run: python3 -m flake8
-      - name: Run pylint
-        run: python3 -m pylint --recursive=y .
+      - name: Run ruff check
+        run: ruff check .
+      - name: Run ruff format
+        run: ruff format --check --diff .
 
   python-unit:
     name: Python Unit
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Cache Pip
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -369,8 +369,9 @@ jobs:
       - name: Install bulk upload dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y poppler-utils
-          sudo apt-get install -y libzbar0
+          sudo apt-get install -y \
+            poppler-utils \
+            libzbar0
 
       - name: Run bulk upload unit tests
         working-directory: sbin/submitty_daemon_jobs
@@ -505,7 +506,7 @@ jobs:
       - name: Find Merge Base
         run: |
           echo MBASE=$(git --git-dir ${PR_REPO_PATH}/Submitty/.git merge-base               \
-                       -a origin/main ${{ github.sha }}) >> $GITHUB_ENV
+                       -a origin/main "$GITHUB_SHA") >> $GITHUB_ENV
 
       - name: Checkout main Branch
         uses: actions/checkout@v7
@@ -551,36 +552,31 @@ jobs:
           sudo useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
 
       - name: Configure Submitty
+        env:
+          MAIN_POSTGRES_PORT: ${{ job.services.postgres-main.ports['5432'] }}
+          BRANCH_POSTGRES_PORT: ${{ job.services.postgres-branch.ports['5432'] }}
         run: |
           configure_submitty() {
-            # $1->MAIN_INSTALL_PATH, $2->MAIN_DATA_PATH, $3->MAIN_REPO_PATH, $4->DB_PORT
+            # $1->INSTALL_PATH, $2->DATA_PATH, $3->REPO_PATH, $4->DB_PORT
             mkdir -vp "$2"          &&  chmod -vR 777 "$2"
             mkdir -vp "$1/config"   &&  chmod -vR 777 "$1/config"
             mkdir -vp "$1/site"     &&  chmod -vR 777 "$1/site"
             mkdir -vp "$2/courses"  &&  chmod -vR 777 "$2/courses"
 
-            (
-              echo "localhost"                    # database host
-              echo "$4"                           # database port
-              echo ""                             # global db user
-              echo "submitty_dbuser"              # global db pass
-              echo ""                             # course db user
-              echo "submitty_dbuser"              # course db pass
-              echo ""                             # timezone
-              echo ""                             # default locale
-              echo ""                             # default course materials file upload limit
-              echo "http://localhost"             # submitty url
-              echo ""                             # vcs url
-              echo ""                             # institution name
-              echo "y"                            # user create account
-              echo ""                             # sysadmin email
-              echo ""                             # where to report
-              echo "1"                            # PamAuth
-              echo ""                             # sysadmin username
-              echo "n"                            # email notification
-            ) | tee /dev/stderr                                                             \
-              | sudo -E python3 "$3/Submitty/.setup/CONFIGURE_SUBMITTY.py"                  \
-                        --install-dir "$1" --data-dir "$2" --debug
+            sudo -E python3 "$3/Submitty/.setup/generate_configs.py" \
+                        --install-dir "$1"
+            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "$1/config/database.json" > "$tmp" && mv "$tmp" "$1/config/database.json"
+            tmp=$(mktemp) && jq --argjson v $4 '.database_port = $v' "$1/config/database.json" > "$tmp" && mv "$tmp" "$1/config/database.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "$1" '.submitty_install_dir = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "$2" '.submitty_data_dir = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+            tmp=$(mktemp) && jq --arg v "$3/Submitty" '.submitty_repository = $v' "$1/config/submitty.json" > "$tmp" && mv "$tmp" "$1/config/submitty.json"
+
+            sudo -E python3 "$3/Submitty/.setup/set_config_permissions.py" \
+                        --install-dir "$1"
+            sudo -E python3 "$3/Submitty/.setup/validate_configs.py" \
+                        --install-dir "$1" --data-dir "$2"
 
             # Copy necessary files to the installation path
             cp -vr "$3/Submitty/sbin" "$1"
@@ -589,23 +585,25 @@ jobs:
           }
 
           configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
-            "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
+            "${MAIN_REPO_PATH}"     "${MAIN_POSTGRES_PORT}"
           configure_submitty "${PR_INSTALL_PATH}"   "${PR_DATA_PATH}"                       \
-            "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
-
+            "${PR_REPO_PATH}"       "${BRANCH_POSTGRES_PORT}"
 
       - name: Create Databases
+        env:
+          MAIN_POSTGRES_PORT: ${{ job.services.postgres-main.ports['5432'] }}
+          BRANCH_POSTGRES_PORT: ${{ job.services.postgres-branch.ports['5432'] }}
         run: |
-          psql -d postgres -h localhost -U postgres -p ${{ job.services.postgres-main.ports['5432'] }} \
+          psql -d postgres -h localhost -U postgres -p "$MAIN_POSTGRES_PORT" \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
-          psql -d postgres -h localhost -U submitty_dbuser -p ${{  job.services.postgres-main.ports['5432']  }} \
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
+          psql -d postgres -h localhost -U submitty_dbuser -p "$MAIN_POSTGRES_PORT" \
             -c "CREATE DATABASE submitty"
 
-          psql -d postgres -h localhost -U postgres        -p ${{ job.services.postgres-branch.ports['5432'] }} \
+          psql -d postgres -h localhost -U postgres        -p "$BRANCH_POSTGRES_PORT" \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
-          psql -d postgres -h localhost -U submitty_dbuser -p ${{ job.services.postgres-branch.ports['5432'] }} \
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
+          psql -d postgres -h localhost -U submitty_dbuser -p "$BRANCH_POSTGRES_PORT" \
             -c "CREATE DATABASE submitty"
 
       - name: Create Database Dumper
@@ -628,6 +626,10 @@ jobs:
 
       - name: Setup Databases and Courses for main
         run: | # migrate main according to dumped master database (assume it is correct)
+          sudo mkdir -p /var/local/submitty
+          sudo rm -rf /var/local/submitty/config
+          sudo ln -sfn ${MAIN_INSTALL_PATH}/config /var/local/submitty/config
+
           python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
           sudo ln -vs /usr/bin/true /usr/bin/ldapadd
@@ -643,6 +645,9 @@ jobs:
 
       - name: Setup Databases and Courses for Current Branch
         run: |
+          sudo rm -rf /var/local/submitty/config
+          sudo ln -sfn ${PR_INSTALL_PATH}/config /var/local/submitty/config
+
           python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
 
           sudo -E python3 ${PR_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py       \
@@ -651,16 +656,19 @@ jobs:
           sudo chmod -vR 777 ${PR_DATA_PATH}/courses
 
       - name: Dump Migrated Databases
+        env:
+          MAIN_POSTGRES_PORT: ${{ job.services.postgres-main.ports['5432'] }}
+          BRANCH_POSTGRES_PORT: ${{ job.services.postgres-branch.ports['5432'] }}
         run: |
           ./dbdump.sh "submitty"                "${GITHUB_WORKSPACE}/dumped/main/master.sql"\
-            "${{  job.services.postgres-main.ports['5432']  }}"
+            "${MAIN_POSTGRES_PORT}"
           ./dbdump.sh "submitty_${M}${Y}_blank" "${GITHUB_WORKSPACE}/dumped/main/course.sql"\
-            "${{  job.services.postgres-main.ports['5432']  }}"
+            "${MAIN_POSTGRES_PORT}"
 
           ./dbdump.sh "submitty"                "${GITHUB_WORKSPACE}/dumped/branch/master.sql"\
-            "${{ job.services.postgres-branch.ports['5432'] }}"
+            "${BRANCH_POSTGRES_PORT}"
           ./dbdump.sh "submitty_${M}${Y}_blank" "${GITHUB_WORKSPACE}/dumped/branch/course.sql"\
-            "${{ job.services.postgres-branch.ports['5432'] }}"
+            "${BRANCH_POSTGRES_PORT}"
 
       - name: Compare Migrated master Databases
         if: always()
@@ -730,9 +738,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
       - uses: ./.github/actions/e2e-Setup-Composite
-      # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -773,7 +780,6 @@ jobs:
           spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-          env: autograding_shipper_off=True
 
       - name: Restart autograding shipper
         run: |
@@ -786,7 +792,6 @@ jobs:
           spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
-          env: autograding_shipper_off=True
 
       - name: Restart autograding worker
         run: |
@@ -955,9 +960,8 @@ jobs:
             ${{ (matrix.containers == 'Autograding-Development' || matrix.containers == 'Autograding-Tutorial') && '--no_submissions' ||
                 '--test_only_grading' }}
 
-      # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
@@ -981,7 +985,7 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           spec: cypress/e2e/Cypress-${{matrix.containers}}/*
           browser: chrome
-          env: run_area=CI
+          expose: run_area=CI
 
       - name: Check for site errors
         working-directory: ${{ env.SUBMITTY_REPOSITORY }}
@@ -993,11 +997,21 @@ jobs:
           name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
+      - name: Validate image
+        if: failure()
+        run: curl --show-error --fail --include http://localhost:1511
+
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: submitty.json
+          path: /usr/local/submitty/config/submitty.json
 
       - uses: actions/upload-artifact@v7
         if: failure()
@@ -1055,11 +1069,18 @@ jobs:
           rm -rf /opt/ghc
           rm -rf "$AGENT_TOOLSDIRECTORY"
 
+      - name: Update database values
+        run: |
+            tmp=$(mktemp) && jq --arg v "localhost" '.database_host = $v' "${GITHUB_WORKSPACE}/.setup/data/configs/database.json" > "$tmp" && mv "$tmp" "${GITHUB_WORKSPACE}/.setup/data/configs/database.json"
+            tmp=$(mktemp) && jq --arg v "DatabaseAuthentication" '.authentication_method = $v' "${GITHUB_WORKSPACE}/.setup/data/configs/authentication.json" > "$tmp" && mv "$tmp" "${GITHUB_WORKSPACE}/.setup/data/configs/authentication.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost" '.submission_url = $v' "${GITHUB_WORKSPACE}/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${GITHUB_WORKSPACE}/.setup/data/configs/submitty.json"
+            tmp=$(mktemp) && jq --arg v "http://localhost/cgi-bin" '.cgi_url = $v' "${GITHUB_WORKSPACE}/.setup/data/configs/submitty.json" > "$tmp" && mv "$tmp" "${GITHUB_WORKSPACE}/.setup/data/configs/submitty.json"
+
       - name: Run ansible script
         shell: bash
         run: |
           cd .setup/ansible
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e "ansible_user=runner submitty_install_config_location=${GITHUB_WORKSPACE}/.setup/data/configs/ submitty_install_submitty_version=${GITHUB_SHA} submitty_install_github_url=https://github.com/${GITHUB_REPOSITORY}.git" -i inventory/submitty playbooks/submitty_install.yml
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
 
       - name: Set perms
@@ -1068,11 +1089,11 @@ jobs:
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Cache Node Modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}

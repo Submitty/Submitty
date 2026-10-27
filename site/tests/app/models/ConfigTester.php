@@ -146,6 +146,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'seek_message_enabled'           => false,
                 'seek_message_instructions'      => '',
                 'polls_enabled'                  => false,
+                'submission_clustering_enabled'  => false,
                 'chat_enabled'                   => false
             ],
             'feature_flags' => [
@@ -323,6 +324,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'seek_message_enabled'           => false,
                     'seek_message_instructions'      => '',
                     'polls_enabled'                  => false,
+                    'submission_clustering_enabled'  => false,
                     'chat_enabled'                   => false
                 ],
                 'feature_flags' => []
@@ -366,6 +368,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
             'polls_enabled'                  => false,
+            'submission_clustering_enabled'  => false,
             'chat_enabled' => false,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,

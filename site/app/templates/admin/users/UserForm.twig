@@ -58,7 +58,7 @@
         {% if use_database %}
             <label>
                 Password:
-                <input type="password" data-testid="password-input" name="user_password" placeholder="New Password" />
+                <input type="password" data-testid="password-input" name="user_password" placeholder="New Password" autocomplete="new-password" />
             </label>
         {% endif %}
         <label for="registered_section" class="full-width">
@@ -75,7 +75,7 @@
         </p>
         <label for="registration_subsection" class="full-width">
             Registration Subsection:
-            <input type="text" name="registration_subsection" id="registration_subsection" placeholder="(Optional)" />
+            <input type="text" name="registration_subsection" id="registration_subsection" data-testid="registration-subsection" placeholder="(Optional)" />
         </label>
         <label for="rotating_section" class="full-width">
             Rotating Section:

@@ -46,7 +46,7 @@ describe('Test cases involving the files panel', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
         cy.get('[data-testid="view-sections"]').uncheck();
-        cy.get('#details-table').contains('mccule').siblings().eq(6).click();
+        cy.get('#details-table').contains('hamile').siblings().eq(6).click();
         cy.get('#submission_browser_btn').click();
     });
 
@@ -72,7 +72,7 @@ describe('Test cases involving the files panel', () => {
         cy.get('#autoscroll_id').click();
         cy.get('#autoscroll_id').should('be.checked');
 
-        cy.get('#grading-panel-student-name').should('contain.text', 'mccule');
+        cy.get('#grading-panel-student-name').should('contain.text', 'hamile');
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
         cy.get('#submissions').click(); // open submissions browser
@@ -86,40 +86,40 @@ describe('Test cases involving the files panel', () => {
 
         // this second student has the same submission as the first
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSubmissionsBrowserOpen();
         assertResultsBrowserOpen();
         assertSingleFileSubmissionOpen();
 
         // this third student has a different submission from the first and second
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        cy.get('#grading-panel-student-name').should('contain.text', 'cummin');
         assertSubmissionsBrowserOpen();
         assertResultsBrowserOpen();
         assertSingleFileSubmissionClosed();
 
         // second submission name should still open; close it for later
         cy.get('#prev-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSingleFileSubmissionOpen();
         clickSingleFileSubmission();
         assertSingleFileSubmissionClosed();
 
         // third submission name should still be closed; open it for later
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        cy.get('#grading-panel-student-name').should('contain.text', 'cummin');
         assertSingleFileSubmissionClosed();
         clickSingleFileSubmission();
         assertSingleFileSubmissionOpen();
 
         // second submission name was closed; it should still be so
         cy.get('#prev-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSingleFileSubmissionClosed();
 
         // third submission name was opened; it should still be so
         cy.get('#next-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'russem');
+        cy.get('#grading-panel-student-name').should('contain.text', 'cummin');
         assertSingleFileSubmissionOpen();
 
         // closing should work as well
@@ -131,7 +131,7 @@ describe('Test cases involving the files panel', () => {
         assertResultsBrowserClosed();
 
         cy.get('#prev-student').click();
-        cy.get('#grading-panel-student-name').should('contain.text', 'rennea');
+        cy.get('#grading-panel-student-name').should('contain.text', 'browna');
         assertSubmissionsBrowserClosed();
         assertResultsBrowserClosed();
 
@@ -160,7 +160,7 @@ describe('Test cases involving auto opening single file submissions', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
         cy.get('[data-testid="view-sections"]').uncheck();
-        cy.get('#details-table').contains('rennea').siblings().eq(6).click();
+        cy.get('#details-table').contains('browna').siblings().eq(6).click();
         cy.get('#submission_browser_btn').click();
 
         cy.get('#autoscroll_id').click();
@@ -231,7 +231,7 @@ describe('Test cases involving auto opening single file submissions', () => {
         combined with the use of display inline styling. A better approach to toggling the file view
         would be to toggle only classes or only inline styles, not both.
     */
-    const file_view_selector = '#file-view[style^="display: block;"]';
+    const file_view_selector = '#file-view[style^="display: flex;"]';
 
     function assertSingleImageSubmissionClosed() {
         cy.get(file_view_selector).should('not.exist');
@@ -290,5 +290,54 @@ describe('Test cases involving auto opening single file submissions', () => {
         // opening a multi-file submission does not sure auto open single file logic
         cy.reload();
         assertSubmissionsBrowserClosed();
+    });
+});
+
+describe('Test cases involving zooming images in the full panel view', () => {
+    it('test the zoom buttons on an image submission', () => {
+        cy.login('bitdiddle');
+        cy.visit(['sample', 'gradeable', 'open_homework']);
+        cy.get('#startnew').then(($clearBtn) => {
+            if (!$clearBtn.is(':disabled')) {
+                $clearBtn.click();
+            }
+        });
+        cy.get('#upload1').selectFile('cypress/fixtures/copy_of_more_autograding_examples/bulk_upload_pdfs/submissions/blank_QR_numeric_id.png', { action: 'drag-drop' });
+        cy.waitPageChange(() => {
+            cy.get('#submit').click();
+        });
+        cy.get('#submitted-files > div').should('contain', 'blank_QR_numeric_id.png');
+        cy.logout();
+
+        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
+        cy.login('instructor');
+        cy.get('[data-testid="view-sections"]').uncheck();
+        cy.get('#details-table').contains('tr', 'bitdiddle').find('[data-testid="grade-button"]').click();
+        cy.get('#submission_browser_btn').click();
+        cy.get('#submissions').click();
+        assertSubmissionsBrowserOpen();
+        cy.get('a.image-file[data-file_name="blank_QR_numeric_id.png"]').click();
+
+        // wait for the image itself to load, not just its alt text
+        cy.get('#annotatable-image').should(($img) => {
+            expect($img[0].naturalWidth).to.be.greaterThan(0);
+        });
+        cy.get('#file-zoom-display').should('have.text', '100%');
+        cy.get('#annotatable-image').invoke('outerWidth').then((fitWidth) => {
+            cy.get('[aria-label="Zoom In"]').click();
+            cy.get('[aria-label="Zoom In"]').click();
+            cy.get('#file-zoom-display').should('have.text', '120%');
+            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth * 1.2, 2);
+
+            // zoom never goes below the size that fits the panel
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('[aria-label="Zoom Out"]').click();
+            cy.get('#file-zoom-display').should('have.text', '100%');
+            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth, 2);
+        });
+
+        cy.get('[aria-label="Collapse File"]').click();
+        cy.get('#annotatable-image').should('not.exist');
     });
 });
