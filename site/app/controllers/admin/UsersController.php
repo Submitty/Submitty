@@ -76,11 +76,11 @@ class UsersController extends AbstractController {
         // Get Active student Columns
         $active_student_columns = '';
         // Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
-        if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 17) {
+        if (isset($_COOKIE['active_student_columns']) && count(explode('-', $_COOKIE['active_student_columns'])) == 16) {
             $active_student_columns = $_COOKIE['active_student_columns'];
         }
         else {
-            $default_columns = array_merge(array_fill(0, 12, 1), array_fill(0, 5, 0));
+            $default_columns = array_merge([1, 0], array_fill(0, 9, 1), array_fill(0, 5, 0));
             $cookie_val = implode('-', $default_columns);
 
             // Expires 10 years from today (functionally indefinite)
@@ -177,16 +177,15 @@ class UsersController extends AbstractController {
         }
 
         //Get Active grader Columns
-        $active_grader_columns = '';
+        $default_grader_columns = '1-1-1-1-0-1';
+        $active_grader_columns = $default_grader_columns;
         //Second argument in if statement checks if cookie has correct # of columns (to clear outdated lengths)
-        if (isset($_COOKIE['active_grader_columns']) && count(explode('-', $_COOKIE['active_grader_columns'])) == 7) {
+        if (isset($_COOKIE['active_grader_columns']) && count(explode('-', $_COOKIE['active_grader_columns'])) == 6) {
             $active_grader_columns = $_COOKIE['active_grader_columns'];
         }
         else {
             //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_grader_columns', implode('-', array_fill(0, 7, true)), time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_grader_columns = implode('-', array_fill(0, 7, true));
-            }
+            setcookie('active_grader_columns', $default_grader_columns, time() + (10 * 365 * 24 * 60 * 60));
         }
 
         return new MultiResponse(
@@ -342,13 +341,17 @@ class UsersController extends AbstractController {
             $error_message .= User::validateUserData('user_password', $_POST['user_password']) ? "" : "Error must enter password for user<br>";
         }
 
+        if ($_POST['edit_user'] === 'true' && ($_POST['user_password'] ?? '') !== '' && !$this->core->getUser()->isSuperUser()) {
+            $error_message .= "Only a superuser can change an existing user's password<br>";
+        }
+
         if (!empty($error_message)) {
             $this->core->addErrorMessage($error_message . " Contact your sysadmin if this should not cause an error.");
             $this->core->redirect($return_url);
         }
 
         if ($_POST['edit_user'] == "true") {
-            if ($user === null) {
+            if ($user === null || !$this->core->getQueries()->wasStudentEverInCourse($user->getId(), $course, $semester)) {
                 $this->core->addErrorMessage("No user found with that user id");
                 $this->core->redirect($return_url);
             }
@@ -434,8 +437,6 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
-                $user->setEmailBoth($submitty_user->getEmailBoth());
-                $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
                 if (
                     $user->getGroup() === User::GROUP_STUDENT

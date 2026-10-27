@@ -41,11 +41,11 @@ class Output {
 
     /** @var Set<array{string,string}> */
     private $audio;
-    /** @var Set */
+    /** @var Set<string> */
     private $css;
-    /** @var Set */
+    /** @var Set<string> */
     private $js;
-    /** @var Set */
+    /** @var Set<string> */
     private $module_js;
     /** @var String */
     private $manifest_json = "";
@@ -677,14 +677,23 @@ HTML;
         return $this->audio;
     }
 
+    /**
+     * @return Set<string>
+     */
     public function getCss(): Set {
         return $this->css;
     }
 
+    /**
+     * @return Set<string>
+     */
     public function getJs(): Set {
         return $this->js;
     }
 
+    /**
+     * @return Set<string>
+     */
     public function getModuleJs(): Set {
         return $this->module_js;
     }
