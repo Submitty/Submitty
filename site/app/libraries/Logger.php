@@ -217,6 +217,22 @@ class Logger {
         static::logMessage('ta_grading', $log_message);
     }
 
+    /**
+     * This logs when a grader downloads a student's submission.
+     * The log is in the format of
+     * Timestamp | Course Semester | Course Name | Gradeable_id | Grader ID | Submitter ID | Download Type | User Agent
+     *
+     * @param array $params All the params in a key-value array
+     */
+    public static function logDownload(array $params) {
+        $log_message[] = $params['course_semester'];
+        $log_message[] = $params['course_name'];
+        $log_message[] = $params['gradeable_id'];
+        $log_message[] = $params['grader_id'];
+        $log_message[] = $params['submitter_id'];
+        $log_message[] = $params['download_type'];
+        static::logMessage('downloads', $log_message);
+    }
 
     /**
      * This logs the activity of a queue when it is
