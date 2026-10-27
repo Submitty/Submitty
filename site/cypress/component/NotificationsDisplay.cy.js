@@ -35,7 +35,7 @@ function getSampleNotifications() {
 
 function updateBadgeDOM(count) {
     const badges = document.querySelectorAll(
-        '[data-testid="sidebar-notification-badge"], [data-testid="mobile-sidebar-notification-badge"], [data-testid="menu-notification-badge"], #nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
+        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
     );
     if (count <= 0) {
         badges.forEach((el) => el.remove());

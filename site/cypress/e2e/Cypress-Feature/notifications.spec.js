@@ -211,31 +211,31 @@ describe('Test cases revolving around course notifications and sidebar badge cou
         cy.visit(buildUrl(['sample']));
 
         // Verify sidebar notification badge exists on the course page
-        cy.get('[data-testid="sidebar-notification-badge"]')
+        cy.get('#nav-sidebar-notifications .notification-badge')
             .should('exist')
             .and('contain.text', '2');
 
         // Navigate to course notifications page
-        cy.get('[data-testid="nav-sidebar-notifications"]').click();
+        cy.get('#nav-sidebar-notifications').click();
         cy.get('[data-testid="course-notifications-page"]').should('exist');
-        cy.get('[data-testid="sidebar-notification-badge"]')
+        cy.get('#nav-sidebar-notifications .notification-badge')
             .should('exist')
             .and('contain.text', '2');
 
         // Mark first individual notification as seen and verify badge count decrements dynamically
         cy.get('[data-testid="notification-seen-button"]').first().click();
-        cy.get('[data-testid="sidebar-notification-badge"]')
+        cy.get('#nav-sidebar-notifications .notification-badge')
             .should('exist')
             .and('contain.text', '1');
 
         // Mark remaining notification(s) as seen via mark-seen-button and verify badge is removed dynamically
         cy.get('[data-testid="mark-seen-button"]').click();
-        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
+        cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
         cy.get('[data-testid="no-unseen-notifications-message"]').should('exist');
 
         // Reload the page and verify badge remains removed
         cy.reload();
-        cy.get('[data-testid="sidebar-notification-badge"]').should('not.exist');
+        cy.get('#nav-sidebar-notifications .notification-badge').should('not.exist');
         cy.get('[data-testid="no-unseen-notifications-message"]').should('exist');
     });
 });
