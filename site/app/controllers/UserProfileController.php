@@ -334,4 +334,53 @@ class UserProfileController extends AbstractController {
             return JsonResponse::getErrorResponse("Secondary email and secondary email notify must both be set");
         }
     }
+    #[Route("/user_profile/change_linkedin_username", methods: ["POST"])]
+    public function changeLinkedinUsername(): JsonResponse {
+        $user = $this->core->getUser();
+
+        if (isset($_POST['linkedin_username'])) {
+            $linkedinUsername = trim($_POST['linkedin_username']);
+
+            if ($linkedinUsername === "" || $user->validateUserData('linkedin_username', $linkedinUsername) === true) {
+                $user->setLinkedinUsername($linkedinUsername);
+                $this->core->getQueries()->updateUser($user);
+
+                return JsonResponse::getSuccessResponse([
+                    'message' => 'LinkedIn username updated successfully',
+                    'linkedin_username' => $linkedinUsername
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("LinkedIn username is invalid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("LinkedIn username must be provided");
+        }
+    }
+
+    #[Route("/user_profile/change_github_username", methods: ["POST"])]
+    public function changeGithubUsername(): JsonResponse {
+    $user = $this->core->getUser();
+
+    if (isset($_POST['github_username'])) {
+        $githubUsername = trim($_POST['github_username']);
+
+        if ($githubUsername === "" || $user->validateUserData('github_username', $githubUsername) === true) {
+            $user->setGithubUsername($githubUsername);
+            $this->core->getQueries()->updateUser($user);
+
+            return JsonResponse::getSuccessResponse([
+                'message' => 'GitHub username updated successfully',
+                'github_username' => $githubUsername
+            ]);
+        }
+        else {
+            return JsonResponse::getErrorResponse("GitHub username is invalid");
+        }
+    }
+    else {
+        return JsonResponse::getErrorResponse("GitHub username must be provided");
+    }
+    }
 }
