@@ -178,16 +178,12 @@ function updatePanelLayoutModes() {
     $('.panel-instructions').remove();
     setMultiPanelModeVisiblities();
     for (const panelIdx in panelsBucket) {
-        const panelCont = document.querySelector(
-            panelsBucket[panelIdx],
-        )?.childNodes;
-        if (!panelCont) {
+        const panelEl = document.querySelector(panelsBucket[panelIdx]);
+        if (!panelEl) {
             continue;
         }
         // Move all the panels from the left and right buckets to the main panels-container
-        for (let idx = 0; idx < panelCont.length; idx++) {
-            document.querySelector('.panels-container')!.append(panelCont[idx]);
-        }
+        document.querySelector('.panels-container')?.append(...Array.from(panelEl.childNodes));
     }
 
     // loop through panel positions (topLeft, topRight, etc)
