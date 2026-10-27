@@ -65,5 +65,15 @@ def down(config, database, semester, course):
 
     database.execute("""
     UPDATE categories_list 
+    SET color = '#0080080' 
+    WHERE(color = '#008000')""")
+
+    database.execute("""
+    UPDATE categories_list 
+    SET color = '#800080' 
+    WHERE(color = '#808080')""")
+
+    database.execute("""
+    UPDATE categories_list 
     SET color = '#000080' 
     WHERE(color = '#0000ff')""")
