@@ -457,6 +457,7 @@ jobs:
     name: DB Check
     runs-on: ubuntu-22.04
     env:
+      PGUSER: postgres
       PGPASSWORD: submitty_dbuser
       MAIN_INSTALL_PATH: ${{ github.WORKSPACE }}/main
       MAIN_DATA_PATH: ${{ github.WORKSPACE }}/main/var
@@ -596,13 +597,15 @@ jobs:
         run: |
           psql -d postgres -h localhost -U postgres -p "$MAIN_POSTGRES_PORT" \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"\
+            -c "CREATE ROLE root WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p "$MAIN_POSTGRES_PORT" \
             -c "CREATE DATABASE submitty"
 
           psql -d postgres -h localhost -U postgres        -p "$BRANCH_POSTGRES_PORT" \
             -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
-            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_course_dbuser'"\
+            -c "CREATE ROLE root WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
           psql -d postgres -h localhost -U submitty_dbuser -p "$BRANCH_POSTGRES_PORT" \
             -c "CREATE DATABASE submitty"
 
