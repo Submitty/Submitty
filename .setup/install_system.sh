@@ -623,9 +623,9 @@ if [ ${WORKER} == 1 ]; then
     if ! grep -q "${SUPERVISOR_USER}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to install submitty" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
+        echo "${SUPERVISOR_USER} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/.setup/INSTALL_SUBMITTY.sh" >> /etc/sudoers
         echo "#grant the submitty user on this worker machine access to the systemctl wrapper" >> /etc/sudoers
-        echo "%${SUPERVISOR_USER} ALL = (root) NOPASSWD: /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" >> /etc/sudoers
+        echo "${SUPERVISOR_USER} ALL = (root) NOPASSWD: /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py *" >> /etc/sudoers
     fi
 fi
 
@@ -693,9 +693,10 @@ if [ ${WORKER} == 0 ]; then
     if ! grep -q "${COURSE_BUILDERS_GROUP}" /etc/sudoers; then
         echo "" >> /etc/sudoers
         echo "#grant limited sudo access to members of the ${COURSE_BUILDERS_GROUP} group (instructors)" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py *" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py *" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py \"\"" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py *" >> /etc/sudoers
     fi
 
 fi

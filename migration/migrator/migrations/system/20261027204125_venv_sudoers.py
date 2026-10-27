@@ -35,19 +35,25 @@ def up(config):
 
         # Append the new rules to the temp file
         with open(temp_sudoers_path, "a") as file:
+            # generate_repos.py
             file.write(
-                f"\n%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/generate_repos.py\n"
+                f"\n%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/generate_repos.py *\n"
+            )
+            # grading_done.py
+            file.write(
+                f"%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/grading_done.py *\n"
             )
             file.write(
-                f"%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/grading_done.py\n"
+                f'%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/grading_done.py ""\n'
             )
+            # regrade.py
             file.write(
-                f"%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/regrade.py\n"
+                f"%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/regrade.py *\n"
             )
             # If in worker mode, also append submitty user to /etc/sudoers
             if WORKER == "1" and SUPERVISOR_USER:
                 file.write(
-                    f"{SUPERVISOR_USER} ALL = (root) NOPASSWD: /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py\n"
+                    f"{SUPERVISOR_USER} ALL = (root) NOPASSWD: /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py *\n"
                 )
 
         # Use visudo to validate the temp file using -c to check syntax
