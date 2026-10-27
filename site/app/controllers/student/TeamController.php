@@ -10,6 +10,7 @@ use app\models\User;
 use app\models\Team;
 use app\models\gradeable\LateDayInfo;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\routers\AccessControl;
 
 class TeamController extends AbstractController {
     /**
@@ -530,7 +531,7 @@ class TeamController extends AbstractController {
      * @param string $gradeable_id
      * @return array<string>
      */
-
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/create_single_student_teams", methods: ["POST"])]
     public function createSingleStudentTeams($gradeable_id) {
         $students = $this->core->getQueries()->getAllUsers();
@@ -583,6 +584,7 @@ class TeamController extends AbstractController {
     * @param string $gradeable_id
     * @return array<string>
     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/create_teams_from_subsections", methods: ["POST"])]
     public function createTeamsFromSubsections($gradeable_id) {
         $users = $this->core->getQueries()->getAllUsers();
@@ -647,7 +649,8 @@ class TeamController extends AbstractController {
      *
      * @param string $gradeable_id
      * @return array<string>
-    */
+     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/team/delete_all_teams", methods: ["POST"])]
     public function deleteTeams($gradeable_id) {
 

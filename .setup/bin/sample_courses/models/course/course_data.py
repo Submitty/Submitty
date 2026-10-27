@@ -2,6 +2,7 @@
 None of the functions should be imported here directly, but from
 the class Course
 """
+
 import os
 import json
 import random
@@ -59,72 +60,40 @@ class Course_data:
 
         # generate values that depend on current date and time
         # helped for the first time today, done --- LAB queue
-        queue_data["queue_entries"][0]["time_in"] = datetime.now() - timedelta(
-            minutes=25
-        )
-        queue_data["queue_entries"][0]["time_out"] = datetime.now() - timedelta(
-            minutes=19
-        )
-        queue_data["queue_entries"][0]["time_help_start"] = datetime.now() - timedelta(
-            minutes=24
-        )
+        queue_data["queue_entries"][0]["time_in"] = datetime.now() - timedelta(minutes=25)
+        queue_data["queue_entries"][0]["time_out"] = datetime.now() - timedelta(minutes=19)
+        queue_data["queue_entries"][0]["time_help_start"] = datetime.now() - timedelta(minutes=24)
         # helped, done --- LAB queue
-        queue_data["queue_entries"][1]["time_in"] = datetime.now() - timedelta(
-            minutes=24
-        )
-        queue_data["queue_entries"][1]["time_out"] = datetime.now() - timedelta(
-            minutes=15
-        )
-        queue_data["queue_entries"][1]["time_help_start"] = datetime.now() - timedelta(
-            minutes=23
-        )
+        queue_data["queue_entries"][1]["time_in"] = datetime.now() - timedelta(minutes=24)
+        queue_data["queue_entries"][1]["time_out"] = datetime.now() - timedelta(minutes=15)
+        queue_data["queue_entries"][1]["time_help_start"] = datetime.now() - timedelta(minutes=23)
         # removed by self --- LAB queue
-        queue_data["queue_entries"][2]["time_in"] = datetime.now() - timedelta(
-            minutes=22
-        )
-        queue_data["queue_entries"][2]["time_out"] = datetime.now() - timedelta(
-            minutes=21
-        )
+        queue_data["queue_entries"][2]["time_in"] = datetime.now() - timedelta(minutes=22)
+        queue_data["queue_entries"][2]["time_out"] = datetime.now() - timedelta(minutes=21)
         # being helped --- HW queue
-        queue_data["queue_entries"][3]["time_in"] = datetime.now() - timedelta(
-            minutes=23
-        )
-        queue_data["queue_entries"][3]["time_help_start"] = datetime.now() - timedelta(
-            minutes=14
-        )
+        queue_data["queue_entries"][3]["time_in"] = datetime.now() - timedelta(minutes=23)
+        queue_data["queue_entries"][3]["time_help_start"] = datetime.now() - timedelta(minutes=14)
         # waiting for help for second time today --- LAB queue
-        queue_data["queue_entries"][4]["time_in"] = datetime.now() - timedelta(
-            minutes=21
-        )
-        queue_data["queue_entries"][4]["last_time_in_queue"] = queue_data[
-            "queue_entries"
-        ][0]["time_in"]
+        queue_data["queue_entries"][4]["time_in"] = datetime.now() - timedelta(minutes=21)
+        queue_data["queue_entries"][4]["last_time_in_queue"] = queue_data["queue_entries"][0][
+            "time_in"
+        ]
         # paused --- HW queue
-        queue_data["queue_entries"][5]["time_in"] = datetime.now() - timedelta(
-            minutes=20
-        )
-        queue_data["queue_entries"][5][
-            "time_paused_start"
-        ] = datetime.now() - timedelta(minutes=18)
+        queue_data["queue_entries"][5]["time_in"] = datetime.now() - timedelta(minutes=20)
+        queue_data["queue_entries"][5]["time_paused_start"] = datetime.now() - timedelta(minutes=18)
         # wait for the first time --- HW queue
-        queue_data["queue_entries"][6]["time_in"] = datetime.now() - timedelta(
-            minutes=15
-        )
+        queue_data["queue_entries"][6]["time_in"] = datetime.now() - timedelta(minutes=15)
         # waiting for help for second time this week --- LAB queue
-        queue_data["queue_entries"][7]["time_in"] = datetime.now() - timedelta(
-            minutes=10
+        queue_data["queue_entries"][7]["time_in"] = datetime.now() - timedelta(minutes=10)
+        queue_data["queue_entries"][7]["last_time_in_queue"] = datetime.now() - timedelta(
+            days=1, minutes=30
         )
-        queue_data["queue_entries"][7][
-            "last_time_in_queue"
-        ] = datetime.now() - timedelta(days=1, minutes=30)
 
         queues_table = Table("queue_settings", self.metadata, autoload_with=self.conn)
         queue_entries_table = Table("queue", self.metadata, autoload_with=self.conn)
 
         # make two sample queues
-        self.conn.execute(
-            insert(queues_table).values(open=True, code="Lab Help", token="lab")
-        )
+        self.conn.execute(insert(queues_table).values(open=True, code="Lab Help", token="lab"))
         self.conn.execute(
             insert(queues_table).values(open=True, code="Homework Debugging", token="hw_debug")
         )
@@ -233,9 +202,9 @@ class Course_data:
         # poll2: take a large portion of self.users and make each submit one random response
         for user in self.users:
             if random.random() < 0.8:
-                generate_rand_int = random.randint(
-                    1, len(polls_data[1]["responses"])
-                ) + len(polls_data[0]["responses"])
+                generate_rand_int = random.randint(1, len(polls_data[1]["responses"])) + len(
+                    polls_data[0]["responses"]
+                )
 
                 poll_responses_data.append(
                     {
@@ -327,17 +296,19 @@ class Course_data:
                     os.path.join(attachment_path, postData[10]),
                 )
             counter += 1
-            self.conn.execute(insert(forum_posts).values(
-                thread_id=postData[0],
-                parent_id=postData[1],
-                author_user_id=postData[2],
-                content=postData[3],
-                timestamp=postData[4],
-                anonymous=True if postData[5] == "t" else False,
-                deleted=True if postData[6] == "t" else False,
-                endorsed_by=postData[7],
-                type=postData[9],
-                has_attachment=True if postData[10] != "f" else False,
-                render_markdown=True if postData[11] == "t" else False,
-            ))
+            self.conn.execute(
+                insert(forum_posts).values(
+                    thread_id=postData[0],
+                    parent_id=postData[1],
+                    author_user_id=postData[2],
+                    content=postData[3],
+                    timestamp=postData[4],
+                    anonymous=True if postData[5] == "t" else False,
+                    deleted=True if postData[6] == "t" else False,
+                    endorsed_by=postData[7],
+                    type=postData[9],
+                    has_attachment=True if postData[10] != "f" else False,
+                    render_markdown=True if postData[11] == "t" else False,
+                )
+            )
         self.conn.commit()

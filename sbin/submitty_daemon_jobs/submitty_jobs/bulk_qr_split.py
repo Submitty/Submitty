@@ -43,17 +43,16 @@ def main(args):
 
         for page_number in range(len(pdfPages.pages)):
             # convert pdf to series of images for scanning
-            with open(filename, 'rb') as open_file:
+            with open(filename, "rb") as open_file:
                 page = convert_from_bytes(
-                    open_file.read(),
-                    first_page=page_number+1, last_page=page_number+2)[0]
+                    open_file.read(), first_page=page_number + 1, last_page=page_number + 2
+                )[0]
 
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
 
             img_grey = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-            ret2, thresh = cv2.threshold(img_grey, 0, 255,
-                                         cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+            ret2, thresh = cv2.threshold(img_grey, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
             # decode img - only look for QR codes
             val = pyzbar.decode(thresh, symbols=[ZBarSymbol.QRCODE])
@@ -64,49 +63,48 @@ def main(args):
                 data = val[0][0].decode("utf-8")
 
                 if not use_ocr:
-                    buff += "Found a QR code with value \'" + data + "\' on"
+                    buff += "Found a QR code with value '" + data + "' on"
                     buff += " page " + str(page_number) + ", "
 
                 if data == "none":  # blank exam with 'none' qr code
                     data = "BLANK EXAM"
                 else:
-                    pre = data[0:len(qr_prefix)]
-                    suf = data[(len(data)-len(qr_suffix)):len(data)]
+                    pre = data[0 : len(qr_prefix)]
+                    suf = data[(len(data) - len(qr_suffix)) : len(data)]
 
-                    if qr_prefix != '' and pre == qr_prefix:
-                        data = data[len(qr_prefix):]
-                    if qr_suffix != '' and suf == qr_suffix:
-                        data = data[:-len(qr_suffix)]
+                    if qr_prefix != "" and pre == qr_prefix:
+                        data = data[len(qr_prefix) :]
+                    if qr_suffix != "" and suf == qr_suffix:
+                        data = data[: -len(qr_suffix)]
 
                 # since QR splitting doesn't know the max page assume length of 3
                 prepended_index = str(i).zfill(3)
 
-                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
-                                                          prepended_index)
-                output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
+                cover_filename = "{}_{}_cover.pdf".format(filename[:-4], prepended_index)
+                output_filename = "{}_{}.pdf".format(filename[:-4], prepended_index)
                 output[output_filename] = {}
 
                 # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
                     data, confidences = scanner.getDigits(thresh, val)
-                    buff += "Found student ID number of \'" + data + "\' on"
+                    buff += "Found student ID number of '" + data + "' on"
                     buff += " page " + str(page_number) + ", "
                     buff += "Confidences: " + str(confidences) + " "
                     output[output_filename]["confidences"] = str(confidences)
 
-                output[output_filename]['id'] = data
+                output[output_filename]["id"] = data
                 # save pdf
-                if i != 0 and prev_file != '':
-                    output[prev_file]['page_count'] = page_count
+                if i != 0 and prev_file != "":
+                    output[prev_file]["page_count"] = page_count
                     # update json file
                     logger.write_to_json(json_file, output)
-                    with open(prev_file, 'wb') as out:
+                    with open(prev_file, "wb") as out:
                         pdf_writer.write(out)
 
                 if id_index == 1:
                     # correct first pdf's page count and print file
-                    output[prev_file]['page_count'] = page_count
-                    with open(prev_file, 'wb') as out:
+                    output[prev_file]["page_count"] = page_count
+                    with open(prev_file, "wb") as out:
                         pdf_writer.write(out)
 
                 # start a new pdf and grab the cover
@@ -116,12 +114,11 @@ def main(args):
                 pdf_writer.add_page(pdfPages.pages[i])
 
                 # save cover
-                with open(cover_filename, 'wb') as out:
+                with open(cover_filename, "wb") as out:
                     cover_writer.write(out)
 
                 # save cover image
-                page.save('{}.jpg'.format(cover_filename[:-4]),
-                          "JPEG", quality=20, optimize=True)
+                page.save("{}.jpg".format(cover_filename[:-4]), "JPEG", quality=20, optimize=True)
 
                 id_index += 1
                 page_count = 1
@@ -130,23 +127,23 @@ def main(args):
                 # the first pdf page doesn't have a qr code
                 if i == 0:
                     prepended_index = str(i).zfill(3)
-                    output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
-                    cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
-                                                              prepended_index)
+                    output_filename = "{}_{}.pdf".format(filename[:-4], prepended_index)
+                    cover_filename = "{}_{}_cover.pdf".format(filename[:-4], prepended_index)
                     output[output_filename] = {}
                     # set the value as blank so a human can check what happened
-                    output[output_filename]['id'] = "BLANK"
+                    output[output_filename]["id"] = "BLANK"
                     prev_file = output_filename
                     id_index += 1
                     cover_writer = PdfWriter()
                     # save cover
                     cover_writer.add_page(pdfPages.pages[i])
-                    with open(cover_filename, 'wb') as out:
+                    with open(cover_filename, "wb") as out:
                         cover_writer.write(out)
 
                     # save cover image
-                    page.save('{}.jpg'.format(cover_filename[:-4]),
-                              "JPEG", quality=20, optimize=True)
+                    page.save(
+                        "{}.jpg".format(cover_filename[:-4]), "JPEG", quality=20, optimize=True
+                    )
 
                 # add pages to current split_pdf
                 page_count += 1
@@ -157,15 +154,15 @@ def main(args):
 
         # save whatever is left
         prepended_index = str(i).zfill(3)
-        output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
-        output[prev_file]['id'] = data
-        output[prev_file]['page_count'] = page_count
+        output_filename = "{}_{}.pdf".format(filename[:-4], prepended_index)
+        output[prev_file]["id"] = data
+        output[prev_file]["page_count"] = page_count
         if use_ocr:
-            output[prev_file]['confidences'] = str(confidences)
+            output[prev_file]["confidences"] = str(confidences)
 
         logger.write_to_json(json_file, output)
 
-        with open(prev_file, 'wb') as out:
+        with open(prev_file, "wb") as out:
             pdf_writer.write(out)
         # write the buffer to the log file, so everything is on one line
         logger.write_to_log(log_file_path, buff)

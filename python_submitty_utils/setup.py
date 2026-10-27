@@ -1,15 +1,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='submitty_utils',
-    author='Submitty',
-    version='0.6.0',
-    packages=find_packages(exclude=('tests',)),
-    license='BSD',
-    description='Python Submitty Utils',
-    install_requires=[
-        'tzlocal'
-    ],
+    name="submitty_utils",
+    author="Submitty",
+    version="0.6.0",
+    packages=find_packages(exclude=("tests",)),
+    license="BSD",
+    description="Python Submitty Utils",
+    install_requires=["tzlocal"],
     tests_require=[],
-    zip_safe=True
+    zip_safe=True,
 )
