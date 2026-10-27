@@ -176,6 +176,7 @@ class RunGenerateRepos(CourseGradeableJob):
                 subprocess.run(
                     [
                         "sudo",
+                        "/usr/local/submitty/venv/bin/python3",
                         gen_script,
                         "--non-interactive",
                         semester,
@@ -444,6 +445,7 @@ class CreateCourse(AbstractJob):
             subprocess.run(
                 [
                     "sudo",
+                    "/usr/local/submitty/venv/bin/python3",
                     "/usr/local/submitty/sbin/adduser_course.py",
                     head_instructor,
                     semester,
@@ -456,6 +458,7 @@ class CreateCourse(AbstractJob):
                 subprocess.run(
                     [
                         "sudo",
+                        "/usr/local/submitty/venv/bin/python3",
                         "/usr/local/submitty/sbin/adduser_course.py",
                         VERIFIED_ADMIN_USER,
                         semester,
