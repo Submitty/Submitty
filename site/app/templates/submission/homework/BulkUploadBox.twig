@@ -349,16 +349,17 @@
     }
 
     function uploadSplitHelper(user_id,path,index = 0,merge_previous = false,clobber = false){
-        submitSplitItem(CSRF, g_id, user_id, path, merge_previous, clobber)
+        return submitSplitItem(CSRF, g_id, user_id, path, merge_previous, clobber)
         .then(function(submit_response){
             displaySubmissionMessage(submit_response);
             moveToNextSubmission(index);
+            return true;
         })
         .catch(function(submit_response){
             displaySubmissionMessage(submit_response);
             console.error(submit_response);
-            //allow user to retry assigning on failure
             toggleButtons(index, false);
+            return false;
         });
     }
 
@@ -391,60 +392,113 @@
         }
     }
 
-    function submitAll(index){
-        if(index > Object.keys(path_list).length){
+    var bulk_submit_running = false;
+
+    function setBulkButtonsDisabled(disable){
+        document.getElementById("bulk_submit_all").disabled = disable;
+        document.getElementById("bulk_delete_all").disabled = disable;
+    }
+
+    function errorReason(e){
+        if(e && typeof e.message === "string"){
+            return e.message;
+        }
+        if(typeof e === "string"){
+            return e;
+        }
+        try{
+            return JSON.stringify(e);
+        }
+        catch(err){
+            return "unknown error";
+        }
+    }
+
+    async function submitAll(startIndex){
+        // must be set before the first await, so a second click can't slip in
+        if(bulk_submit_running){
             return;
         }
+        bulk_submit_running = true;
+        setBulkButtonsDisabled(true);
 
-        var text_area = document.getElementById("bulk_user_id_" + String(index));
-        var expected_count = parseExpectedPageBox();
+        var results = {submitted: 0, skipped: [], failed: []};
+        try{
+            var total = Object.keys(path_list).length;
+            var expected_count = parseExpectedPageBox();
+            var has_expected = Array.isArray(expected_count) && expected_count.length > 0;
 
-        var user_id = "";
-        if(text_area !== null){
-            if(text_area.disabled === false){
-                user_id = text_area.value;
+            // lock every eligible row up front so row buttons can't be used mid-batch
+            var queue = [];
+            for(var i = startIndex; i <= total; i++){
+                var ta = document.getElementById("bulk_user_id_" + String(i));
+                var r = document.getElementById("row-" + String(i));
+                if(ta === null || r === null || ta.disabled){
+                    continue;
+                }
+                toggleButtons(i, true);
+                queue.push(i);
             }
-            else{
-                return submitAll(index + 1);
+
+            for(const index of queue){
+                var user_id = document.getElementById("bulk_user_id_" + String(index)).value;
+                var label = user_id !== "" ? user_id : "row " + String(index);
+
+                var skip = function(reason){
+                    results.skipped.push(label + ": " + reason);
+                    toggleButtons(index, false);
+                };
+
+                var page_count = document.getElementById("page_count_" + String(index));
+                if(page_count && has_expected
+                   && expected_count.indexOf(parseInt(page_count.innerHTML)) === -1){
+                    skip("page count doesn't match expected");
+                    continue;
+                }
+                if(user_id === ""){
+                    skip("no user ID entered");
+                    continue;
+                }
+
+                try{
+                    var response = await validateUserId(CSRF, g_id, user_id);
+                    if(response['data']['previous_submission'] !== false){
+                        skip("already has a submission");
+                        continue;
+                    }
+                    var path = decodeURIComponent(path_list[index]);
+                    var submit_response = await submitSplitItem(CSRF, g_id, user_id, path);
+                    displaySubmissionMessage(submit_response);
+                    moveToNextSubmission(index);
+                    results.submitted++;
+                }
+                catch(e){
+                    console.error(e);
+                    toggleButtons(index, false);
+                    results.failed.push(label + ": " + errorReason(e));
+                }
             }
         }
-        else{
-            return submitAll(index + 1);
+        finally{
+            bulk_submit_running = false;
+            setBulkButtonsDisabled(false);
+            showBulkSubmitSummary(results);
         }
-        //if the expected page count doesn't match skip and let the user decide
-        var page_count = document.getElementById("page_count_" + String(index));
-        if(page_count && expected_count !== [] && !isNaN(expected_count) ){
-            if(expected_count.indexOf(parseInt(page_count.innerHTML) ) === -1 ){
-                return submitAll(index + 1);
-            }
+    }
+
+    function showBulkSubmitSummary(results){
+        if(results.submitted === 0 && results.skipped.length === 0 && results.failed.length === 0){
+            displayMessage("No PDFs were eligible to submit.", "error");
+            return;
         }
-
-        //if there's an invalid submission skip this
-        if(document.getElementById("row-" + String(index)).style.backgroundColor == "pink"){
-            return submitAll(index + 1);
+        if(results.submitted > 0){
+            displayMessage(String(results.submitted) + " PDF(s) submitted.", "success");
         }
-
-        var path = decodeURIComponent(path_list[index]);
-
-        validateUserId(CSRF,g_id,user_id)
-        .then(function(response){
-            if(response['data']['previous_submission'] === false){
-                var submit_btn = document.getElementById("bulk_submit_" + String(index));
-                var delete_btn = document.getElementById("bulk_delete_" + String(index));
-                var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
-
-                moveToNextSubmission(index);
-                uploadSplitHelper(user_id,path,index);
-                return submitAll(index + 1);
-            }
-            else{
-                return submitAll(index + 1);
-            }
-        })
-        .catch(function(response){
-            displaySubmissionMessage(response);
-            console.error(response);
-            return submitAll(index + 1);
+        results.skipped.forEach(function(s){
+            displayMessage("Skipped " + s, "warning");
+        });
+        results.failed.forEach(function(f){
+            displayMessage("Failed " + f, "error");
         });
     }
 
