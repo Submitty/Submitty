@@ -1,3 +1,10 @@
+const getResponseStatus = (response) => {
+    const responseData = typeof response.body === 'string'
+        ? JSON.parse(response.body)
+        : response.body;
+    return responseData.status;
+};
+
 describe('Peer Grading Component testing', () => {
     after(() => {
         cy.login();
@@ -64,12 +71,6 @@ describe('Peer Grading Component testing', () => {
     it('Uploads peer assignment CSV files with more than 500 pairs', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'grading_homework_pdf', 'update?nav_tab=4']);
-        const getResponseStatus = (response) => {
-            const responseData = typeof response.body === 'string'
-                ? JSON.parse(response.body)
-                : response.body;
-            return responseData.status;
-        };
 
         cy.fixture('peer_assign_file.csv').then((fixture) => {
             const userIds = [...new Set(
@@ -114,26 +115,36 @@ describe('Peer Grading Component testing', () => {
             cy.wait('@uploadPeerAssignments').then(({ response }) => {
                 expect(getResponseStatus(response)).to.equal('success');
             });
-
-            cy.get('[data-testid="upload-peer-graders-list"]').selectFile({
-                contents: Cypress.Buffer.from('grader,student\nstudent,unknown_user\n'),
-                fileName: 'unknown_peer_assignment.csv',
-                mimeType: 'text/csv',
-            }, { force: true });
-            cy.wait('@uploadPeerAssignments').then(({ response }) => {
-                expect(getResponseStatus(response)).to.equal('error');
-            });
-            cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
-
-            cy.get('[data-testid="upload-peer-graders-list"]').selectFile({
-                contents: Cypress.Buffer.from('grader,student\nritcha,gutmal\nritcha,gutmal\n'),
-                fileName: 'duplicate_peer_assignment.csv',
-                mimeType: 'text/csv',
-            }, { force: true });
-            cy.wait('@uploadPeerAssignments').then(({ response }) => {
-                expect(getResponseStatus(response)).to.equal('error');
-            });
-            cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
         });
+    });
+
+    it('Rejects peer assignment CSV uploads with unknown users without replacing the matrix', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'grading_homework_pdf', 'update?nav_tab=4']);
+        cy.intercept('POST', '**/gradeable/grading_homework_pdf/update').as('uploadPeerAssignments');
+        cy.get('[data-testid="upload-peer-graders-list"]').selectFile({
+            contents: Cypress.Buffer.from('grader,student\nstudent,unknown_user\n'),
+            fileName: 'unknown_peer_assignment.csv',
+            mimeType: 'text/csv',
+        }, { force: true });
+        cy.wait('@uploadPeerAssignments').then(({ response }) => {
+            expect(getResponseStatus(response)).to.equal('error');
+        });
+        cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
+    });
+
+    it('Rejects duplicate peer assignment CSV rows without replacing the matrix', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'grading_homework_pdf', 'update?nav_tab=4']);
+        cy.intercept('POST', '**/gradeable/grading_homework_pdf/update').as('uploadPeerAssignments');
+        cy.get('[data-testid="upload-peer-graders-list"]').selectFile({
+            contents: Cypress.Buffer.from('grader,student\nritcha,gutmal\nritcha,gutmal\n'),
+            fileName: 'duplicate_peer_assignment.csv',
+            mimeType: 'text/csv',
+        }, { force: true });
+        cy.wait('@uploadPeerAssignments').then(({ response }) => {
+            expect(getResponseStatus(response)).to.equal('error');
+        });
+        cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
     });
 });
