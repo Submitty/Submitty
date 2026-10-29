@@ -21,8 +21,8 @@ class Database:
         :type environment: str
         """
         self.DynamicBase = declarative_base(class_registry=dict())
-        if 'database_driver' not in params:
-            raise RuntimeError('Need to supply a driver')
+        if "database_driver" not in params:
+            raise RuntimeError("Need to supply a driver")
 
         connection_string = Database.get_connection_string(params)
         self.engine = create_engine(connection_string)
@@ -47,26 +47,24 @@ class Database:
         """
         # We only support sqlite in-memory as it's only used for testing
         # at the moment
-        if params['database_driver'] == 'sqlite':
-            connection_string = 'sqlite://'
+        if params["database_driver"] == "sqlite":
+            connection_string = "sqlite://"
         else:
-            if params['database_driver'] == 'psql':
-                connection_string = 'postgresql+psycopg2://'
+            if params["database_driver"] == "psql":
+                connection_string = "postgresql+psycopg2://"
             else:
-                raise RuntimeError(
-                    'Invalid driver: {}'.format(params['database_driver'])
-                )
+                raise RuntimeError("Invalid driver: {}".format(params["database_driver"]))
 
-            host = params['database_host']
-            connection_string += '{}:{}@{}/{}'.format(
-                params['database_user'],
-                params['database_password'],
-                f"{host}:{params.get('database_port', 5432)}" if not Path(host).exists() else '',
-                params['dbname']
+            host = params["database_host"]
+            connection_string += "{}:{}@{}/{}".format(
+                params["database_user"],
+                params["database_password"],
+                f"{host}:{params.get('database_port', 5432)}" if not Path(host).exists() else "",
+                params["dbname"],
             )
 
             if Path(host).exists():
-                connection_string += '?host={}'.format(host)
+                connection_string += "?host={}".format(host)
 
         return connection_string
 
@@ -114,21 +112,20 @@ class Database:
         """
         self.inspector.clear_cache()
         for column in self.inspector.get_columns(table):
-            if search_column == column['name']:
+            if search_column == column["name"]:
                 return True
         return False
 
 
 def get_migration_table(environment, Base):
     """Get the migration table for a given environment."""
+
     class MigrationTable(Base):
         __tablename__ = "migrations_{}".format(environment)
 
         id = Column(String(100), primary_key=True)
         commit_time = Column(
-            TIMESTAMP,
-            onupdate=func.current_timestamp(),
-            default=func.current_timestamp()
+            TIMESTAMP, onupdate=func.current_timestamp(), default=func.current_timestamp()
         )
         status = Column(SmallInteger, default=0)
 
