@@ -96,8 +96,7 @@ class ImageController extends AbstractController {
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
-        $submitter = $this->core->getQueries()->getSubmitterById($id);
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $id, $id);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
