@@ -10,7 +10,11 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("ALTER TABLE courses_users ADD COLUMN IF NOT EXISTS date_registered TIMESTAMP WITHOUT TIMEZONE DEFAULT NOW();")
+    database.execute("ALTER TABLE courses_users ADD COLUMN IF NOT EXISTS date_registered TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW();")
+
+    # The default value will fill in NOW() to all existing and historical records, which is a data inaccuracy.
+    # We don't know the data history, so set all existing records' date_registration to NULL.
+    database.execute("UPDATE courses_users SET date_registered=NULL;")
 
     database.execute("""
         CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
@@ -73,7 +77,7 @@ def up(config, database):
                         || quote_literal(NEW.registration_type) || ', '
                         || NEW.manual_registration || ', '
                         || quote_literal(user_row.display_name_order) || ', '
-                        || quote_nullable(user_row.date_registered)
+                        || quote_nullable(NEW.date_registered)
                     || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';

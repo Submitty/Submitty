@@ -146,7 +146,7 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(NEW.registration_type) || ', '
                         || NEW.manual_registration || ', '
                         || quote_literal(user_row.display_name_order) || ', '
-                        || quote_nullable(user_row.date_registered)
+                        || quote_nullable(NEW.date_registered)
                     || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
