@@ -36,6 +36,7 @@ function getButtonId(button: Button): string | undefined {
         <span
           v-if="!button.href"
           :id="getButtonId(button)"
+          :data-testid="getButtonId(button)"
           class="flex-row"
           :class="[button.class]"
         >
@@ -50,6 +51,7 @@ function getButtonId(button: Button): string | undefined {
           <span
             v-if="button.badge && button.badge > 0"
             class="notification-badge"
+            :data-testid="mobile ? 'mobile-sidebar-notification-badge' : 'sidebar-notification-badge'"
           >
             {{ button.badge }}
           </span>
@@ -57,6 +59,7 @@ function getButtonId(button: Button): string | undefined {
         <a
           v-else
           :id="getButtonId(button)"
+          :data-testid="getButtonId(button)"
           :href="button.href"
           :title="button.title"
           class="flex-row"
@@ -73,6 +76,7 @@ function getButtonId(button: Button): string | undefined {
           <span
             v-if="button.badge && button.badge > 0"
             class="notification-badge"
+            :data-testid="mobile ? 'mobile-sidebar-notification-badge' : 'sidebar-notification-badge'"
           >
             {{ button.badge }}
           </span>
