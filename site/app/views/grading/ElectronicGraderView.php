@@ -1946,6 +1946,19 @@ HTML;
                 );
             }
         }
+        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+        foreach ($gradeable->getComponents() as $component) {
+            if (!$component->isPeerComponent()) {
+                continue;
+            }
+            $container = $ta_graded_gradeable->getGradedComponentContainer($component);
+            foreach ($container->getGradedComponents() as $gc) {
+                $grader = $gc->getGrader();
+                if ($grader !== null) {
+                    $peers_to_list[] = $grader->getId();
+                }
+            }
+        }
         $peers_to_list = array_values(array_unique($peers_to_list));
         $components_details_array = [];
         $component_scores = [];
@@ -1957,18 +1970,23 @@ HTML;
             "graded_versions" => [],
             "version_conflicts" => []
         ];
+        $peer_users = $this->core->getQueries()->getUsersById($peers_to_list);
         foreach ($peers_to_list as $peer) {
-            $peer_user = $this->core->getQueries()->getUsersById([$peer])[$peer];
-            $peer_names[$peer] = $peer_user->getDisplayedGivenName() . ' ' . $peer_user->getDisplayedFamilyName() . ' (' . $peer . ')';
+            if (isset($peer_users[$peer])) {
+                $peer_user = $peer_users[$peer];
+                $peer_names[$peer] = $peer_user->getDisplayedGivenName() . ' ' . $peer_user->getDisplayedFamilyName() . ' (' . $peer . ')';
+            }
         }
-        $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
         foreach ($gradeable->getComponents() as $component) {
             if (!$component->isPeerComponent()) {
                 continue;
             }
             $component_id = $component->getId();
             foreach ($peers_to_list as $peer) {
-                $peer_user = $this->core->getQueries()->getUsersById([$peer])[$peer];
+                if (!isset($peer_users[$peer])) {
+                    continue;
+                }
+                $peer_user = $peer_users[$peer];
                 $graded_component = $ta_graded_gradeable->getGradedComponent($component, $peer_user);
                 if ($graded_component === null) {
                     continue;
