@@ -341,3 +341,44 @@ describe('Test cases involving zooming images in the full panel view', () => {
         cy.get('#annotatable-image').should('not.exist');
     });
 });
+
+describe('Test cases involving markdown submissions', () => {
+    it('test that markdown files are rendered', () => {
+        cy.login('bitdiddle');
+        cy.visit(['sample', 'gradeable', 'open_homework']);
+        cy.get('#startnew').then(($clearBtn) => {
+            if (!$clearBtn.is(':disabled')) {
+                $clearBtn.click();
+            }
+        });
+        cy.get('#upload1').selectFile({
+            contents: Cypress.Buffer.from('# My Answer\n\nThis is **bold**.\n\n<script>alert(1)</script>\n'),
+            fileName: 'answer.md',
+        }, { action: 'drag-drop' });
+        cy.waitPageChange(() => {
+            cy.get('#submit').click();
+        });
+        cy.get('#submitted-files > div').should('contain', 'answer.md');
+        cy.logout();
+
+        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
+        cy.login('instructor');
+        cy.get('[data-testid="view-sections"]').uncheck();
+        cy.get('#details-table').contains('tr', 'bitdiddle').find('[data-testid="grade-button"]').click();
+        cy.get('#submission_browser_btn').click();
+        cy.get('#submissions').click();
+        assertSubmissionsBrowserOpen();
+        cy.get('.openable-element-submissions[data-file_name="answer.md"]').click();
+
+        cy.get('div[id^=file_viewer_][data-file_name="answer.md"] iframe', { timeout: 20000 })
+            .its('0.contentDocument.body')
+            .find('[data-testid="markdown-file"]')
+            .should(($markdown) => {
+                expect($markdown.find('h1')).to.have.text('My Answer');
+                expect($markdown.find('strong')).to.have.text('bold');
+                // raw html is shown as text, not run
+                expect($markdown.find('script')).to.have.length(0);
+                expect($markdown).to.contain.text('<script>alert(1)</script>');
+            });
+    });
+});
