@@ -1,12 +1,73 @@
 /* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializeStudentSocketClient */
 /* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
 
+let pollIndexTimerId = null;
+
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function () {
         $(this).siblings('table').toggle();
         $(this).find('i').toggleClass('down');
     });
+    initializePollIndexTimers();
 });
+
+function initializePollIndexTimers() {
+    clearInterval(pollIndexTimerId);
+    pollIndexTimerId = null;
+
+    function tick() {
+        let active = false;
+        const now = Date.now();
+        document.querySelectorAll('.poll-index-timer[data-end-time]').forEach((timer) => {
+            const remaining = new Date(timer.dataset.endTime).getTime() - now;
+            if (!Number.isFinite(remaining) || remaining <= 0) {
+                timer.textContent = Number.isFinite(remaining) ? 'Poll Ended' : '—';
+                timer.removeAttribute('data-end-time');
+                return;
+            }
+
+            active = true;
+            const totalSeconds = Math.ceil(remaining / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor(totalSeconds / 60) % 60;
+            const seconds = totalSeconds % 60;
+            timer.textContent = [hours, minutes, seconds].map((value) => String(value).padStart(2, '0')).join(':');
+        });
+        return active;
+    }
+
+    if (tick()) {
+        pollIndexTimerId = setInterval(() => {
+            if (!tick()) {
+                clearInterval(pollIndexTimerId);
+                pollIndexTimerId = null;
+            }
+        }, 1000);
+    }
+}
+
+function updatePollIndexState(pollid, response) {
+    // Status endpoints redirect to the index with the server's updated deadline.
+    const page = new DOMParser().parseFromString(response, 'text/html');
+    const timer = document.getElementById(`poll_${pollid}_timer`);
+    const updatedTimer = page.getElementById(`poll_${pollid}_timer`);
+    if (timer && updatedTimer) {
+        timer.textContent = updatedTimer.textContent;
+        if (updatedTimer.hasAttribute('data-end-time')) {
+            timer.dataset.endTime = updatedTimer.dataset.endTime;
+        }
+        else {
+            timer.removeAttribute('data-end-time');
+        }
+    }
+    for (const suffix of ['visible', 'view_results']) {
+        const checkbox = page.getElementById(`poll_${pollid}_${suffix}`);
+        if (checkbox) {
+            $(`#poll_${pollid}_${suffix}`).prop('checked', checkbox.checked);
+        }
+    }
+    initializePollIndexTimers();
+}
 
 function newDeletePollForm(pollid, pollname, base_url) {
     if (confirm(`This will delete poll '${pollname}'. Are you sure?`)) {
@@ -66,6 +127,9 @@ function updatePollAcceptingAnswers(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
+        beforeSend: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', true),
+        success: (response) => updatePollIndexState(pollid, response),
+        complete: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', false),
         error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
@@ -94,6 +158,9 @@ function updatePollVisible(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
+        beforeSend: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', true),
+        success: (response) => updatePollIndexState(pollid, response),
+        complete: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', false),
         error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
