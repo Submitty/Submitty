@@ -8,8 +8,8 @@
 import { verifyWebSocketStatus } from '../../support/utils';
 
 const visitPoll = (title, text, wsEnabled = false) => {
-       // 3rd child represents the student view, 8th/9th child represents the instructor view depending on the 'date released' visibility
-       cy.contains(title).siblings(':nth-child(3), :nth-child(8), :nth-child(9)').contains(text).click();
+    // 3rd child represents the student view, 8th/9th child represents the instructor view depending on the 'date released' visibility
+    cy.contains(title).siblings(':nth-child(3), :nth-child(8), :nth-child(9)').contains(text).click();
     return cy.url().should('match', /\/polls\/\d+$/).then(() => {
         if (wsEnabled) {
             return verifyWebSocketStatus();

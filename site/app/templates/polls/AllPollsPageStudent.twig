@@ -10,14 +10,16 @@
             </div>
         </div>
         <table id="today-table" class="table table-striped" style="width:100%;">
-                <col style="width: 40%">
                 <col style="width: 35%">
-                <col style="width: 25%">
+                <col style="width: 30%">
+                <col style="width: 20%">
+                <col style="width: 15%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Your Answer</th>
+                    <th scope="col" style="text-align: left">Name</th>
+                    <th scope="col" style="text-align: left">Your Answer</th>
                     <th scope="col">View Poll</th>
+                    <th scope="col">Time Remaining</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,6 +54,11 @@
                                 {% endif %}
                             </a>
                         </td>
+                        <td>
+                            {% if poll.isOpen() and poll.isTimerEnabled() %}
+                                <span class="poll-countdown" data-end-time="{{ poll.getEndTime().format('c') }}"></span>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -67,14 +74,16 @@
             </div>
         </div>
         <table id="older-table" class="table table-striped" style="width:100%;">
-            <col style="width: 40%">
-            <col style="width: 35%">
-            <col style="width: 25%">
+                <col style="width: 35%">
+                <col style="width: 30%">
+                <col style="width: 20%">
+                <col style="width: 15%">
             <thead>
                 <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Your Answer</th>
+                    <th scope="col" style="text-align: left">Name</th>
+                    <th scope="col" style="text-align: left">Your Answer</th>
                     <th scope="col">View Poll</th>
+                    <th scope="col">Time Remaining</th>
                 </tr>
             </thead>
             <tbody>
@@ -91,6 +100,7 @@
                                 }
                             } only %}
                         </td>
+                    </td>
                         <td>
                             <a href="{{ base_url }}/{{ poll.getId() }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
@@ -108,11 +118,19 @@
                                     <a style="color:inherit ; pointer-events: none ; cursor: default ;" >Closed</a>
                                 {% endif %}
                             </a>
-                        </td>
-                    </tr>
+                        </td>        
+                        <td>
+                            {% if poll.isOpen() and poll.isTimerEnabled() %}
+                                <span class="poll-countdown" data-end-time="{{ poll.getEndTime().format('c') }}"></span>
+                            {% endif %}
+                        </td>                
+                  </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
 </div>
+<script>
+    $(document).ready(() => initializePollCountdowns());
+</script>
