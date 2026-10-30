@@ -15,9 +15,9 @@ def up(config, database, semester, course):
     :type course: str
     """
     
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_personal_webpage TEXT DEFAULT NULL;")
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username TEXT DEFAULT NULL;")
-    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_github_username TEXT DEFAULT NULL; ")
+    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_personal_webpage character varying(255) DEFAULT '';")
+    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username character varying(255) DEFAULT '';")
+    database.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS user_github_username character varying(255) DEFAULT ''; ")
 
     
     pass

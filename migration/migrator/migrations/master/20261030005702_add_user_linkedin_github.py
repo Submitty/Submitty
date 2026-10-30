@@ -12,9 +12,9 @@ def up(config, database):
     """
     
     database.execute("""
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_personal_webpage TEXT DEFAULT NULL;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_github_username TEXT DEFAULT NULL;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username TEXT DEFAULT NULL;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username character varying(255) DEFAULT '';
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_github_username character varying(255) DEFAULT '';
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username character varying(255) DEFAULT '';
 
     """)
 
