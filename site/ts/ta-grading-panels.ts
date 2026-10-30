@@ -18,7 +18,8 @@ type PanelElement
         | 'grade_inquiry_info'
         | 'discussion_browser'
         | 'peer_info'
-        | 'notebook-view';
+        | 'notebook-view'
+        | 'peer_participation';
 
 let panelElements: Array<{ str: PanelElement; icon: string }> = [
     { str: 'autograding_results', icon: '.grading_toolbar .fa-list' },
@@ -33,6 +34,7 @@ let panelElements: Array<{ str: PanelElement; icon: string }> = [
     { str: 'discussion_browser', icon: '.grading_toolbar .fa-comment-alt' },
     { str: 'grade_inquiry_info', icon: '.grading_toolbar .grade_inquiry_icon' },
     { str: 'notebook-view', icon: '.grading_toolbar .fas fa-book-open' },
+    { str: 'peer_participation', icon: '.grading_toolbar .fa-clipboard-list' },
 ];
 
 // Width of mobile and Tablet screens width
