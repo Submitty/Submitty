@@ -354,6 +354,9 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                     || 'user_email=' || quote_literal(NEW.user_email) || ', '
                     || 'user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ', '
                     || 'user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', '
+                    || 'user_linkedin_username=' || quote_literal(NEW.user_linkedin_username) || ', '
+                    || 'user_github_username=' || quote_literal(NEW.user_github_username) || ', '
+                    || 'user_personal_webpage=' || quote_literal(NEW.user_personal_webpage) || ', '
                     || 'time_zone=' || quote_literal(NEW.time_zone) || ', '
                     || 'user_preferred_locale=' || quote_nullable(NEW.user_preferred_locale) || ', '
                     || 'display_image_state=' || quote_literal(NEW.display_image_state) || ', '
@@ -747,6 +750,9 @@ CREATE TABLE public.users (
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
     date_format character varying(3) DEFAULT 'YMD'::character varying,
+    user_personal_webpage character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_github_username character varying(255) DEFAULT ''::character varying NOT NULL,
+    user_linkedin_username character varying(255) DEFAULT ''::character varying NOT NULL,
     CONSTRAINT user_preferred_familyname_not_empty CHECK (((user_preferred_familyname)::text <> ''::text)),
     CONSTRAINT user_preferred_givenname_not_empty CHECK (((user_preferred_givenname)::text <> ''::text)),
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
