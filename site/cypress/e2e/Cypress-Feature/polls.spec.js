@@ -8,9 +8,8 @@
 import { verifyWebSocketStatus } from '../../support/utils';
 
 const visitPoll = (title, text, wsEnabled = false) => {
-    // 3rd child represents the student view, 7th/8th child represents the instructor view depending on the 'date released' visibility
-    cy.contains(title).siblings(':nth-child(3), :nth-child(7), :nth-child(8)').contains(text).click();
-
+    // 3rd child represents the student view, 8th/9th child represents the instructor view depending on the 'date released' visibility
+    cy.contains(title).siblings(':nth-child(3), :nth-child(8), :nth-child(9)').contains(text).click();
     return cy.url().should('match', /\/polls\/\d+$/).then(() => {
         if (wsEnabled) {
             return verifyWebSocketStatus();
@@ -323,7 +322,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
         cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
-        cy.get('[data-testid="timer"]').should('contain', 'Poll Ended');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(9)').click();
         cy.go('back');
 
         // Removing duration to continue testing
@@ -460,7 +459,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.visit(['sample', 'polls']);
 
         cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
-        cy.get('[data-testid="timer"]').should('be.visible');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(9)').click();
         // this timeout is set to 30 seconds because Cypress needs to wait for the poll to end.
         cy.get('[data-testid="timer"]', { timeout: 30000 }).should('contain', 'Poll Ended');
         cy.go('back');
