@@ -77,8 +77,8 @@ def up(config, database):
                         || quote_literal(NEW.registration_type) || ', '
                         || NEW.manual_registration || ', '
                         || quote_literal(user_row.display_name_order) || ', '
-                        || quote_nullable(NEW.date_registered)
-                    || ')';
+                        || quote_nullable(NEW.date_registered) ||
+                    ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
                     END IF;
@@ -94,7 +94,7 @@ def up(config, database):
                         || 'registration_type=' || quote_literal(NEW.registration_type) || ', '
                         || 'manual_registration=' || NEW.manual_registration
                         || 'date_registered=' || quote_nullable(NEW.date_registered) || ', '
-                    || ' WHERE user_id=' || quote_literal(NEW.user_id);
+                        || ' WHERE user_id=' || quote_literal(NEW.user_id);
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
                     END IF;
