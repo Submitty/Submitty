@@ -20,6 +20,29 @@
     margin: 0 0 1em;
 }
 
+.title-row {
+    display: flex;
+    align-items: center;
+}
+.save-indicator {
+    margin: 0 0 0 1em;
+    pointer-events: none;
+}
+.save-indicator-unchanged {
+    visibility: hidden;
+}
+.save-indicator-unsaved {
+    visibility: visible;
+}
+.save-indicator-saved {
+    visibility: visible;
+    color: var(--standard-dark-green);
+}
+.save-indicator-fail {
+    visibility: visible;
+    color: var(--standard-light-red);
+}
+
 textarea.config-row {
     resize: vertical;
 }

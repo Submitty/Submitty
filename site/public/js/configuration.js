@@ -1,10 +1,30 @@
 /* global csrfToken, buildCourseUrl */
 
 $(document).ready(() => {
-    $('input,textarea,select').on('change', function () {
+    const inputAreas = $('input,textarea,select');
+
+    inputAreas.each(function () {
+        addLabelsForSaveIndicators(this.id);
+    });
+    createSaveIndicators();
+
+    inputAreas.on('change', function () {
         // Skip elements with the no-autosave class
         if ($(this).hasClass('no-autosave')) {
             return;
+        }
+
+        const saveIndicatorToUse = this.getAttribute('data-usesaveindicator');
+        const saveDiv = $(`#${saveIndicatorToUse}-save-div`).get(0);
+        const saveText = $(`#${saveIndicatorToUse}-save-text`).get(0);
+        const saveIcon = $(`#${saveIndicatorToUse}-save-icon`).get(0);
+        const hasSaveIndicator = saveDiv && saveText && saveIcon;
+        if (hasSaveIndicator) {
+            saveDiv.classList.remove('save-indicator-unchanged', 'save-indicator-saved', 'save-indicator-fail');
+            saveDiv.classList.add('save-indicator-unsaved');
+            saveText.textContent = 'Saving...';
+            saveIcon.classList.add('fas', 'fa-circle-notch', 'fa-spin');
+            saveIcon.classList.remove('fa-solid', 'fa-check', 'fa-x');
         }
 
         const elem = this;
@@ -40,7 +60,8 @@ $(document).ready(() => {
                         message: 'invalid response received from server',
                     };
                 }
-                if (response['status'] === 'fail') {
+                const failed = response['status'] === 'fail';
+                if (failed) {
                     alert(response['message']);
                     $(elem).focus();
                     elem.value = $(elem).attr('value');
@@ -50,6 +71,21 @@ $(document).ready(() => {
                         $(elem).prop('checked', false);
                     }
                 }
+
+                if (hasSaveIndicator) {
+                    saveDiv.classList.remove('save-indicator-unsaved');
+                    saveIcon.classList.remove('fas', 'fa-circle-notch', 'fa-spin');
+                    if (!failed) {
+                        saveDiv.classList.add('save-indicator-saved');
+                        saveIcon.classList.add('fa-solid', 'fa-check');
+                    }
+                    else {
+                        saveDiv.classList.add('save-indicator-fail');
+                        saveIcon.classList.add('fa-solid', 'fa-x');
+                    }
+                    saveText.textContent = !failed ? 'Saved!' : 'Failed to save.';
+                }
+
                 $(elem).attr('value', elem.value);
             },
         });
@@ -105,4 +141,54 @@ function confirmSelfRegistration(element, needs_reg_sections) {
     }
 
     return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
+}
+
+function addLabelsForSaveIndicators(elementId) {
+    /*
+    This adds 'data-saveindicator="fieldId"' to the title of a field,
+    and 'data-usesaveindicator="fieldId"' to the actual input field.
+    This ends up missing fields that share an indicator with something else,
+    or fields that don't use "for='fieldId'" in their title span.
+    Those have to be labelled manually in Configuration.twig.
+    */
+    let title = $(`label[for='${elementId}'] .option-title`);
+    if (title.length === 0 && elementId) {
+        title = $(`#${elementId} .option-title`);
+    }
+    if (title.length === 0) {
+        return;
+    }
+    title = title.get(0);
+    const field = $(`#${elementId}`);
+
+    title.setAttribute('data-saveindicator', `${elementId}`);
+    field.get(0).setAttribute('data-usesaveindicator', `${elementId}`);
+}
+
+function createSaveIndicators() {
+    const requiresSaveIndicators = $('*[data-saveindicator]');
+    requiresSaveIndicators.each(function () {
+        const titleQuery = $(this);
+        const title = titleQuery.get(0);
+        const indicatorId = title.getAttribute('data-saveindicator');
+
+        const titleRow = document.createElement('span');
+        titleRow.classList.add('title-row');
+        title.parentNode.insertBefore(titleRow, title);
+        titleRow.appendChild(title);
+
+        const saveDiv = document.createElement('div');
+        saveDiv.id = `${indicatorId}-save-div`;
+        saveDiv.classList.add('save-indicator', 'save-indicator-unchanged');
+        saveDiv.setAttribute('data-testid', `${indicatorId}-save-indicator`);
+        const saveIcon = document.createElement('i');
+        saveIcon.id = `${indicatorId}-save-icon`;
+        const saveText = document.createElement('span');
+        saveText.id = `${indicatorId}-save-text`;
+        saveText.setAttribute('data-testid', `${indicatorId}-save-text`);
+        saveText.classList.add('subtitle');
+        saveDiv.appendChild(saveIcon);
+        saveDiv.appendChild(saveText);
+        titleRow.appendChild(saveDiv);
+    });
 }
