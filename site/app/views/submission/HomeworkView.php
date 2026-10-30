@@ -1227,7 +1227,7 @@ class HomeworkView extends AbstractView {
             'can_change_submissions' => $gradeable->isStudentSubmit(),
             'can_see_all_versions' => $gradeable->isStudentSubmit(),
             'active_same_as_graded' => $active_same_as_graded,
-            'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->isTaGradingComplete(),
+            'ta_grades_incomplete' => $gradeable->isTaGrading() && $gradeable->isTaGradeReleased() && !$graded_gradeable->canStudentSeeTaGrading(),
             'csrf_token' => $this->core->getCsrfToken(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable_with_seconds'),
             'after_ta_open' => $gradeable->getGradeStartDate() < $this->core->getDateTimeNow()
@@ -1246,7 +1246,7 @@ class HomeworkView extends AbstractView {
 
         $rendered_ta_results = '';
         $been_ta_graded = false;
-        if ($graded_gradeable->isTaGradingComplete()) {
+        if ($graded_gradeable->canStudentSeeTaGrading()) {
             $been_ta_graded = true;
             $rendered_ta_results = $this->core->getOutput()->renderTemplate(
                 'AutoGrading',
@@ -1259,6 +1259,7 @@ class HomeworkView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
             'been_ta_graded' => $been_ta_graded,
+            'incomplete_manual_grading' => $graded_gradeable->isTaGradingPartiallyReleased(),
             'rendered_ta_results' => $rendered_ta_results]);
     }
 
@@ -1272,7 +1273,7 @@ class HomeworkView extends AbstractView {
         $rendered_peer_results = '';
         $been_peer_graded = false;
         // TODO: For now, Peer and TA grading completeness are synonymous.
-        if ($graded_gradeable->isTaGradingComplete()) {
+        if ($graded_gradeable->canStudentSeeTaGrading()) {
             $been_peer_graded = true;
             $rendered_peer_results = $this->core->getOutput()->renderTemplate(
                 'AutoGrading',
@@ -1285,6 +1286,7 @@ class HomeworkView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/PeerResultsBox.twig', [
             'been_peer_graded' => $been_peer_graded,
+            'incomplete_manual_grading' => $graded_gradeable->isTaGradingPartiallyReleased(),
             'rendered_peer_results' => $rendered_peer_results]);
     }
 
