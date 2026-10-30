@@ -15,6 +15,7 @@ declare global {
         generateDataURL(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<AnnotatedView[] | null>;
         popupAnnotatedImage(gradeable_id: string, filename: string, path: string, anon_path: string): Promise<void>;
         zoomImage(delta: number): boolean;
+        restoreImageZoom(): void;
     }
 }
 
@@ -322,7 +323,7 @@ const MIN_IMAGE_ZOOM = 1;
 const MAX_IMAGE_ZOOM = 5;
 
 // The original <img> holds the zoom state because it survives swaps with the MarkerView.
-// Loading a new file creates a new <img>, which resets zoom to 100%.
+// Loading a new file creates a new <img>, so the last zoom is saved and restored on load.
 // Only the submission panel has zoom controls, so lookups are scoped to its #file-content.
 function getZoomableImage(): { img: HTMLImageElement | null; markerView: MarkerView | null } {
     const markerView = document.querySelector<MarkerView>('#file-content #annotation-marker-view');
@@ -336,8 +337,9 @@ function zoomImage(delta: number): boolean {
     if (!img) {
         return false;
     }
-    // The fit size can't be measured until the image loads
-    if (!img.naturalWidth) {
+    // The fit size can't be measured until the image loads. Firefox knows naturalWidth
+    // before the image is laid out at that size, so wait until it's complete too.
+    if (!img.complete || !img.naturalWidth) {
         return true;
     }
 
@@ -350,8 +352,33 @@ function zoomImage(delta: number): boolean {
 
     const zoom = Math.round((parseFloat(img.dataset.zoom ?? '1') + delta) * 100) / 100;
     img.dataset.zoom = `${Math.min(MAX_IMAGE_ZOOM, Math.max(MIN_IMAGE_ZOOM, zoom))}`;
+    localStorage.setItem('image-zoom', img.dataset.zoom);
     applyImageZoom();
     return true;
+}
+
+// Like 'pdf-scale' in PDFEmbedded.js, keeps the zoom when switching students or files
+function restoreImageZoom(): void {
+    const { img } = getZoomableImage();
+    const zoom = parseFloat(localStorage.getItem('image-zoom') ?? '1') || 1;
+    if (!img?.parentElement || zoom <= 1) {
+        return;
+    }
+    // The fit size can only be measured once the image has loaded and its panel is shown.
+    // The parent is observed too since annotations may swap the image for a MarkerView,
+    // and load is listened for since the size may not change once loading finishes.
+    const restore = () => {
+        const { img: current, markerView } = getZoomableImage();
+        if (current === img && img.complete && img.naturalWidth && (markerView ?? img).offsetWidth) {
+            observer.disconnect();
+            img.removeEventListener('load', restore);
+            zoomImage(zoom - 1);
+        }
+    };
+    const observer = new ResizeObserver(restore);
+    observer.observe(img);
+    observer.observe(img.parentElement);
+    img.addEventListener('load', restore);
 }
 
 function applyImageZoom(): void {
@@ -898,3 +925,4 @@ window.quickDownload = quickDownload;
 window.generateDataURL = generateDataURL;
 window.popupAnnotatedImage = popupAnnotatedImage;
 window.zoomImage = zoomImage;
+window.restoreImageZoom = restoreImageZoom;
