@@ -337,8 +337,9 @@ function zoomImage(delta: number): boolean {
     if (!img) {
         return false;
     }
-    // The fit size can't be measured until the image loads
-    if (!img.naturalWidth) {
+    // The fit size can't be measured until the image loads. Firefox knows naturalWidth
+    // before the image is laid out at that size, so wait until it's complete too.
+    if (!img.complete || !img.naturalWidth) {
         return true;
     }
 
@@ -364,16 +365,20 @@ function restoreImageZoom(): void {
         return;
     }
     // The fit size can only be measured once the image has loaded and its panel is shown.
-    // The parent is observed too since annotations may swap the image for a MarkerView.
-    const observer = new ResizeObserver(() => {
+    // The parent is observed too since annotations may swap the image for a MarkerView,
+    // and load is listened for since the size may not change once loading finishes.
+    const restore = () => {
         const { img: current, markerView } = getZoomableImage();
-        if (current === img && img.naturalWidth && (markerView ?? img).offsetWidth) {
+        if (current === img && img.complete && img.naturalWidth && (markerView ?? img).offsetWidth) {
             observer.disconnect();
+            img.removeEventListener('load', restore);
             zoomImage(zoom - 1);
         }
-    });
+    };
+    const observer = new ResizeObserver(restore);
     observer.observe(img);
     observer.observe(img.parentElement);
+    img.addEventListener('load', restore);
 }
 
 function applyImageZoom(): void {

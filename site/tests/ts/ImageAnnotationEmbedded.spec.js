@@ -53,6 +53,22 @@ test('a new image is zoomed to the saved zoom once it loads', () => {
     expect(document.getElementById('file-zoom-display').textContent).toEqual('150%');
 });
 
+test('the saved zoom waits until the image has finished loading', () => {
+    localStorage.setItem('image-zoom', '1.5');
+    window.restoreImageZoom();
+
+    // Firefox can know the size before the image is laid out at that size
+    Object.defineProperty(img, 'complete', { value: false, configurable: true });
+    loadImage(img);
+    resizeCallback();
+    expect(img.style.width).toEqual('400px');
+
+    // the size might not change again once it has loaded
+    Object.defineProperty(img, 'complete', { value: true });
+    img.dispatchEvent(new Event('load'));
+    expect(img.style.width).toEqual('600px');
+});
+
 test('nothing happens without a saved zoom', () => {
     window.restoreImageZoom();
     expect(resizeCallback).toBeUndefined();
