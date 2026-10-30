@@ -82,7 +82,7 @@
         <h2>Online Polls</h2>
         <hr>
         <div id="polls_enabled_wrapper" class="config-row checkbox-row">
-            <input type="checkbox" name="polls_enabled" id="polls-enabled" value="true" {{ fields['polls_enabled'] ? 'checked': '' }} />
+            <input type="checkbox" name="polls_enabled" id="polls-enabled" value="true" {{ fields['polls_enabled'] ? 'checked': '' }} data-testid="polls-enabled" />
             <label for="polls-enabled">
                 <span class="option-title">Enable Online Polls</span>
                 <span class="option-alt">Choose whether to enable online polling for this course.</span>
@@ -92,7 +92,7 @@
         <h2>Live Chat</h2>
         <hr>
         <div id="chat_enabled_wrapper" class="config-row checkbox-row">
-            <input type="checkbox" name="chat_enabled" id="chat-enabled" value="true" {{ fields['chat_enabled'] ? 'checked': '' }} />
+            <input type="checkbox" name="chat_enabled" id="chat-enabled" value="true" {{ fields['chat_enabled'] ? 'checked': '' }} data-testid="chat-enabled" />
             <label for="chat-enabled">
                 <span class="option-title">Enable Live Chat</span>
                 <span class="option-alt">Choose whether to enable Live Chatroom for this course.</span>
@@ -129,7 +129,7 @@
                 Leave blank if you do not have a private repository for gradeable configurations.
             </span>
         </label>
-        <input class="config-row" type="text" name="private_repository" id="private-repository" value="{{ fields['private_repository'] }}" />
+        <input class="config-row" type="text" name="private_repository" id="private-repository" value="{{ fields['private_repository'] }}" data-testid="private-repository" />
         <fieldset class="config-row">
             <legend id="vcs-legend" data-saveindicator="vcs-legend">
                 <span class="option-title">Version Control System (VCS) Type</span>
@@ -156,13 +156,13 @@
                 internal ex. <kbd>ssh+svn://192.168.56.101/test-course</kbd>
             </span>
         </label>
-        <input class="config-row" type="text" name="vcs_base_url" id="vcs-base-url" value="{{ fields['vcs_base_url'] }}" />
+        <input class="config-row" type="text" name="vcs_base_url" id="vcs-base-url" value="{{ fields['vcs_base_url'] }}" data-testid="vcs-base-url" />
 
         <h2>Teams</h2>
         <hr>
 
         <div id="seek-message-enabled-wrapper" class="config-row checkbox-row">
-            <input type="checkbox" name="seek_message_enabled" id="seek-message-enabled" value="true" {{ fields['seek_message_enabled'] ? 'checked': '' }} />
+            <input type="checkbox" name="seek_message_enabled" id="seek-message-enabled" value="true" {{ fields['seek_message_enabled'] ? 'checked': '' }} data-testid="seek-message-enabled" />
             <label for="seek-message-enabled">
                 <span class="option-title">Enable Team/Partner Seeking Message</span>
                 <span class="option-alt">Choose whether to enable a team seeking message for this course.</span>
@@ -175,7 +175,7 @@
                 What instructions should be shown to students before they enter a message?
             </span>
         </label>
-        <textarea class="config-row" name="seek_message_instructions" id="seek-message-instructions">{{ fields['seek_message_instructions'] }}</textarea>
+        <textarea class="config-row" name="seek_message_instructions" id="seek-message-instructions" data-testid="seek-message-instructions">{{ fields['seek_message_instructions'] }}</textarea>
 
         <h2>Late Days</h2>
         <hr>
@@ -187,7 +187,7 @@
                 Additional late days can be granted (e.g., as incentives) using the "Late Days Allowed" form.
             </span>
         </label>
-        <input class="config-row" type="number" name="default_student_late_days" id="default-student-late-days" value="{{ fields['default_student_late_days'] }}" />
+        <input class="config-row" type="number" name="default_student_late_days" id="default-student-late-days" value="{{ fields['default_student_late_days'] }}" data-testid="default-student-late-days" />
 
         <label for="default-hw-late-days" class="config-row">
             <span class="option-title">Default Maximum Late Days Per Assignment</span>
@@ -196,7 +196,7 @@
                 per assignment on the "Create/Edit Gradeable" form.
             </span>
         </label>
-        <input class="config-row" type="number" name="default_hw_late_days" id="default-hw-late-days" value="{{ fields['default_hw_late_days'] }}" />
+        <input class="config-row" type="number" name="default_hw_late_days" id="default-hw-late-days" value="{{ fields['default_hw_late_days'] }}" data-testid="default-hw-late-days"/>
 
         <h2>Grading</h2>
         <hr>
@@ -205,13 +205,13 @@
             <span class="option-title">Grades Returned Message</span>
             <span class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</span>
         </label>
-        <textarea class="config-row" name="course_email" id="course-email">{{ fields['course_email'] }}</textarea>
+        <textarea class="config-row" name="course_email" id="course-email" data-testid="course-email">{{ fields['course_email'] }}</textarea>
 
         <label for="grade-inquiry-message" class="config-row">
             <span class="option-title">Grade Inquiry Warning Message</span>
             <span class="option-alt">Input the warning message show to students while submitting a grade inquiry.</span>
         </label>
-        <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="4">{{ fields['grade_inquiry_message'] }}</textarea>
+        <textarea class="config-row" name="grade_inquiry_message" id="grade-inquiry-message" rows="4" data-testid="grade-inquiry-message">{{ fields['grade_inquiry_message'] }}</textarea>
 
         <div class="config-row checkbox-row">
             <input type="checkbox" name="submission_clustering_enabled" id="submission-clustering-enabled" value="true" {{ fields['submission_clustering_enabled'] ? 'checked' : '' }} data-testid="submission-clustering-enabled"/>
@@ -289,7 +289,7 @@
             <span class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</span>
         </label>
         <div id="instructor-seating" class="config-row">
-            <select name="room_seating_gradeable_id" id="room-seating-gradeable-id">
+            <select name="room_seating_gradeable_id" id="room-seating-gradeable-id" data-testid="room-seating-gradeable-id">
                 {% for seating_option in gradeable_seating_options %}
                     <option value="{{ seating_option['g_id'] }}"{{ fields['room_seating_gradeable_id'] == seating_option['g_id'] ? ' selected' : ''}}>
                         {{ seating_option['g_title'] }} {{ seating_option['g_id'] != "" ? "<" ~ seating_option['g_id'] ~ ">" : "" }}
@@ -298,7 +298,7 @@
             </select>
             <label id="seating-only-label" class="option-alt" for="seating-only-for-instructor">
                 Visible only to Instructors?
-                <input type="checkbox" name="seating_only_for_instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} data-usesaveindicator="room-seating-gradeable-id" />
+                <input type="checkbox" name="seating_only_for_instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} data-testid="seating-only-for-instructor" data-usesaveindicator="room-seating-gradeable-id" />
             </label>
         </div>
 
@@ -316,7 +316,7 @@
         </div>
 
         <div class="config-row checkbox-row">
-            <input type="checkbox" name="display_custom_message" id="display-custom-message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} />
+            <input type="checkbox" name="display_custom_message" id="display-custom-message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} data-testid="display-custom-message" />
             <label for="display-custom-message">
                 <span class="option-title">Display Custom Message</span>
                 <span class="option-alt">Show a custom message to students at the top of the navigation page.</span>
