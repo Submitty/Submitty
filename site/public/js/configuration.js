@@ -143,7 +143,7 @@ function confirmSelfRegistration(element, needs_reg_sections) {
     return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
 }
 
-function addLabelsForSaveIndicators(elementId){
+function addLabelsForSaveIndicators(elementId) {
     /*
     This adds 'data-saveindicator="fieldId"' to the title of a field,
     and 'data-usesaveindicator="fieldId"' to the actual input field.
@@ -165,9 +165,9 @@ function addLabelsForSaveIndicators(elementId){
     field.get(0).setAttribute('data-usesaveindicator', `${elementId}`);
 }
 
-function createSaveIndicators(){
+function createSaveIndicators() {
     const requiresSaveIndicators = $('*[data-saveindicator]');
-    requiresSaveIndicators.each(function() {
+    requiresSaveIndicators.each(function () {
         const titleQuery = $(this);
         const title = titleQuery.get(0);
         const indicatorId = title.getAttribute('data-saveindicator');
