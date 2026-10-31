@@ -53,6 +53,8 @@ class DockerUI extends AbstractModel {
     protected array $fail_images = [];
     /** @var array<mixed> Mapping between images to which Submitty capabilities they are associated with */
     private array $image_to_capability_mapping;
+    /** @var array<string,int> First position of each image name in the configuration, used to pick the primary name */
+    private array $image_config_order;
     /**
      * Mapping between workers and the docker version they run, this is collected from the
      * docker logs but displayed later in the worker machines table
@@ -145,6 +147,18 @@ class DockerUI extends AbstractModel {
      * @param array<mixed> $autograding_workers - parsed JSON with autograding worker information
      */
     private function parseWorkersAndCapabilities(array $autograding_containers, array $autograding_workers): void {
+        // Record the order in which names appear in the config, any new images are appended,
+        // so the primary should be first
+        $position = 0;
+        foreach ($autograding_containers as $container_images) {
+            foreach ($container_images as $container_image) {
+                if (!isset($this->image_config_order[$container_image])) {
+                    $this->image_config_order[$container_image] = $position;
+                }
+                $position++;
+            }
+        }
+    
         $capabilities = [];
         $no_image_capabilities = [];
         $image_to_capability = [];
@@ -283,6 +297,12 @@ class DockerUI extends AbstractModel {
         $image_array = explode(", ", $tags);
         // Read next three lines for additional details
         $image = $this->readImageDetails();
+
+        // The repo tags order that docker pulls is not consistent, so sort by when they were added to the config
+        usort($image_array, function (string $a, string $b): int {
+            return ($this->image_config_order[$a] ?? PHP_INT_MAX)
+            <=> ($this->image_config_order[$b] ?? PHP_INT_MAX);
+        });
 
         // take the first name in the list of name:tags and use that as the primary
         $image->primary_name = array_shift($image_array);
