@@ -315,16 +315,6 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
-        // While these are inaccessible from the UI, the redundancy prevents direct POST removal requests
-        $message = implode(', ', $removed) . " has been removed from the configuration. "
-            . "Click 'Update dockers and machines' to apply changes.";
-        if (count($not_listed) > 0) {
-            $message .= ' Not listed in the configuration: ' . implode(', ', $not_listed) . '.';
-        }
-        if (count($not_owned) > 0) {
-            $message .= ' You can only remove images you own: ' . implode(', ', $not_owned) . '.';
-        }
-
         $failures = [];
         if (count($not_listed) > 0) {
             $failures[] = 'Not listed in the configuration: ' . implode(', ', $not_listed) . '.';
