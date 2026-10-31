@@ -573,6 +573,7 @@ class Gradeable extends AbstractModel {
 
         $assignments = [];
         $user_ids = [];
+        $seen_assignments = [];
         foreach ($input as $index => $values) {
             $row_number = $index + 2;
             if (
@@ -592,6 +593,10 @@ class Gradeable extends AbstractModel {
             if ($grader === $student) {
                 throw new \InvalidArgumentException("A student cannot grade themselves (CSV row {$row_number}).");
             }
+            if (isset($seen_assignments[$grader][$student])) {
+                throw new \InvalidArgumentException("Duplicate peer grading assignment on CSV row {$row_number}.");
+            }
+            $seen_assignments[$grader][$student] = true;
             $assignments[] = [$grader, $student];
             $user_ids[$grader] = $grader;
             $user_ids[$student] = $student;
