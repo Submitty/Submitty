@@ -16,9 +16,15 @@ const props = defineProps<{
     course: boolean;
 }>();
 
-const showPopup = ref(false);
+const emit = defineEmits<{
+    'update-badge-dom': [count: number];
+}>();
+
 const showUnseenOnly = ref(true);
-const localUnseenCount = ref(props.unseenCount);
+const initialUnseenCount = props.unseenCount >= 0
+    ? props.unseenCount
+    : props.notifications.filter((n) => !n.seen).length;
+const localUnseenCount = ref(initialUnseenCount);
 
 // Preference is the same between course and home pages
 onMounted(() => {
@@ -28,6 +34,9 @@ onMounted(() => {
     }
     else if (pref === 'all') {
         showUnseenOnly.value = false;
+    }
+    if (props.course) {
+        emit('update-badge-dom', localUnseenCount.value);
     }
 });
 
@@ -71,20 +80,14 @@ function markSeen() {
                         n.seen = true;
                     }
                 }
+                localUnseenCount.value = 0;
+                emit('update-badge-dom', 0);
             },
             error: function (err) {
                 console.error(err);
             },
         });
     }
-    // Home Page
-    else {
-        showPopup.value = true;
-    }
-}
-
-function goToNotificationSettings() {
-    window.location.href = buildCourseUrl(['notifications', 'settings']);
 }
 
 // mark notification as seen without reloading
@@ -92,7 +95,8 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
     for (const n of localNotifications.value) {
         if (n.id === id && n.course === course) {
             n.seen = true;
-            localUnseenCount.value--;
+            localUnseenCount.value = Math.max(0, localUnseenCount.value - 1);
+            emit('update-badge-dom', localUnseenCount.value);
             break;
         }
     }
@@ -101,26 +105,37 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
 // mark specified course notifications as seen without reloading
 function markAllSeen(courses: Record<string, unknown>[]) {
     for (const { term, course, count } of courses) {
-        localUnseenCount.value = localUnseenCount.value - Number(count);
+        localUnseenCount.value = Math.max(0, localUnseenCount.value - Number(count));
         for (const n of localNotifications.value) {
             if (n.term === term && n.course === course) {
                 n.seen = true;
             }
         }
     }
+    emit('update-badge-dom', localUnseenCount.value);
 }
 
 </script>
 <template>
-  <div>
-    <div class="notifications-header-container">
-      <h1 class="notifications-header">
+  <div data-testid="notifications-display">
+    <div
+      class="notifications-header-container"
+      data-testid="notifications-header-container"
+    >
+      <h1
+        class="notifications-header"
+        data-testid="notifications-header"
+      >
         Notifications
       </h1>
-      <div class="notifications-actions">
+      <div
+        class="notifications-actions"
+        data-testid="notifications-actions"
+      >
         <button
           v-if="notifications.length !== 0"
           class="btn btn-default"
+          data-testid="toggle-unseen-button"
           @click="toggleUnseenOnly"
         >
           {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
@@ -128,28 +143,31 @@ function markAllSeen(courses: Record<string, unknown>[]) {
         <button
           v-if="notifications.length !== 0 && props.course"
           class="btn btn-primary"
+          data-testid="mark-seen-button"
           @click="markSeen"
         >
           Mark as seen
         </button>
         <MarkSeenPopup
           v-if="notifications.length !== 0 && !props.course"
+          data-testid="mark-seen-popup"
           @mark-all="({ courses }) => markAllSeen(courses)"
         />
-        <button
+        <a
           v-if="props.course"
           class="btn btn-primary"
           data-testid="notification-settings-button"
-          @click="goToNotificationSettings"
+          :href="buildCourseUrl(['notifications', 'settings'])"
         >
           Settings
-        </button>
+        </a>
       </div>
     </div>
     <p
       v-if="localNotifications.length === 0"
       id="no-recent-notifications"
       class="no-recent"
+      data-testid="no-notifications-message"
     >
       No notifications to view.
     </p>
@@ -157,6 +175,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       v-if="visibleNotifications.length === 0 && localNotifications.length > 0 && localUnseenCount <= 0"
       id="no-recent-notifications"
       class="no-recent"
+      data-testid="no-unseen-notifications-message"
     >
       No unseen notifications.
     </p>
@@ -165,6 +184,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       :key="n.id"
       class="notification"
       :class="{ unseen: !n.seen }"
+      data-testid="notification-item-wrapper"
     >
       <SingleNotification
         :notification="n"
@@ -179,13 +199,15 @@ function markAllSeen(courses: Record<string, unknown>[]) {
       <p
         v-if="visibleNotifications.length >= 10 && localUnseenCount >= 11"
         class="unseen-count-p"
+        data-testid="additional-unseen-message"
       >
         You have <span class="unseen-count">{{ localUnseenCount - 10 }}</span> additional unseen notification<span v-if="localUnseenCount > 11">s</span>.
       </p>
       <!-- Unseen notifications that will not reach the front-end -->
       <p
-        v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && localNotifications.length > 10 && (localUnseenCount - visibleNotifications.length) > 0"
+        v-if="visibleNotifications.length < 10 && localUnseenCount > 0 && (localUnseenCount - visibleNotifications.length) > 0"
         class="unseen-count-p"
+        data-testid="older-unseen-message"
       >
         You have <span class="unseen-count">{{ localUnseenCount - visibleNotifications.length }}</span> older unseen notification<span v-if="localUnseenCount > 1">s</span> in your course notifications not displayed here.
       </p>
