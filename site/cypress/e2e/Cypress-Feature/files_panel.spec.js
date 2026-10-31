@@ -322,6 +322,8 @@ describe('Test cases involving zooming images in the full panel view', () => {
         cy.get('#annotatable-image').should(($img) => {
             expect($img[0].naturalWidth).to.be.greaterThan(0);
         });
+        // only images in submissions_processed can be annotated
+        cy.get('.annotation-toolbar').should('not.exist');
         cy.get('#file-zoom-display').should('have.text', '100%');
         cy.get('#annotatable-image').invoke('outerWidth').then((fitWidth) => {
             cy.get('[aria-label="Zoom In"]').click();
