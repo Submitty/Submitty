@@ -158,7 +158,7 @@ class DockerUI extends AbstractModel {
                 $position++;
             }
         }
-    
+
         $capabilities = [];
         $no_image_capabilities = [];
         $image_to_capability = [];
