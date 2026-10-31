@@ -8,7 +8,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'update-badge-dom': [count: number];
+    'badge-count-change': [count: number];
 }>();
 
 const unseenCount = computed(() => props.notifications.filter((n) => !n.seen).length);
@@ -23,7 +23,7 @@ const unseenCount = computed(() => props.notifications.filter((n) => !n.seen).le
       :notifications="notifications"
       :unseen-count="unseenCount"
       :course="true"
-      @update-badge-dom="(count: number) => emit('update-badge-dom', count)"
+      @badge-count-change="(count: number) => emit('badge-count-change', count)"
     />
   </div>
 </template>
