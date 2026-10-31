@@ -56,7 +56,9 @@
                 <br/>
             {% endif %}
             {% if peer and not team_assignment %}
-                <b>Current percentage of Peer grading done:</b> {{ entire_peer_percentage }}% ({{ entire_peer_graded }}/{{ entire_peer_total }})
+                <b>Peer grading component progress (each component counts separately):</b> {{ peer_review_components_completed }} / {{ peer_review_components_total }} ({{ peer_review_components_percentage }}%)
+                <br/>
+                <b>Students with submissions who have started peer grading (at least one component graded):</b> {{ peer_graders_started }} / {{ peer_graders_assigned }} ({{ peer_grader_participation_percentage }}%)
                 <br>
             {% endif %}
                 <b>TA Grading By Sections:</b>

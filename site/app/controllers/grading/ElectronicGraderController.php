@@ -639,6 +639,8 @@ class ElectronicGraderController extends AbstractController {
         $peers_to_grade = 0;
         $peer_graded_components = 0;
         $peer_components = 0;
+        $peer_graders_assigned = 0;
+        $peer_graders_started = 0;
         $total_users_who_submitted = [];
         $graders_of_inquiries = [];
         $verified_components = [];
@@ -655,6 +657,7 @@ class ElectronicGraderController extends AbstractController {
             $peer_graded_components = 0;
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $student_array = [];
+            $student_registration_types = [];
             $student_list = [];
             $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
             foreach ($students as $student) {
@@ -662,10 +665,27 @@ class ElectronicGraderController extends AbstractController {
                 $sorted_students[$reg_sec][] = $student;
                 array_push($student_list, ['user_id' => $student->getId()]);
                 array_push($student_array, $student->getId());
+                $student_registration_types[$student->getId()] = $student->getRegistrationType();
             }
+            $active_versions = $this->core->getQueries()->getActiveVersions($gradeable, $student_array);
             foreach ($student_array as $student) {
-                $peer_graded_components += $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $student);
-                $peer_components += count($this->core->getQueries()->getPeerAssignment($gradeable_id, $student));
+                $peer_assignments_for_student = $this->core->getQueries()->getPeerAssignment($gradeable_id, $student);
+                if (count($peer_assignments_for_student) === 0) {
+                    continue;
+                }
+
+                $graded_peer_components_for_student = $this->core->getQueries()->getNumGradedPeerComponents($gradeable_id, $student);
+                $peer_graded_components += $graded_peer_components_for_student;
+                $peer_components += count($peer_assignments_for_student);
+                if (
+                    ($active_versions[$student] ?? 0) > 0
+                    && ($include_withdrawn_students || $student_registration_types[$student] !== 'withdrawn')
+                ) {
+                    $peer_graders_assigned++;
+                    if ($graded_peer_components_for_student > 0) {
+                        $peer_graders_started++;
+                    }
+                }
             }
         }
         if ($peer) {
@@ -812,6 +832,8 @@ class ElectronicGraderController extends AbstractController {
                  'non_late_verified_components' => 0,
                  'view_peer_graded_components' => $peer_graded_components,
                  'view_peer_components' => $peer_components,
+                 'peer_graders_started' => $peer_graders_started,
+                 'peer_graders_assigned' => $peer_graders_assigned,
                  'ta_graded_components' => 0,
                  'num_gradeables' => $num_gradeables,
                  'graders' => [],
