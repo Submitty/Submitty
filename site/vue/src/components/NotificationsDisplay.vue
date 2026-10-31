@@ -17,7 +17,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'update-badge-dom': [count: number];
+    'badge-count-change': [count: number];
 }>();
 
 const showUnseenOnly = ref(true);
@@ -36,7 +36,7 @@ onMounted(() => {
         showUnseenOnly.value = false;
     }
     if (props.course) {
-        emit('update-badge-dom', localUnseenCount.value);
+        emit('badge-count-change', localUnseenCount.value);
     }
 });
 
@@ -81,7 +81,7 @@ function markSeen() {
                     }
                 }
                 localUnseenCount.value = 0;
-                emit('update-badge-dom', 0);
+                emit('badge-count-change', 0);
             },
             error: function (err) {
                 console.error(err);
@@ -96,7 +96,7 @@ function markIndividualSeen({ id, course }: { id: number; course: string }) {
         if (n.id === id && n.course === course) {
             n.seen = true;
             localUnseenCount.value = Math.max(0, localUnseenCount.value - 1);
-            emit('update-badge-dom', localUnseenCount.value);
+            emit('badge-count-change', localUnseenCount.value);
             break;
         }
     }
@@ -112,7 +112,7 @@ function markAllSeen(courses: Record<string, unknown>[]) {
             }
         }
     }
-    emit('update-badge-dom', localUnseenCount.value);
+    emit('badge-count-change', localUnseenCount.value);
 }
 
 </script>

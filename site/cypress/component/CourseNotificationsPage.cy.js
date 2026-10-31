@@ -47,8 +47,8 @@ const mockNotifications = [
 ];
 
 describe('CourseNotificationsPage', () => {
-    it('mounts and passes computed unseen count to NotificationsDisplay and forwards update-badge-dom', () => {
-        mountWithEmitSpy(CourseNotificationsPage, 'update-badge-dom', {
+    it('mounts and passes computed unseen count to NotificationsDisplay and forwards badge-count-change', () => {
+        mountWithEmitSpy(CourseNotificationsPage, 'badge-count-change', {
             notifications: mockNotifications,
         }, 'badgeSpy');
 
@@ -58,10 +58,10 @@ describe('CourseNotificationsPage', () => {
         cy.get('@badgeSpy').should('have.been.calledWith', 2);
     });
 
-    it('computes unseen count as 0 and emits update-badge-dom with 0 when all notifications are seen', () => {
+    it('computes unseen count as 0 and emits badge-count-change with 0 when all notifications are seen', () => {
         const allSeenNotifications = mockNotifications.map((n) => ({ ...n, seen: true }));
 
-        mountWithEmitSpy(CourseNotificationsPage, 'update-badge-dom', {
+        mountWithEmitSpy(CourseNotificationsPage, 'badge-count-change', {
             notifications: allSeenNotifications,
         }, 'badgeSpy');
 
