@@ -96,7 +96,7 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
                     {{ self.renderPeerSummary(component, num_decimals, active_same_as_graded) }}
                 {% endfor %}
             </div>
-            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals)  }}
+            {{ self.renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals, active_same_as_graded) }}
             {# /Peer Component boxes #}
         {% endif %}
 
@@ -167,32 +167,21 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
 {%- endmacro -%}
 
 
-{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
+{%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals, active_same_as_graded) -%}
+    {% import 'functions/TAResultsFunctions.twig' as TAResultsFunctions %}
     <div id="peer_feedback_wrapper" style="display: none;">
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
-                <table class="mobile-table" id="peer-feedback-table-{{grader}}">
-                    <tbody>
-                        {% for component in peer_components %}
-                            <div class="box-info">
-                                <h4>{{ component.title|escape }}</h4>
-                                <p>
-                                        {% for mark in component.marks|filter(mark => mark.published or mark.earned[anon_grader_id_mapping[grader]]) %}
-                                        {% if mark.earned[anon_grader_id_mapping[grader]] %}
-                                            <i class="far fa-check-square fa-1g"></i>
-                                        {% else %}
-                                            <i class="far fa-square fa-1g"></i>
-                                        {% endif %}
-                                        {{ mark.points|round(num_decimals) }}
-                                        {{ mark.title|nl2br }}
-                                        </br>
-                                    {% endfor %}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div id="peer-feedback-table-{{grader}}">
+                    {% set grader_id = anon_grader_id_mapping[grader] %}
+                    {% for component in peer_components %}
+                        {% if component.peer_results[grader_id] is defined %}
+                            {% set peer_component = component|merge(component.peer_results[grader_id]) %}
+                            {{ TAResultsFunctions.renderComponent(peer_component, true, num_decimals, active_same_as_graded) }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
                 {% if grader_info[anon_grader_id_mapping[grader]] is defined %}
                     <div class="overall-comment-box">
                         <p class="overall-comment-author">

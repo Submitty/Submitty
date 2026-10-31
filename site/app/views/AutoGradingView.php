@@ -606,6 +606,27 @@ class AutoGradingView extends AbstractView {
                 ];
             }, $component->getMarks());
 
+            // Prepare each peer's results for the shared TA component display.
+            $peer_results = [];
+            foreach ($container->getGradedComponents() as $graded_component) {
+                $peer_results[$graded_component->getGrader()->getId()] = [
+                    'total_score' => $graded_component->getTotalScore(),
+                    'custom_mark_score' => $graded_component->getScore(),
+                    'comment' => $graded_component->getComment(),
+                    'version_graded' => $graded_component->getGradedVersion(),
+                    'graders' => [],
+                    'marks' => array_map(function (Mark $mark) use ($graded_component) {
+                        $earned = $graded_component->hasMark($mark);
+                        return [
+                            'title' => $mark->getTitle(),
+                            'points' => $mark->getPoints(),
+                            'show_mark' => $mark->isPublish() || $earned,
+                            'earned' => $earned,
+                        ];
+                    }, $component->getMarks()),
+                ];
+            }
+
             $peer_grading_earned += $container->getTotalScore();
             // Maintain names (Peer 1, Peer 2, etc.) for each of the peer graders to help the student
             // reason about feedback.
@@ -629,6 +650,7 @@ class AutoGradingView extends AbstractView {
                     return $grader->getId();
                 }, $container->getGraders())),
                 'marks' => $component_marks,
+                'peer_results' => $peer_results,
             ];
         }, $peer_graded_components);
         /*$peer_anon_component_data = $peer_component_data;
