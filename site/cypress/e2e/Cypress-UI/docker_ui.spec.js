@@ -402,20 +402,30 @@ describe('Docker UI Test', () => {
             .first()
             .click();
 
-        // Wait for the tag to be pulled and reported
+        // Wait for the tag to be pulled and reported as an alias of the existing image
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('body').then(($body) => {
-                return $body.find('[data-image-id="submitty/python:3.10"]').length > 0;
+            return cy.get('[data-testid="image-row"]').then(($rows) => {
+                return $rows.filter(':contains("submitty/python:3.10")').length > 0;
             });
         }, 60000, 500);
 
+        // The primary name is the one that appears first in the config, so the new tag is an alias
+        cy.get('[data-image-id="submitty/python:3.10"]').should('not.exist');
+        cy.get('[data-testid="image-row"][data-primary-name="submitty/python:latest"]')
+            .find('.tag-list')
+            .should('contain.text', 'submitty/python:3.10');
+
         cy.intercept('POST', '**/admin/remove_image').as('removeImage');
 
-        // Both names should be offered
-        cy.get('[data-image-id="submitty/python:3.10"]').click();
+        // Both names should be offered, with the primary listed first
+        cy.get('[data-image-id="submitty/python:latest"]').click();
         cy.get('[data-testid="remove-image-form"]').should('be.visible');
+        cy.get('[data-testid="remove-image-intro-multiple"]').should('be.visible');
         cy.get('[data-testid="remove-image-checkbox"]').should('have.length', 2);
+        cy.get('[data-testid="remove-image-checkbox"]').eq(0).should('have.value', 'submitty/python:latest');
+        cy.get('[data-testid="remove-image-checkbox"]').eq(1).should('have.value', 'submitty/python:3.10');
+        cy.get('[data-testid="remove-image-options"]').should('contain.text', 'submitty/python:latest (primary)');
 
         cy.get('[data-testid="remove-image-checkbox"][value="submitty/python:3.10"]').check();
         cy.get('[data-testid="remove-image-checkbox"][value="submitty/python:latest"]').should('be.disabled');
@@ -427,7 +437,8 @@ describe('Docker UI Test', () => {
 
         // The default survives
         cy.reload();
-        cy.get('[data-testid="image-row"]').should('contain.text', 'submitty/python:latest');
+        cy.get('[data-testid="image-row"][data-primary-name="submitty/python:latest"]')
+            .should('exist');
     });
 
     it('Should not show remove option on system images to non-superusers', () => {

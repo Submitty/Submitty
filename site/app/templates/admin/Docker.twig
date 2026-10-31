@@ -139,7 +139,7 @@
             {% set name = full[0] %}
             {% set tag = full[1] %}
 
-            <tr class="image-row" data-testid="image-row">
+            <tr class="image-row" data-testid="image-row" data-primary-name="{{ image.primary_name }}">
                 <td>{{ name }}</td>
                 <td>{{ tag }}</td>
                 <td>
