@@ -1,6 +1,6 @@
 import { skipOn } from '@cypress/skip-test';
 
-skipOn(Cypress.env('run_area') === 'CI', () => {
+skipOn(Cypress.expose('run_area') === 'CI', () => {
     describe('Testing functionality of Autograder Results', () => {
         beforeEach(() => {
             cy.visit(['sample', 'gradeable', 'closed_team_homework']);

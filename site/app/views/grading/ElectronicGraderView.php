@@ -418,8 +418,8 @@ HTML;
         foreach ($users as $user => $details) {
             $given_name = htmlspecialchars($details["given_name"]);
             $family_name = htmlspecialchars($details["family_name"]);
-            $upload_timestamp = $details["upload_time"];
-            $submit_timestamp = $details["submit_time"];
+            $upload_timestamp = htmlspecialchars($details["upload_time"]);
+            $submit_timestamp = htmlspecialchars($details["submit_time"]);
             $filepath = htmlspecialchars($details["file"]);
 
             $return .= <<<HTML
@@ -1115,7 +1115,7 @@ HTML;
                 "message" => "Withdrawn Student"
             ];
         }
-        if ($graded_gradeable->hasOverriddenGrades()) {
+        if (!$is_peer_grader && $graded_gradeable->hasOverriddenGrades()) {
             $total_possible = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() + $gradeable->getManualGradingPoints();
             $overridden_message = "Overridden grades: " . $graded_gradeable->getTotalScore() . " / " . $total_possible;
             $overridden_comment = trim($graded_gradeable->getOverriddenComment());
@@ -1776,7 +1776,7 @@ HTML;
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
-        $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
+        $has_overridden_grades = !$is_peer_grader && $graded_gradeable->hasOverriddenGrades();
         $show_clear_conflicts = false;
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
