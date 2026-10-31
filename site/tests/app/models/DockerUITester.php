@@ -133,7 +133,6 @@ class DockerUITester extends BaseUnitTest {
         $image = $images["submitty/tutorial:database_client"];
         $this->assertEquals("sha256:c67c468a2e23", $image->digest);
 
-        // Names in the config are sorted ahead of names that are not, so the config name is the primary
         $this->assertArrayNotHasKey("ubuntu:custom", $images);
         $this->assertArrayHasKey("submitty/autograding-default:latest", $images);
         $image = $images["submitty/autograding-default:latest"];
