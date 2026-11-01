@@ -65,6 +65,37 @@ describe('Test cases revolving around bulk uploading', () => {
         });
     });
 });
+
+describe('Bulk upload PDF page assignments', () => {
+    it('opens the configured PDF page for each rubric component', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'bulk_upload_page_assignment', 'grading', 'details']);
+        cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-testid="grade-table"]')
+            .find('[data-testid="grade-button"]')
+            .contains('Grade')
+            .first()
+            .click();
+
+        cy.intercept('POST', '**/gradeable/bulk_upload_page_assignment/grading/pdf').as('loadPdf');
+
+        [1, 2, 3].forEach((page, index) => {
+            cy.get('[data-testid="component-container"]').eq(index).click();
+            if (page === 1) {
+                cy.wait('@loadPdf').its('request.body.page_num').then((pageNumber) => {
+                    expect(Number(pageNumber)).to.equal(page - 1);
+                });
+            }
+            cy.get('#file-content').should(($container) => {
+                const container = $container[0];
+                const pageElement = container.querySelector(`[data-page-number="${page}"]`);
+                expect(pageElement).to.not.be.null;
+                expect(container.scrollTop).to.be.closeTo(pageElement.offsetTop, 2);
+            });
+        });
+    });
+});
+
 describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
     it('upload.pdf visibility should follow blind grading and page assignment rules', () => {
         // Note: At some point, once there are more bulk upload type gradeables available for testing

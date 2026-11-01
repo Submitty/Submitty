@@ -301,7 +301,6 @@ class Gradeable(object):
             if self.type >= 0:
                 component["gc_ta_comment"] = generate_random_ta_note()
                 component["gc_student_comment"] = generate_random_student_note()
-                component["gc_page"] = 0
             if self.type == 1:
                 component["gc_lower_clamp"] = 0
                 component["gc_default"] = 0
