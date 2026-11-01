@@ -118,6 +118,29 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                 expect(response.body.message).to.eql('An error has occurred: Gradeable already exists');
             });
 
+            // Decimal team sizes must be rejected instead of being silently truncated.
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: {
+                    title: 'Decimal Team Size',
+                    instructions_url: '',
+                    id: 'decimal-team-size',
+                    type: 'Electronic File',
+                    bulk_upload: false,
+                    team_gradeable: {
+                        team_size_max: 2.5,
+                    },
+                    ta_grading: false,
+                    syllabus_bucket: 'homework',
+                },
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.message).to.eql('An error has occurred: Max team size must be a non-negative integer!');
+            });
+
             // Invalid type error message
             cy.request({
                 method: 'POST',
