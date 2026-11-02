@@ -2,6 +2,7 @@
     <div class="draggable_content" style="width:100%">
         <div style="padding:20px; margin-top:10px;">
             <span class="col grading_label" style="padding-left:0;">Peer Participation</span>
+            <p data-testid="peer-participation-summary">Assigned to grade {{ assigned_count }} student(s); graded {{ completed_count }} of {{ assigned_count }}.</p>
             {% if participation is empty %}
                 <p data-testid="peer-participation-empty">No peer grading participation found.</p>
             {% else %}

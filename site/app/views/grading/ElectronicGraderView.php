@@ -2019,14 +2019,19 @@ HTML;
     public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable): string {
         $submitter = $graded_gradeable->getSubmitter();
         $participation = [];
+        $assigned_count = 0;
+        $completed_count = 0;
         if (!$submitter->isTeam()) {
-            $participation = $this->core->getQueries()->getPeerParticipationForGrader(
-                $submitter->getId(),
-                $graded_gradeable->getGradeable()->getId()
-            );
+            $gradeable_id = $graded_gradeable->getGradeable()->getId();
+            $participation = $this->core->getQueries()->getPeerParticipationForGrader($submitter->getId(), $gradeable_id);
+            $assigned = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($submitter->getId())[$gradeable_id] ?? [];
+            $assigned_count = count($assigned);
+            $completed_count = count(array_intersect($assigned, array_keys($participation)));
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
-            'participation' => $participation
+            'participation' => $participation,
+            'assigned_count' => $assigned_count,
+            'completed_count' => $completed_count
         ]);
     }
 
