@@ -2020,7 +2020,7 @@ HTML;
      */
     public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable, bool $anonymize = false): string {
         $submitter = $graded_gradeable->getSubmitter();
-        $participation = [];
+        $entries = [];
         if (!$submitter->isTeam()) {
             $gradeable_id = $graded_gradeable->getGradeable()->getId();
             $participation = $this->core->getQueries()->getPeerParticipationForGrader(
