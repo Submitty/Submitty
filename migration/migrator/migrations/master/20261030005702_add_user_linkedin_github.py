@@ -10,13 +10,11 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    
     database.execute("""
         ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username character varying(255) DEFAULT '';
         ALTER TABLE users ADD COLUMN IF NOT EXISTS user_github_username character varying(255) DEFAULT '';
         ALTER TABLE users ADD COLUMN IF NOT EXISTS user_personal_webpage character varying(255) DEFAULT '';
     """)
-
     pass
 
 
