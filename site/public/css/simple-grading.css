@@ -172,7 +172,14 @@ input[type="number"]::-webkit-outer-spin-button {
     text-align: center;
     width:100%;
     margin-left: -20px;
+    visibility: hidden;
 }
+.simple-full-credit .simple-grade-text,
+.simple-half-credit .simple-grade-text{
+    visibility: visible;
+}
+
+
 .simple-grade-text-container{
     display:flex;
     text-align: left;
@@ -181,6 +188,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .simple-half-credit .simple-grade-grader,
-.simple-half-credit .simple-grade-date {
+.simple-half-credit .simple-grade-date,
+.simple-half-credit .fa-hourglass {
     color: var(--btn-text-black);
 }

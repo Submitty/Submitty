@@ -252,6 +252,8 @@ function updateCheckpointCells(elems, scores, no_cookie) {
                     elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
                     break;
                 default:
+                    elem.removeClass('simple-half-credit');
+                    elem.removeClass('simple-full-credit');
                     elem.css('background-color', 'var(--invisible) !important');
                     break;
             }
@@ -907,6 +909,8 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
                     elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
                     break;
                 default:
+                    elem.removeClass('simple-half-credit');
+                    elem.removeClass('simple-full-credit');
                     elem.css('background-color', 'var(--invisible) !important');
                     break;
             }
