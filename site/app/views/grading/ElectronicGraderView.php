@@ -2042,8 +2042,8 @@ HTML;
                 if ($anonymize) {
                     usort($entries, static fn (array $a, array $b): int => strcmp($a['display_id'], $b['display_id']));
                 }
-                }
             }
+        }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
             'participation' => $entries
         ]);
