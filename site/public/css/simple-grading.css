@@ -170,18 +170,17 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .simple-grade-text {
     text-align: center;
-    width:100%;
+    width: 100%;
     margin-left: -20px;
     visibility: hidden;
 }
 .simple-full-credit .simple-grade-text,
-.simple-half-credit .simple-grade-text{
+.simple-half-credit .simple-grade-text {
     visibility: visible;
 }
 
-
-.simple-grade-text-container{
-    display:flex;
+.simple-grade-text-container {
+    display: flex;
     text-align: left;
     align-items: center;
     justify-content: left;
