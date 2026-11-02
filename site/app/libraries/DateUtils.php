@@ -57,7 +57,9 @@ class DateUtils {
         if ($date1 == $date2) {
             return 0;
         }
-        $diff = $date1->diff($date2);
+        // Compare in UTC so a daylight saving change does not shorten or lengthen a day
+        $utc = new \DateTimeZone('UTC');
+        $diff = (clone $date1)->setTimezone($utc)->diff((clone $date2)->setTimezone($utc));
         $days_late = intval($diff->format('%r%a'));
         if ($date1 < $date2) {
             if ($diff->h > 0 || $diff->i > 0 || $diff->s > 0) {
