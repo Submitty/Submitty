@@ -26,7 +26,7 @@ class UsersView extends AbstractView {
         array $download_info,
         array $formatted_tzs,
         bool $use_database = false,
-        string $active_student_columns = '1-1-1-1-1-1-1-1-1-1-1-1'
+        string $active_student_columns = '1-0-1-1-1-1-1-1-1-1-1-0-0-0-0-0'
     ): string {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
         $this->core->getOutput()->addInternalCss('directory.css');
@@ -66,7 +66,7 @@ class UsersView extends AbstractView {
      * @param string  $active_grader_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
-    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false, $active_grader_columns = '1-1-1-1-1-1-1') {
+    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false, $active_grader_columns = '1-1-1-1-0-1') {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('table.css');

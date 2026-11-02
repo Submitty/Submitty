@@ -8,31 +8,27 @@
     </p>
     <div class="toggle-columns-menu">
         <div class="toggle-checkbox-area">
-            <input id="toggle-user-id" type="checkbox" class="toggle-columns-box">
-            <label for="toggle-user-id">User ID</label>
-        </div>
-        <div class="toggle-checkbox-area">
-            <input id="toggle-given-name" type="checkbox" class="toggle-columns-box">
+            <input id="toggle-given-name" type="checkbox" class="toggle-columns-box" data-testid="toggle-given-name">
             <label for="toggle-given-name">Given Name</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input id="toggle-family-name" type="checkbox" class="toggle-columns-box">
+            <input id="toggle-family-name" type="checkbox" class="toggle-columns-box" data-testid="toggle-family-name">
             <label for="toggle-family-name">Family Name</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input id="toggle-user-group" type="checkbox" class="toggle-columns-box">
+            <input id="toggle-user-group" type="checkbox" class="toggle-columns-box" data-testid="toggle-user-group">
             <label for="toggle-user-group">User Group</label>
         </div>
         <div class="toggle-checkbox-area">   
-            <input id="toggle-registration-sections" type="checkbox" class="toggle-columns-box">
+            <input id="toggle-registration-sections" type="checkbox" class="toggle-columns-box" data-testid="toggle-registration-sections">
             <label for="toggle-registration-sections">Registration Sections</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input id="toggle-edit-grader" type="checkbox" class="toggle-columns-box">
-            <label for="toggle-edit-grader">Edit Grader</label>
+            <input id="toggle-registration-subsection" type="checkbox" class="toggle-columns-box" data-testid="toggle-registration-subsection">
+            <label for="toggle-registration-subsection">Registration Subsection</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input id="toggle-demote-grader" type="checkbox" class="toggle-columns-box">
+            <input id="toggle-demote-grader" type="checkbox" class="toggle-columns-box" data-testid="toggle-demote-grader">
             <label for="toggle-demote-grader">Demote Grader</label>
         </div>
     </div>
@@ -44,6 +40,6 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateManageGradersColumns()"/>
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" onclick="updateManageGradersColumns()" data-testid="toggle-columns-submit"/>
 
 {% endblock %}
