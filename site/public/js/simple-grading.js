@@ -204,7 +204,6 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         const elem = $(el);
         let set_new = false;
 
-        const firstLoad = old_scores[elem.data('id')] === undefined;
         old_scores[elem.data('id')] = parseFloat(elem.data('score')) || 0;
 
         // if one score passed, set all elems to it
@@ -234,15 +233,29 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         }
 
         if (set_new) {
-            new_scores[elem.data('id')] = elem.data('score');
+            const score = elems.data('score');
+            new_scores[elem.data('id')] = score;
 
             // create border we can animate to reflect ajax status
-            elem.stop(true, false);
             elem.css('border-right-style', 'solid');
             elem.css('border-right-color', `${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-            if (firstLoad && old_scores[elem.data('id')] === 0) {
-                elem.css('border-right-width', `${elem[0].offsetWidth}px`);
+
+            switch (score) {
+                case 1.0:
+                    elem.removeClass('simple-half-credit');
+                    elem.addClass('simple-full-credit');
+                    elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
+                    break;
+                case 0.5:
+                    elem.removeClass('simple-full-credit');
+                    elem.addClass('simple-half-credit');
+                    elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
+                    break;
+                default:
+                    elem.css('background-color', 'var(--invisible) !important');
+                    break;
             }
+            elem.find('.fa-hourglass').css('visibility', 'visible');
 
             // set new grader data
             elem.data('grader', $('#data-table').data('current-grader'));
@@ -882,14 +895,11 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
             elem.find('.simple-grade-grader').text(grader);
             elem.find('.simple-grade-date').text(date);
 
-            let targetBorderWidth = 0;
-
             switch (score) {
                 case 1.0:
                     elem.removeClass('simple-half-credit');
                     elem.addClass('simple-full-credit');
                     elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
-                    targetBorderWidth = 0;
                     break;
                 case 0.5:
                     elem.removeClass('simple-full-credit');
@@ -897,11 +907,10 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
                     elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
                     break;
                 default:
-                    targetBorderWidth = elem[0].offsetWidth;
+                    elem.css('background-color', 'var(--invisible) !important');
                     break;
             }
-            elem.stop(true, false);
-            elem.animate({ 'border-right-width': `${targetBorderWidth}px` }, 400);
+            elem.find('.fa-hourglass').css('visibility', 'hidden');
         }
     }
 }

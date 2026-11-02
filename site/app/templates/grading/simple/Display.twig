@@ -247,11 +247,15 @@
                     data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
                 {% endif %}
             >
-                {% if core.getUser().accessFullGrading() %}
-                    <p class="simple-grade-grader">{{ component_grade and component_grade.getGrader() ? component_grade.getGrader().getId() : '' }}</p>
-                    <p class="simple-grade-date">{{ component_grade and component_grade.getGradeTime() ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
-                {% endif %}
-
+                <div class="simple-grade-text-container">
+                    <i class="fa-solid fa-hourglass" style="visibility: hidden"></i>
+                    <div class="simple-grade-text">
+                        {% if core.getUser().accessFullGrading() %}
+                            <p class="simple-grade-grader">{{ component_grade and component_grade.getGrader() ? component_grade.getGrader().getId() : '' }}</p>
+                            <p class="simple-grade-date">{{ component_grade and component_grade.getGradeTime() ? component_grade.getGradeTime()|date("Y-m-d H:i:s") : "" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
             </td>
         {% endif %}
     {% endfor %}
