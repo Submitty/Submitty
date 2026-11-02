@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializeStudentSocketClient */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializeStudentIndexSocketClient initializeStudentSocketClient */
 /* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
 
 let pollIndexTimerId = null;
@@ -389,6 +389,118 @@ function initializeIndexSocketClient() {
         }
     };
     window.socketClient.open('polls_index');
+}
+
+function initializeStudentIndexSocketClient(base_url) {
+    let pending = false;
+    let dirty = false;
+
+    // Use the same Markdown renderer as Vue.twig, with script-free props for dynamic rows.
+    function mountAnswer(row) {
+        const answer = row.querySelector('.student-poll-answer');
+        window.submitty.render(answer, 'component', 'Markdown', { content: answer.dataset.content })
+            .then(() => {
+                // The lazy component import may finish after a deletion or visibility change.
+                if (!answer.isConnected) {
+                    answer.unmount?.();
+                }
+            });
+    }
+
+    document.querySelectorAll('#student-polls .student-poll-row').forEach(mountAnswer);
+
+    function refresh() {
+        dirty = true;
+        if (pending) {
+            return;
+        }
+        pending = true;
+        dirty = false;
+        $.ajax({ url: `${base_url}/student_index`, dataType: 'json', headers: { Accept: 'application/json' }, cache: false })
+            .done((response) => {
+                // A newer notification invalidates this response. Fetch again before applying it.
+                if (dirty || response?.status !== 'success' || typeof response.data?.html !== 'string') {
+                    return;
+                }
+                const page = new DOMParser().parseFromString(response.data.html, 'text/html');
+                const tables = ['today-table', 'older-table'];
+                const currentPage = document.getElementById('student-polls');
+                const updatedPage = page.getElementById('student-polls');
+                if (!updatedPage || !tables.every((id) => updatedPage.querySelector(`#${id} tbody`))) {
+                    return;
+                }
+                const rows = new Map(Array.from(currentPage.querySelectorAll('.student-poll-row'), (row) => [row.dataset.pollId, row]));
+                const updatedIds = new Set(Array.from(updatedPage.querySelectorAll('.student-poll-row'), (row) => row.dataset.pollId));
+                for (const [id, row] of rows) {
+                    if (!updatedIds.has(id)) {
+                        row.querySelector('.student-poll-answer').unmount?.();
+                        row.remove();
+                    }
+                }
+                for (const id of tables) {
+                    const body = currentPage.querySelector(`#${id} tbody`);
+                    updatedPage.querySelectorAll(`#${id} .student-poll-row`).forEach((updatedRow, index) => {
+                        let row = rows.get(updatedRow.dataset.pollId);
+                        const isNew = !row;
+                        if (isNew) {
+                            // Never evaluate scripts from the fetched page.
+                            updatedRow.querySelectorAll('script').forEach((script) => script.remove());
+                            row = document.importNode(updatedRow, true);
+                        }
+                        else {
+                            row.cells[0].textContent = updatedRow.cells[0].textContent;
+                            const action = row.querySelector('.student-poll-action');
+                            const updatedAction = updatedRow.querySelector('.student-poll-action');
+                            if (!action.isEqualNode(updatedAction)) {
+                                action.replaceChildren(...updatedAction.childNodes);
+                            }
+                            const timer = row.querySelector('.poll-index-timer');
+                            const updatedTimer = updatedRow.querySelector('.poll-index-timer');
+                            if (timer && updatedTimer) {
+                                timer.textContent = updatedTimer.textContent;
+                                if (updatedTimer.hasAttribute('data-end-time')) {
+                                    timer.dataset.endTime = updatedTimer.dataset.endTime;
+                                }
+                                else {
+                                    timer.removeAttribute('data-end-time');
+                                }
+                            }
+                            else if (timer) {
+                                timer.remove();
+                            }
+                            else if (updatedTimer) {
+                                row.insertBefore(updatedTimer, action);
+                            }
+                        }
+                        // Match server ordering/grouping without replacing existing answer mounts.
+                        if (body.children[index] !== row) {
+                            body.insertBefore(row, body.children[index] ?? null);
+                        }
+                        if (isNew) {
+                            mountAnswer(row);
+                        }
+                    });
+                }
+                initializePollIndexTimers();
+            })
+            .fail((error) => console.error('Unable to refresh student poll state:', error))
+            .always(() => {
+                pending = false;
+                if (dirty) {
+                    refresh();
+                }
+            });
+    }
+
+    window.socketClient = new WebSocketClient();
+    // Also recover changes missed before connecting or while disconnected.
+    window.socketClient.onopen = refresh;
+    window.socketClient.onmessage = (msg) => {
+        if (msg.type === 'poll_state_changed') {
+            refresh();
+        }
+    };
+    window.socketClient.open('polls_student_index');
 }
 
 function initializeStudentSocketClient(poll_id) {

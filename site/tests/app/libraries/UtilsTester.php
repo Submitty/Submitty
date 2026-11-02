@@ -1020,6 +1020,10 @@ PDF);
                 ['page' => 'polls_index', 'term' => 's26', 'course' => 'cs101'],
                 's26-cs101-polls_index'
             ],
+            'polls_student_index' => [
+                ['page' => 'polls_student_index', 'term' => 's26', 'course' => 'cs101'],
+                's26-cs101-polls_student_index'
+            ],
             'polls missing poll_id' => [
                 ['page' => 'polls', 'term' => 's26', 'course' => 'cs101', 'instructor' => 'true'],
                 null
