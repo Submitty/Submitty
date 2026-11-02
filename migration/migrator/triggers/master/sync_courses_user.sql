@@ -62,8 +62,8 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                     || quote_literal(NEW.registration_type) || ', '
                     || NEW.manual_registration || ', '
                     || quote_literal(user_row.display_name_order) || ', '
-                    || quote_nullable(NEW.date_registered) ||
-                ')';
+                    || quote_nullable(NEW.date_registered)
+                || ')';
                 IF query_string IS NULL THEN
                     RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
                 END IF;
@@ -77,8 +77,8 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                     || 'registration_section=' || quote_nullable(NEW.registration_section) || ', '
                     || 'rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', '
                     || 'registration_type=' || quote_literal(NEW.registration_type) || ', '
-                    || 'manual_registration=' || NEW.manual_registration
-                    || 'date_registered=' || quote_nullable(NEW.date_registered) || ', '
+                    || 'manual_registration=' || NEW.manual_registration || ','
+                    || 'date_registered=' || quote_nullable(NEW.date_registered)
                     || ' WHERE user_id=' || quote_literal(NEW.user_id);
                 IF query_string IS NULL THEN
                     RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
