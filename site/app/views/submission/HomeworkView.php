@@ -1286,7 +1286,6 @@ class HomeworkView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/PeerResultsBox.twig', [
             'been_peer_graded' => $been_peer_graded,
-            'incomplete_manual_grading' => $graded_gradeable->isTaGradingPartiallyReleased(),
             'rendered_peer_results' => $rendered_peer_results]);
     }
 
