@@ -25,6 +25,7 @@ from . import INSTALL_DIR, DATA_DIR
 from . import write_to_log as logger
 from . import VERIFIED_ADMIN_USER
 
+VENV_PATH = os.path.join(INSTALL_DIR, "venv", "bin", "python3")
 
 class AbstractJob(ABC):
     """
@@ -126,7 +127,7 @@ class RunAutoRainbowGrades(CourseJob):
         try:
             with open(debug_output, "w") as file:
                 subprocess.call(
-                    ["python3", path, semester, course, source], stdout=file, stderr=file
+                    [VENV_PATH, path, semester, course, source], stdout=file, stderr=file
                 )
         except PermissionError:
             print("error, could not open " + file + " for writing")
@@ -176,7 +177,7 @@ class RunGenerateRepos(CourseGradeableJob):
                 subprocess.run(
                     [
                         "sudo",
-                        "/usr/local/submitty/venv/bin/python3",
+                        VENV_PATH,
                         gen_script,
                         "--non-interactive",
                         semester,
@@ -445,7 +446,7 @@ class CreateCourse(AbstractJob):
             subprocess.run(
                 [
                     "sudo",
-                    "/usr/local/submitty/venv/bin/python3",
+                    VENV_PATH,
                     "/usr/local/submitty/sbin/adduser_course.py",
                     head_instructor,
                     semester,
@@ -458,7 +459,7 @@ class CreateCourse(AbstractJob):
                 subprocess.run(
                     [
                         "sudo",
-                        "/usr/local/submitty/venv/bin/python3",
+                        VENV_PATH,
                         "/usr/local/submitty/sbin/adduser_course.py",
                         VERIFIED_ADMIN_USER,
                         semester,
@@ -488,7 +489,7 @@ class UpdateDockerImages(AbstractJob):
         )
         with os.fdopen(log_fd, "a") as output_file:
             subprocess.run(
-                ["python3", script_path, "--docker_images"], stdout=output_file, stderr=output_file
+                [VENV_PATH, script_path, "--docker_images"], stdout=output_file, stderr=output_file
             )
 
         log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(
@@ -514,7 +515,7 @@ class UpdateSystemInfo(AbstractJob):
         script = os.path.join(INSTALL_DIR, "sbin", "shipper_utils", "get_sysinfo.py")
         with os.fdopen(log, "a") as output_file:
             subprocess.run(
-                ["python3", script, "--workers", "service", "disk", "sysload"],
+                [VENV_PATH, script, "--workers", "service", "disk", "sysload"],
                 stdout=output_file,
                 stderr=output_file,
             )
@@ -658,4 +659,4 @@ class GradingClustering(CourseGradeableJob):
         algorithm = self.job_details["algorithm"]
 
         script = str(Path(INSTALL_DIR, "sbin", "grading_clustering", "main.py"))
-        subprocess.run(["python3", script, semester, course, gradeable, algorithm], check=True)
+        subprocess.run([VENV_PATH, script, semester, course, gradeable, algorithm], check=True)
