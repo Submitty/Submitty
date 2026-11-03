@@ -410,6 +410,23 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     public static function getSubmitButton(Core $core, Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone) {
+        // Grading can start, or grades can be released, before the due date.
+        // Students can still submit on time, so show the open button.
+        // Keep the graded button for students who submitted, so they can view their grade.
+        $submitted = $graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete();
+        if (
+            (
+                $list_section === GradeableList::GRADING
+                || ($list_section === GradeableList::GRADED && !$submitted)
+            )
+            && $gradeable->isStudentSubmit()
+            && $gradeable->hasDueDate()
+            && $gradeable->isSubmissionOpen()
+            && !$gradeable->isSubmissionClosed()
+        ) {
+            $list_section = GradeableList::OPEN;
+        }
+
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $date_time = null;
