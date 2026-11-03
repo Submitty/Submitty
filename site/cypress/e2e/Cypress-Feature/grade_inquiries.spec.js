@@ -48,45 +48,59 @@ describe('Test cases revolving around grade inquiries', () => {
         });
     });
 
+
     it('Should test if users can see grade inquiry panel/containers', () => {
-        ['ta', 'grader'].forEach((user) => {
-            cy.login(user);
-            cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
-            cy.get('[data-testid="popup-window"]').should('exist');
-            cy.get('[data-testid="close-button"]').should('exist');
-            cy.get('[data-testid="popup-save-button"]').should('exist');
-            cy.get('[data-testid="popup-save-button"]').click();
-            if (user === 'ta') {
-                cy.get('[data-testid="view-sections"]').click();
-            }
-            cy.get('[data-testid="grade-button"]').eq(4).click();
-            cy.get('[data-testid="grade-inquiry-info-btn"]').click();
-            cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
-            cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
-            cy.get('[data-testid="reply-text-area-36"]').click();
-            cy.get('[data-testid="reply-text-area-36"]').type('Submitty');
-            cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
-            cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
-            cy.url().should('not.match', /\/gradeable\/\d+\/grading\/details$/).then(() => {
-                verifyWebSocketStatus();
-            });
+        // Full-access grader should be able to access grade inquiries.
+        cy.login('ta');
+        cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
+        cy.get('[data-testid="popup-window"]').should('exist');
+        cy.get('[data-testid="close-button"]').should('exist');
+        cy.get('[data-testid="popup-save-button"]').should('exist');
+        cy.get('[data-testid="popup-save-button"]').click();
+        cy.get('[data-testid="view-sections"]').click();
+        cy.get('[data-testid="grade-button"]').eq(4).click();
+        cy.get('[data-testid="grade-inquiry-info-btn"]').click();
+        cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
+        cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('be.disabled');
+        cy.get('[data-testid="reply-text-area-36"]').click();
+        cy.get('[data-testid="reply-text-area-36"]').type('Submitty');
+        cy.get('[data-testid="markdown-mode-tab-preview"]').first().should('exist');
+        cy.get('[data-testid="grade-inquiry-actions"]').contains('Submit Grade Inquiry').should('not.be.disabled');
 
-            // redirect page in order to avoid race condition
-            cy.visit('/');
-
-            // need to clear local storage to refresh grader's responsibility page
-            cy.logout();
-            cy.clearCookies();
-            cy.clearLocalStorage();
+        cy.url().should('not.match', /\/gradeable\/\d+\/grading\/details$/).then(() => {
+            verifyWebSocketStatus();
         });
 
-        // student view
+        cy.visit('/');
+        cy.logout();
+        cy.clearCookies();
+        cy.clearLocalStorage();
+
+        // Limited-access grader should not access grade inquiries.
+        cy.login('grader');
+        cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
+        cy.get('[data-testid="popup-window"]').should('exist');
+        cy.get('[data-testid="close-button"]').should('exist');
+        cy.get('[data-testid="popup-save-button"]').should('exist');
+        cy.get('[data-testid="popup-save-button"]').click();
+        cy.get('[data-testid="grade-button"]').eq(4).click();
+        cy.get('[data-testid="grade-inquiry-info-btn"]').click();
+        cy.get('[data-testid="grading-label"]').should('contain', 'Grade Inquiry');
+        cy.get('[data-testid="grade-inquiry-actions"]').should('not.exist');
+
+        cy.visit('/');
+        cy.logout();
+        cy.clearCookies();
+        cy.clearLocalStorage();
+
+        // Student view
         cy.login('bitdiddle');
         cy.visit(['sample', 'gradeable', gradeableId]);
         cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 9998-01-01 @ 12:00 AM EST').then(() => {
             verifyWebSocketStatus();
         });
     });
+
     it('should test cases regarding abnormal grade inquiry dates', () => {
         cy.login();
         setGradeInquiriesForGradeable(gradeableId, beforeGradeInquiryStartDate);

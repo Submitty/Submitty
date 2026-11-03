@@ -567,7 +567,7 @@
 {# Grading Button #}
 {% macro render_column_grading(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) %}
     {% set badge_count = 0 %}
-    {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
+    {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and (core.getUser().getGroup() == 4 or (core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()))) %}
     {% if graded_gradeable.getSubmitter().getId() in overrides %}
         {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getManualGradingPoints() %}
         {% set override_marks = override_data[graded_gradeable.getSubmitter().getId()].marks %}
@@ -635,7 +635,7 @@
 
 {# Grading Button (peer) TODO: fix this for peer grading support #}
 {% macro render_column_grading_blind(context, section, graded_gradeable, index, info, column, overrides, override_data, anon_ids) %}
-    {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()) %}
+    {% set peer_only_grader = graded_gradeable.getGradeable().hasPeerComponent() and (core.getUser().getGroup() == 4 or (core.getUser().accessGrading() and not core.getAccess().checkGroupPrivilege(core.getUser().getGroup(), graded_gradeable.getGradeable().getMinGradingGroup()))) %}
     {% if  graded_gradeable.getSubmitter().getId() in overrides %}
         {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getManualGradingPoints() %}
         {% set override_marks = override_data[graded_gradeable.getSubmitter().getId()].marks %}
