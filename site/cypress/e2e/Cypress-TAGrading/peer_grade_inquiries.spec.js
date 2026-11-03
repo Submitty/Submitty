@@ -22,6 +22,7 @@ describe('Peer graders should not see grade inquiry indicators', () => {
 
     it('should hide grade inquiry indicators from peer graders', () => {
         setGradeInquiriesForGradeable('9998-01-01 00:00:00');
+
         cy.login(peerGraderId);
 
         cy.visit([
@@ -32,13 +33,13 @@ describe('Peer graders should not see grade inquiry indicators', () => {
             'details',
         ]);
 
-        cy.get('[data-testid="popup-save-button"]').click();
-
-        const studentGradeButton = `[data-testid="grade-button"][href*="who_id=${overriddenAnonId}"]`;
+        const studentGradeButton =
+            `[data-testid="grade-button"][href*="who_id=${overriddenAnonId}"]`;
 
         cy.get(studentGradeButton).should('exist');
 
-        cy.get(studentGradeButton).should('not.contain', 'Grade Inquiry');
+        cy.get(studentGradeButton)
+            .should('not.contain', 'Grade Inquiry');
 
         cy.get(studentGradeButton)
             .should('not.have.attr', 'data-grade-inquiry');
@@ -55,6 +56,7 @@ describe('Peer graders should not see grade inquiry indicators', () => {
 
     after(() => {
         setGradeInquiriesForGradeable('1974-01-13 23:59:59');
+
         cy.visit('/');
         cy.logout();
     });
