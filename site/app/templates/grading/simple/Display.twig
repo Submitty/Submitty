@@ -248,7 +248,7 @@
                 {% endif %}
             >
                 <div class="simple-grade-text-container">
-                    <i class="fa-solid fa-hourglass" style="visibility: hidden"></i>
+                    <i class="fa-solid fa-hourglass fa-fade" style="visibility: hidden"></i>
                     <div class="simple-grade-text">
                         {% if core.getUser().accessFullGrading() %}
                             <p class="simple-grade-grader">{{ component_grade and component_grade.getGrader() ? component_grade.getGrader().getId() : '' }}</p>
