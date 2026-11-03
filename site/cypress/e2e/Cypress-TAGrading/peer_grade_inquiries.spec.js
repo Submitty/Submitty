@@ -1,3 +1,4 @@
+
 describe('Peer graders should not see grade inquiry indicators', () => {
     const gradeableId = 'grading_pdf_peer_homework';
     const peerGraderId = 'baliss';
@@ -34,8 +35,7 @@ describe('Peer graders should not see grade inquiry indicators', () => {
 
         cy.get('[data-testid="popup-save-button"]').click();
 
-        const studentGradeButton
-        = `[data-testid="grade-button"][href*="who_id=${overriddenAnonId}"]`;
+        const studentGradeButton = `[data-testid="grade-button"][href*="who_id=${overriddenAnonId}"]`;
 
         cy.get(studentGradeButton).should('exist');
 
@@ -47,6 +47,9 @@ describe('Peer graders should not see grade inquiry indicators', () => {
         cy.get(studentGradeButton)
             .find('.notification-badge')
             .should('not.exist');
+
+        cy.screenshot('peer-grader-no-grade-inquiry');
+
         cy.visit('/');
         cy.logout();
     });
