@@ -1,4 +1,3 @@
-
 describe('Peer graders should not see grade inquiry indicators', () => {
     const gradeableId = 'grading_pdf_peer_homework';
     const peerGraderId = 'baliss';
