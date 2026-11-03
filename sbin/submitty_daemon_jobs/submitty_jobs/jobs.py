@@ -27,6 +27,7 @@ from . import VERIFIED_ADMIN_USER
 
 VENV_PATH = os.path.join(INSTALL_DIR, "venv", "bin", "python3")
 
+
 class AbstractJob(ABC):
     """
     Abstract class that all jobs should extend from, creating a common
