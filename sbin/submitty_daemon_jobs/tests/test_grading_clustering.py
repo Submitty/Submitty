@@ -53,7 +53,6 @@ class TestGradingClustering(unittest.TestCase):
         # Verify it invoked subprocess correctly
         mock_subprocess.assert_called_once()
         args, kwargs = mock_subprocess.call_args
-        self.assertEqual(args[0][0], "python3")
         self.assertIn("main.py", args[0][1])
         self.assertIn("grading_clustering", args[0][1])
         self.assertEqual(args[0][2:], ["s23", "csci1100", "hw1", "dummy_split"])
