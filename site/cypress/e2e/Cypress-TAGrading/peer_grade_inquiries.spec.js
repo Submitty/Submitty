@@ -34,7 +34,7 @@ describe('Peer graders should not see grade inquiry indicators', () => {
         ]);
 
         const studentGradeButton 
-        = `[data-testid="grade-button"][href*="who_id=${overriddenAnonId}"]`;
+            = `[data-testid="grade-button"][href*="who_id=${overriddenAnonId}"]`;
 
         cy.get(studentGradeButton).should('exist');
 
