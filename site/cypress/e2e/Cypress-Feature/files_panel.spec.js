@@ -294,50 +294,249 @@ describe('Test cases involving auto opening single file submissions', () => {
 });
 
 describe('Test cases involving zooming images in the full panel view', () => {
-    it('test the zoom buttons on an image submission', () => {
-        cy.login('bitdiddle');
-        cy.visit(['sample', 'gradeable', 'open_homework']);
-        cy.get('#startnew').then(($clearBtn) => {
-            if (!$clearBtn.is(':disabled')) {
-                $clearBtn.click();
+    const imageName = 'blank_QR_numeric_id.png';
+
+    function imageSize(dimension) {
+        return cy.get('#annotatable-image').then(($img) => parseFloat($img.css(dimension)));
+    }
+
+    function openImage(name = imageName) {
+        cy.get('#file-view').then(($view) => {
+            if ($view.css('display') === 'flex') {
+                cy.get('[aria-label="Collapse File"]').click();
+                cy.get('#file-view').should('not.be.visible');
             }
         });
-        cy.get('#upload1').selectFile('cypress/fixtures/copy_of_more_autograding_examples/bulk_upload_pdfs/submissions/blank_QR_numeric_id.png', { action: 'drag-drop' });
-        cy.waitPageChange(() => {
-            cy.get('#submit').click();
+        cy.get('#div_viewer_sd1').then(($browser) => {
+            if (!$browser.is(':visible')) {
+                cy.get('#submissions').click();
+            }
         });
-        cy.get('#submitted-files > div').should('contain', 'blank_QR_numeric_id.png');
-        cy.logout();
-
-        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
-        cy.login('instructor');
-        cy.get('[data-testid="view-sections"]').uncheck();
-        cy.get('#details-table').contains('tr', 'bitdiddle').find('[data-testid="grade-button"]').click();
-        cy.get('#submission_browser_btn').click();
-        cy.get('#submissions').click();
-        assertSubmissionsBrowserOpen();
-        cy.get('a.image-file[data-file_name="blank_QR_numeric_id.png"]').click();
-
-        // wait for the image itself to load, not just its alt text
+        cy.get(`a.image-file[data-file_name="${name}"]`).click();
         cy.get('#annotatable-image').should(($img) => {
             expect($img[0].naturalWidth).to.be.greaterThan(0);
         });
+    }
+
+    function navigateToStudent(button, student, remaining = 30) {
+        cy.waitPageChange(() => cy.get(button).click());
+        cy.get('#grading-panel-student-name').invoke('text').then((name) => {
+            if (!name.includes(student)) {
+                expect(remaining, `navigation to ${student}`).to.be.greaterThan(0);
+                navigateToStudent(button, student, remaining - 1);
+            }
+        });
+    }
+
+    before(() => {
+        for (const [student, image] of [
+            ['bitdiddle', `copy_of_more_autograding_examples/bulk_upload_pdfs/submissions/${imageName}`],
+            ['browna', 'copy_of_more_autograding_examples/jupyter_notebook_autograding/config/test_output/graph.png'],
+        ]) {
+            cy.login(student);
+            cy.visit(['sample', 'gradeable', 'open_homework']);
+            cy.get('#startnew').then(($clearBtn) => {
+                if (!$clearBtn.is(':disabled')) {
+                    $clearBtn.click();
+                }
+            });
+            cy.get('#upload1').selectFile([
+                `cypress/fixtures/${image}`,
+                'cypress/fixtures/words_249.pdf',
+            ], { action: 'drag-drop' });
+            cy.waitPageChange(() => {
+                cy.get('#submit').click();
+            });
+            cy.get('#submitted-files > div').should('contain', image.split('/').pop());
+            cy.get('.auto-results-queue-msg', { timeout: 120000 }).should('not.exist');
+            cy.logout();
+        }
+    });
+
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'open_homework', 'grading', 'details']);
+        cy.clearLocalStorage('image-scale');
+        cy.clearLocalStorage('pdf-scale');
+        cy.window().then((win) => {
+            win.localStorage.setItem('general-setting-arrow-function', 'default');
+            win.localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
+        });
+        cy.get('[data-testid="view-sections"]').uncheck();
+        cy.get('#details-table').contains('tr', 'bitdiddle').find('[data-testid="grade-button"]').click();
+        cy.get('#submission_browser_btn').click();
+        openImage();
+    });
+
+    afterEach(() => {
+        cy.clearLocalStorage('image-scale');
+        cy.clearLocalStorage('pdf-scale');
+    });
+
+    it('test the zoom buttons on an image submission', () => {
         cy.get('#file-zoom-display').should('have.text', '100%');
-        cy.get('#annotatable-image').invoke('outerWidth').then((fitWidth) => {
+        imageSize('width').then((fitWidth) => {
             cy.get('[aria-label="Zoom In"]').click();
             cy.get('[aria-label="Zoom In"]').click();
             cy.get('#file-zoom-display').should('have.text', '120%');
-            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth * 1.2, 2);
+            imageSize('width').should('be.closeTo', fitWidth * 1.2, 2);
 
             // zoom never goes below the size that fits the panel
             cy.get('[aria-label="Zoom Out"]').click();
             cy.get('[aria-label="Zoom Out"]').click();
             cy.get('[aria-label="Zoom Out"]').click();
             cy.get('#file-zoom-display').should('have.text', '100%');
-            cy.get('#annotatable-image').invoke('outerWidth').should('be.closeTo', fitWidth, 2);
+            imageSize('width').should('be.closeTo', fitWidth, 2);
+
+            for (let i = 0; i < 41; i++) {
+                cy.get('[aria-label="Zoom In"]').click();
+            }
+            cy.get('#file-zoom-display').should('have.text', '500%');
+            imageSize('width').should('be.closeTo', fitWidth * 5, 2);
         });
 
         cy.get('[aria-label="Collapse File"]').click();
         cy.get('#annotatable-image').should('not.exist');
+    });
+
+    it('retains zoom through student navigation and reload, fitting each image separately', () => {
+        imageSize('width').then((firstFitWidth) => {
+            for (let i = 0; i < 3; i++) {
+                cy.get('[aria-label="Zoom In"]').click();
+            }
+            cy.get('#file-zoom-display').should('have.text', '130%');
+            imageSize('width').should('be.closeTo', firstFitWidth * 1.3, 2);
+
+            navigateToStudent('#next-student', 'browna');
+            cy.get('#grading-panel-student-name').should('contain.text', 'browna');
+            openImage('graph.png');
+            cy.get('#file-zoom-display').should('have.text', '130%');
+            imageSize('height').then((zoomedHeight) => {
+                for (let i = 0; i < 3; i++) {
+                    cy.get('[aria-label="Zoom Out"]').click();
+                }
+                cy.get('#file-zoom-display').should('have.text', '100%');
+                imageSize('height').should('be.closeTo', zoomedHeight / 1.3, 2);
+                for (let i = 0; i < 3; i++) {
+                    cy.get('[aria-label="Zoom In"]').click();
+                }
+            });
+
+            navigateToStudent('#prev-student', 'bitdiddle');
+            cy.get('#grading-panel-student-name').should('contain.text', 'bitdiddle');
+            openImage();
+            cy.get('#file-zoom-display').should('have.text', '130%');
+            imageSize('width').should('be.closeTo', firstFitWidth * 1.3, 2);
+
+            cy.reload();
+            openImage();
+            cy.get('#file-zoom-display').should('have.text', '130%');
+            imageSize('width').should('be.closeTo', firstFitWidth * 1.3, 2);
+            cy.screenshot('image-zoom-after-student-navigation-and-reload');
+        });
+    });
+
+    it('defaults to fitted size for invalid saved zoom levels', () => {
+        imageSize('width').then((fitWidth) => {
+            for (const value of ['', 'invalid', '1.3junk', 'NaN', 'Infinity', '0.9', '5.1']) {
+                cy.window().then((win) => win.localStorage.setItem('image-scale', value));
+                openImage();
+                cy.get('#file-zoom-display').should('have.text', '100%');
+                imageSize('width').should('be.closeTo', fitWidth, 2);
+            }
+        });
+    });
+
+    it('keeps image and PDF zoom independent', () => {
+        cy.get('[aria-label="Zoom In"]').click();
+        cy.get('#file-zoom-display').should('have.text', '110%');
+        cy.window().then((win) => win.localStorage.setItem('pdf-scale', '1.5'));
+        cy.get('[aria-label="Collapse File"]').click();
+        cy.get('#file-view').should('not.be.visible');
+        cy.get('[data-testid="submission-browser-file"][data-file-name="words_249.pdf"] [aria-label="Show file in full panel"]').click();
+        cy.get('#file-zoom-display').should('have.text', '150%');
+        cy.get('[aria-label="Zoom In"]').click();
+        cy.get('#file-zoom-display').should('have.text', '160%');
+        openImage();
+        cy.get('#file-zoom-display').should('have.text', '110%');
+        cy.window().then((win) => {
+            expect(win.localStorage.getItem('image-scale')).to.equal('1.1');
+            expect(win.localStorage.getItem('pdf-scale')).to.equal('1.6');
+        });
+    });
+
+    it('keeps markers aligned through restored zoom, editing, cancel, save, and cleanup', () => {
+        cy.window().then((win) => win.localStorage.setItem('image-scale', '1.3'));
+        openImage();
+        cy.window().then((win) => {
+            const img = win.document.getElementById('annotatable-image');
+            const state = {
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+                markers: [{
+                    typeName: 'FrameMarker',
+                    left: img.naturalWidth * 0.1,
+                    top: img.naturalHeight * 0.1,
+                    width: img.naturalWidth * 0.2,
+                    height: img.naturalHeight * 0.2,
+                    rotationAngle: 0,
+                    strokeColor: '#ff0000',
+                    strokeWidth: 2,
+                }],
+            };
+            // Normal uploads do not enable annotations; initialize the same viewer used by bulk uploads.
+            win.initImageAnnotation('open_homework', 'bitdiddle', 'instructor', imageName, '', win.csrfToken, false, {
+                instructor: JSON.stringify(state),
+            });
+        });
+
+        function assertMarkerAlignment() {
+            cy.get('#annotation-marker-view').should(($view) => {
+                const view = $view[0];
+                expect(view.markers).to.have.length(1);
+                const image = view.shadowRoot.querySelector('img').getBoundingClientRect();
+                const marker = view.markers[0].container.getBoundingClientRect();
+                expect(image.width).to.be.greaterThan(0);
+                expect((marker.left - image.left) / image.width).to.be.closeTo(0.1, 0.01);
+                expect((marker.top - image.top) / image.height).to.be.closeTo(0.1, 0.01);
+                expect(marker.width / image.width).to.be.closeTo(0.2, 0.01);
+                expect(marker.height / image.height).to.be.closeTo(0.2, 0.01);
+            });
+        }
+
+        cy.get('#file-zoom-display').should('have.text', '130%');
+        assertMarkerAlignment();
+        cy.get('[aria-label="Zoom In"]').click();
+        cy.get('#file-zoom-display').should('have.text', '140%');
+        assertMarkerAlignment();
+        cy.window().then((win) => win.addAnnotations());
+        cy.get('#global-annotation-editor').should(($editor) => {
+            expect($editor[0].markerArea.getState().markers).to.have.length(1);
+        });
+        cy.get('#global-annotation-editor').shadow().find('[aria-label="Close"]').click();
+        assertMarkerAlignment();
+        cy.window().then((win) => win.addAnnotations());
+        cy.get('#global-annotation-editor').should(($editor) => {
+            expect($editor[0].markerArea.getState().markers).to.have.length(1);
+        });
+        cy.get('#global-annotation-editor').shadow().find('[aria-label="OK"]').click();
+        cy.get('#global-annotation-editor-wrapper').should('not.be.visible');
+        assertMarkerAlignment();
+        cy.intercept('POST', '**/img/annotations', { status: 'success' }).as('saveAnnotations');
+        cy.window().then((win) => win.saveAnnotations());
+        cy.wait('@saveAnnotations').then(({ request }) => {
+            const annotations = typeof request.body === 'string'
+                ? new URLSearchParams(request.body).get('annotations')
+                : request.body.annotations;
+            expect(JSON.parse(annotations).markers).to.have.length(1);
+        });
+        cy.screenshot('image-zoom-marker-alignment');
+        cy.window().then((win) => win.cleanupAnnotationEditor());
+        cy.get('#global-annotation-editor-wrapper').should('not.exist');
+        cy.get('#annotation-marker-view').should('not.exist');
+        cy.get('#annotatable-image').should(($img) => {
+            expect($img[0].dataset.zoom).to.equal('1.4');
+        });
+        cy.get('#file-zoom-display').should('have.text', '140%');
     });
 });
