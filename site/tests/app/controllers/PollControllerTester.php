@@ -17,8 +17,6 @@ use app\views\GlobalView;
 use tests\BaseUnitTest;
 
 class PollControllerTester extends BaseUnitTest {
-    use \phpmock\phpunit\PHPMock;
-
     protected function tearDown(): void {
         $_POST = [];
         $_FILES = [];
@@ -127,12 +125,19 @@ class PollControllerTester extends BaseUnitTest {
     public function testImportedPollsNotifyAfterPersistence(): void {
         $flushed = false;
         $controller = $this->mutationController($flushed);
-        $_FILES = ['polls_file' => ['tmp_name' => '/uploaded-polls.json']];
-        $this->getFunctionMock('app\libraries', 'is_file')->expects($this->once())->with('/uploaded-polls.json')->willReturn(true);
-        $this->getFunctionMock('app\libraries', 'file_get_contents')->expects($this->once())->with('/uploaded-polls.json')
-            ->willReturn(json_encode(PollUtils::getPollExportData([$this->poll()])));
-        $controller->importPollsFromJSON();
-        $this->assertTrue($flushed);
+        $file = tmpfile();
+        $this->assertIsResource($file);
+
+        try {
+            $json = json_encode(PollUtils::getPollExportData([$this->poll()]), JSON_THROW_ON_ERROR);
+            $this->assertSame(strlen($json), fwrite($file, $json));
+            $_FILES = ['polls_file' => ['tmp_name' => stream_get_meta_data($file)['uri']]];
+            $controller->importPollsFromJSON();
+            $this->assertTrue($flushed);
+        }
+        finally {
+            fclose($file);
+        }
     }
 
     public function testStudentIndexKeepsFuturePollsOutOfBothGroups(): void {

@@ -733,7 +733,6 @@ class PollController extends AbstractController {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
 
-        /** @var \app\repositories\poll\PollRepository */
         $repo = $em->getRepository(Poll::class);
 
         /** @var Poll|null */
