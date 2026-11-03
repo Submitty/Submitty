@@ -94,6 +94,8 @@ class Access {
     const CHECK_PEER_SOLUTIONS           = 1 << 31;
     const REQUIRE_ARG_POLL               = 1 << 32;
     const POLL_CHECK_HISTOGRAM           = 1 << 33;
+    /** Prevent peer-only staff graders from accessing grade inquiries */
+    const CHECK_NOT_PEER_ONLY_STAFF_GRADER = 1 << 34;
 
 
     // Broader user group access cases since generally actions are "minimum this group"
@@ -166,7 +168,7 @@ class Access {
         $this->permissions["grading.electronic.verify_all"] = self::CHECK_CSRF | self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.silent_edit"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.export_components"] = self::ALLOW_MIN_INSTRUCTOR; // this doesn't need to be instructor, but they're the only ones who will do this
-        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.electronic.grade_inquiry"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_NOT_PEER_ONLY_STAFF_GRADER;
 
         $this->permissions["autograding.load_checks"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE;
         $this->permissions["autograding.show_hidden_cases"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::ALLOW_SELF_GRADEABLE;
@@ -472,6 +474,12 @@ class Access {
             $grading_checks = true;
 
             $peer_only_staff_grader = $gradeable !== null && $gradeable->hasPeerComponent() && $user !== null && $user->accessGrading() && !$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup());
+            if (
+                self::checkBits($checks, self::CHECK_NOT_PEER_ONLY_STAFF_GRADER)
+                && $peer_only_staff_grader
+            ) {
+                $grading_checks = false;
+            }
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
                 if (!$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup())) {
