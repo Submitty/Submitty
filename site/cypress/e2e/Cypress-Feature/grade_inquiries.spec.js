@@ -48,7 +48,6 @@ describe('Test cases revolving around grade inquiries', () => {
         });
     });
 
-
     it('Should test if users can see grade inquiry panel/containers', () => {
         // Full-access grader should be able to access grade inquiries.
         cy.login('ta');
