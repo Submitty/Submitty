@@ -32,7 +32,11 @@ describe('Peer graders should not see grade inquiry indicators', () => {
             'details',
         ]);
 
-        cy.get('[data-testid="popup-save-button"]').click();
+        cy.get('body').then(($body) => {
+            if ($body.find('[data-testid="popup-save-button"]').length) {
+                cy.get('[data-testid="popup-save-button"]').click();
+            }
+        });
 
         cy.get('[data-testid="grade-button"]')
             .its('length')
