@@ -42,15 +42,13 @@ export function getStudentNavigationFilter(
     inquiryStatus: string | undefined,
     configuredFilter: string | null,
 ): string {
-    if (clusterMode) {
-        return 'cluster';
-    }
     if (inquiryStatus === 'on') {
         return 'active-inquiry';
     }
-    return configuredFilter !== 'active-inquiry' && configuredFilter !== 'cluster'
+    const filter = configuredFilter !== 'active-inquiry' && configuredFilter !== 'cluster'
         ? configuredFilter || 'default'
         : 'default';
+    return clusterMode && filter === 'default' ? 'cluster' : filter;
 }
 
 export function gotoPrevStudent(clusterMode = false) {

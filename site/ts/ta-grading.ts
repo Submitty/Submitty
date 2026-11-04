@@ -17,7 +17,7 @@ import {
     toggleCommonMark,
     toggleComponent as oldToggleComponent,
 } from './ta-grading-rubric';
-import { gotoNextStudent, gotoPrevStudent } from './ta-grading-toolbar';
+import { getStudentNavigationFilter } from './ta-grading-toolbar';
 
 declare global {
     interface Window {
@@ -52,20 +52,21 @@ declare global {
 const cookie_version = 1;
 
 export function changeStudentArrowTooltips(data: string) {
-    const inquiry_status = window.Cookies.get('inquiry_status');
-    if (inquiry_status === 'on') {
-        data = 'active-inquiry';
-    }
-    else {
-        // if inquiry_status is off, and data equals active inquiry means the user set setting to active-inquiry manually
-        // and need to set back to default since user also manually changed inquiry_status to off.
-        if (data === 'active-inquiry') {
-            data = 'default';
-        }
-    }
+    const filter = getStudentNavigationFilter(
+        $('#toggle-cluster-mode').attr('data-cluster-mode') === 'true',
+        window.Cookies.get('inquiry_status'),
+        data,
+    );
+    const cluster = filter === 'cluster';
+    $('#prev-student').attr('title', cluster ? 'Previous cluster' : 'Previous student');
+    $('#next-student').attr('title', cluster ? 'Next cluster' : 'Next student');
     // eslint-disable-next-line no-useless-assignment
     let component_id = NO_COMPONENT_ID;
-    switch (data) {
+    switch (filter) {
+        case 'cluster':
+            $('#prev-student-navlink').find('i').first().attr('title', 'Previous cluster');
+            $('#next-student-navlink').find('i').first().attr('title', 'Next cluster');
+            break;
         case 'ungraded':
             component_id = getFirstOpenComponentId(false);
             if (component_id === NO_COMPONENT_ID) {
@@ -1149,10 +1150,10 @@ async function toggleComponent(component_id: number, saveChanges: boolean, edit_
 $(() => {
     // Navigate to the prev / next student buttons
     registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
-        gotoPrevStudent();
+        $('#prev-student').trigger('click');
     });
     registerKeyHandler({ name: 'Next Student', code: 'ArrowRight' }, () => {
-        gotoNextStudent();
+        $('#next-student').trigger('click');
     });
 
     // Key handler / shorthand for toggling in between panels

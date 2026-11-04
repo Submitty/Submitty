@@ -25,8 +25,11 @@ class GradingOrderTester extends \PHPUnit\Framework\TestCase {
         $no_submission = $this->submitter('no_submission');
         $b = $this->submitter('b');
         $order = (new \ReflectionClass(GradingOrder::class))->newInstanceWithoutConstructor();
-        foreach (['section_submitters' => [[$a, $same, $withdrawn, $no_submission, $b]],
-                  'has_submission' => ['a' => true, 'same' => true, 'withdrawn' => true, 'b' => true]] as $name => $value) {
+        $properties = [
+            'section_submitters' => [[$a, $same, $withdrawn, $no_submission, $b]],
+            'has_submission' => ['a' => true, 'same' => true, 'withdrawn' => true, 'b' => true]
+        ];
+        foreach ($properties as $name => $value) {
             $property = new \ReflectionProperty(GradingOrder::class, $name);
             $property->setAccessible(true);
             $property->setValue($order, $value);
@@ -44,8 +47,11 @@ class GradingOrderTester extends \PHPUnit\Framework\TestCase {
         $a = $this->submitter('a');
         $team = $this->submitter('team', true, true);
         $order = (new \ReflectionClass(GradingOrder::class))->newInstanceWithoutConstructor();
-        foreach (['section_submitters' => [[$a, $team]],
-                  'has_submission' => ['a' => true, 'team' => true]] as $name => $value) {
+        $properties = [
+            'section_submitters' => [[$a, $team]],
+            'has_submission' => ['a' => true, 'team' => true]
+        ];
+        foreach ($properties as $name => $value) {
             $property = new \ReflectionProperty(GradingOrder::class, $name);
             $property->setAccessible(true);
             $property->setValue($order, $value);
