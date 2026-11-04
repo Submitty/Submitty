@@ -1,7 +1,6 @@
 describe('Peer graders should not see grade inquiry indicators', () => {
     const gradeableId = 'grading_pdf_peer_homework';
     const peerGraderId = 'baliss';
-    const overriddenAnonId = 'ED9OAlz1ndBS6Um';
 
     const setGradeInquiriesForGradeable = (date) => {
         cy.login('instructor');
@@ -33,20 +32,23 @@ describe('Peer graders should not see grade inquiry indicators', () => {
             'details',
         ]);
 
-        const studentGradeButton
-            = `[data-testid="grade-button"][href*="who_id=${overriddenAnonId}"]`;
+        cy.get('[data-testid="popup-save-button"]').click();
 
-        cy.get(studentGradeButton).should('exist');
+        cy.get('[data-testid="grade-button"]')
+            .its('length')
+            .should('be.greaterThan', 0);
 
-        cy.get(studentGradeButton)
-            .should('not.contain', 'Grade Inquiry');
+        cy.get('[data-testid="grade-button"]').each(($button) => {
+            cy.wrap($button)
+                .should('not.contain', 'Grade Inquiry');
 
-        cy.get(studentGradeButton)
-            .should('not.have.attr', 'data-grade-inquiry');
+            cy.wrap($button)
+                .should('not.have.attr', 'data-grade-inquiry');
 
-        cy.get(studentGradeButton)
-            .find('.notification-badge')
-            .should('not.exist');
+            cy.wrap($button)
+                .find('.notification-badge')
+                .should('not.exist');
+        });
 
         cy.screenshot('peer-grader-no-grade-inquiry');
 
