@@ -1,5 +1,3 @@
-from textwrap import dedent
-
 """Migration for the Submitty master database."""
 
 
