@@ -1249,7 +1249,8 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerEditMarksPanel', $graded_gradeable);
         }
         if ($isPeerParticipationPanel) {
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerParticipationPanel', $graded_gradeable);
+            $anonymize = $anon_mode || $blind_grading !== 'unblind';
+            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderPeerParticipationPanel', $graded_gradeable, $anonymize);
         }
         if ($isDiscussionPanel) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderDiscussionForum', $graded_gradeable->getGradeable()->getDiscussionThreadId(), $graded_gradeable->getSubmitter(), $graded_gradeable->getGradeable()->isTeamAssignment());
@@ -2014,19 +2015,32 @@ HTML;
      * Render the Peer Participation panel
      *
      * @param GradedGradeable $graded_gradeable
+     * @param bool $anonymize Show anonymous IDs instead of real user IDs
      * @return string
      */
-    public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable): string {
+    public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable, bool $anonymize = false): string {
         $submitter = $graded_gradeable->getSubmitter();
         $participation = [];
         $assigned_count = 0;
         $completed_count = 0;
         if (!$submitter->isTeam()) {
             $gradeable_id = $graded_gradeable->getGradeable()->getId();
-            $participation = $this->core->getQueries()->getPeerParticipationForGrader($submitter->getId(), $gradeable_id);
+            $participation = $this->core->getQueries()->getPeerParticipationForGrader(
+                $submitter->getId(),
+                $gradeable_id
+            );
             $assigned = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($submitter->getId())[$gradeable_id] ?? [];
             $assigned_count = count($assigned);
             $completed_count = count(array_intersect($assigned, array_keys($participation)));
+            if ($anonymize && $participation !== []) {
+                $anon_ids = $this->core->getQueries()->getAnonId(array_keys($participation), $gradeable_id);
+                $anonymized = [];
+                foreach ($participation as $user_id => $data) {
+                    $anonymized[$anon_ids[$user_id] ?? 'Unknown'] = $data;
+                }
+                ksort($anonymized);
+                $participation = $anonymized;
+            }
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
             'participation' => $participation,
