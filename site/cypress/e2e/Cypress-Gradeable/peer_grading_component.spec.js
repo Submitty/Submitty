@@ -128,7 +128,7 @@ describe('Peer Grading Component testing', () => {
             mimeType: 'text/csv',
         }, { force: true });
         cy.wait('@uploadPeerAssignments').then(({ response }) => {
-            expect(getResponseStatus(response)).to.equal('error');
+            expect(getResponseStatus(response)).to.equal('fail');
         });
         cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
     });
@@ -143,7 +143,7 @@ describe('Peer Grading Component testing', () => {
             mimeType: 'text/csv',
         }, { force: true });
         cy.wait('@uploadPeerAssignments').then(({ response }) => {
-            expect(getResponseStatus(response)).to.equal('error');
+            expect(getResponseStatus(response)).to.equal('fail');
         });
         cy.contains('[data-testid="table-wrapper"] tbody tr', 'ritcha').should('contain', 'gutmal');
     });
