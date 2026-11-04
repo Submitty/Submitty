@@ -65,7 +65,7 @@ describe('Tests cases for the Student API', () => {
                 expect(data_string).to.contain('test_cases');
                 // CI doesn't have grades
                 // Requires VCS Subdirectory gradeable to be graded
-                if (Cypress.env('run_area') !== 'CI') {
+                if (Cypress.expose('run_area') !== 'CI') {
                     const python_test = {
                         name: 'Python test',
                         details: 'python3 *.py',

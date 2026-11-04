@@ -6,15 +6,24 @@
 {% if not active_same_as_graded %}
     $('.peer-results-box').css('background-color', 'var(--standard-light-red)')
 {% endif %}
-{# When the user clicks on a peer tab in peer feedback mode, hide all other peer feedback panels, set all other tabs to unselected, set the clicked peer tab to selected and show the corresponding peer feedback panel #}
+{# Switch between the summary and individual peer feedback panels. #}
+function open_peer_summary_tab() {
+    $('#normal_peer_wrapper').show();
+    $('#comments_wrapper').show();
+    $('#peer_feedback_wrapper').hide();
+    $('[id^="peer_feedback_nav_"]').removeClass('active-btn');
+    $('#peer_summary_nav').addClass('active-btn');
+}
 
-function open_peer_feedback_tab(user, ordered_graders) {
-    $('.page-content').hide();
-    $('#peer-feedback-'+user).show();
-    for (var i = 0 ; i<{{ordered_graders|json_encode|raw}}.length;i++){
-        $('#peer_feedback_nav_'+{{ordered_graders|json_encode|raw}}[i]).removeClass('active-btn');
-    }
-    $('#peer_feedback_nav_'+user).addClass('active-btn');
+function open_peer_feedback_tab(user) {
+    $('#normal_peer_wrapper').hide();
+    $('#comments_wrapper').hide();
+    $('#peer_feedback_wrapper').show();
+    $('#peer_feedback_wrapper .page-content').hide();
+    $('#peer-feedback-' + user).show();
+    $('[id^="peer_feedback_nav_"]').removeClass('active-btn');
+    $('#peer_summary_nav').removeClass('active-btn');
+    $('#peer_feedback_nav_' + user).addClass('active-btn');
 }
 function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
     let peer_feedback_positive = ['no_response', 'thanks', 'helpful', 'detailed'];
@@ -39,20 +48,6 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
         peerFeedbackUpload(grader_id, user_id, g_id, feedback);
     }
 }
-function switch_feedback_modes() {
-    if($('#switch_feedback_button')[0].textContent == "Switch to Feedback Mode"){
-        $('#switch_feedback_button')[0].textContent = "Switch to Normal Display";
-        $('#peer_feedback_wrapper').show();
-        $('#comments_wrapper').hide();
-        $('#normal_peer_wrapper').hide();
-    }
-    else{
-        $('#switch_feedback_button')[0].textContent = "Switch to Feedback Mode";
-        $('#normal_peer_wrapper').show();
-        $('#comments_wrapper').show();
-        $('#peer_feedback_wrapper').hide();
-    }
-}
 </script>
 
 {% if not been_ta_graded %}
@@ -64,7 +59,6 @@ function switch_feedback_modes() {
 {% else %}
     <div class="sub">
 
-        <button class = 'btn btn-default' id = "switch_feedback_button" onclick='switch_feedback_modes()'>Switch to Feedback Mode</button>
 
         {# /Overview #}
 
@@ -82,7 +76,20 @@ function switch_feedback_modes() {
                     <h4>Peer Grading Total</h4>
                 </div>
             </div>
-
+            <div class="box grade-results peer-results-tabs" id="peer_results_tabs">
+                <button type="button" class="btn btn-default active-btn"
+                        id="peer_summary_nav"
+                        onclick="open_peer_summary_tab();">
+                    SUMMARY
+                </button>
+                {% for grader in ordered_graders %}
+                    <button type="button" class="btn btn-default"
+                            id="peer_feedback_nav_{{grader}}"
+                            onclick="open_peer_feedback_tab('{{grader}}');">
+                        {{ peer_aliases[grader] }}
+                    </button>
+                {% endfor %}
+            </div>
             {# Peer Component boxes #}
             <div id="normal_peer_wrapper">
                 {% for component in peer_components %}
@@ -224,11 +231,6 @@ function switch_feedback_modes() {
 
 {%- macro renderPeerFeedbackTable(peer_components, peer_aliases, ordered_graders, grader_info, user_id, gradeable_id, peer_feedback, anon_grader_id_mapping, num_decimals) -%}
     <div id="peer_feedback_wrapper" style="display: none;">
-        <div class="box grade-results">
-            {% for grader in ordered_graders %}
-                <a class="nav-bar key_to_click" id="peer_feedback_nav_{{grader}}" onclick="open_peer_feedback_tab('{{grader}}');">{{peer_aliases[grader]}}</a>
-            {% endfor %}
-        </div>
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">

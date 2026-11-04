@@ -39,7 +39,8 @@ const displayHidden = ref(props.displayHidden || false);
       @click="handleClick"
     >
       <i
-        :class="`fas ${displayHidden ? hiddenIcon : visibleIcon} icon-header icon-streched`"
+        class="fas icon-header icon-streched"
+        :class="displayHidden ? hiddenIcon : visibleIcon"
       />
     </button>
   </span>

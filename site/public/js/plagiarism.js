@@ -274,6 +274,7 @@ function loadUser2DropdownList(state) {
 function loadConcatenatedFileForEditor(state, editor) {
     // makes an ajax request to get the concatenated file with respsect
     // to the selected user + version in panel number #editor
+    // eslint-disable-next-line no-useless-assignment
     let url = '';
     if (editor === 1) {
         url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'concat'])}?user_id=${state.user_1_selected.user_id}&version=${state.user_1_selected.version}`;
@@ -446,6 +447,7 @@ function refreshColorInfo(state) {
             state.editor1.scrollTo(0, scrollPos.top);
 
             $.each(state.color_info, (i, interval) => {
+                // eslint-disable-next-line no-useless-assignment
                 let color = '';
                 if (interval.type === 'match') {
                     color = 'match';

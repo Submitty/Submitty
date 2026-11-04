@@ -11,6 +11,7 @@ from __future__ import print_function
 import glob
 import os
 import pwd
+import re
 import shutil
 import subprocess
 import tempfile
@@ -116,8 +117,9 @@ def main():
                   "xargs -I \"@@\" dropdb -h localhost -U submitty_dbuser \"@@\"")
         del os.environ['PGPASSWORD']
 
-        psql_version = subprocess.check_output("psql -V | egrep -o '[0-9]{1,}\.[0-9]{1,}'",
-                                               shell=True).strip()
+        psql_version_output = subprocess.check_output(["psql", "-V"], text=True)
+        psql_version_match = re.search(r"[0-9]+\.[0-9]+", psql_version_output)
+        psql_version = psql_version_match.group(0) if psql_version_match else ""
 
         try:
             shutil.move('/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf.backup', '/etc/postgresql/' + str(psql_version) + '/main/pg_hba.conf')

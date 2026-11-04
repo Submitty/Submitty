@@ -32,7 +32,7 @@ apt-get update
 
 apt-get install -qy python python-dev python3 python3-dev libpython3.4
 
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     export SUBMISSION_URL='http://192.168.56.201'
     export DATABASE_PORT=25432
 fi
@@ -51,7 +51,7 @@ apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-externa
 apt-get install -qy php7.0 php7.0-cli php7.0-fpm php7.0-curl php7.0-pgsql php7.0-mcrypt
 apt-get install -qqy php7.0-zip php7.0-mbstring php7.0-xml
 
-if [ ${VAGRANT} == 1 ]; then
+if [ "${VAGRANT}" == 1 ]; then
     apt-get install -qqy php7.0-sqlite3 php7.0-xdebug
 fi
 

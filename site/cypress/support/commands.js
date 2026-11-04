@@ -88,6 +88,7 @@ Cypress.Commands.add('waitPageChange', (fn) => {
 * @param {String|String[]}
 */
 Cypress.Commands.overwrite('visit', (originalFn, options) => {
+    // eslint-disable-next-line no-useless-assignment
     let url = '';
 
     if (Array.isArray(options)) {

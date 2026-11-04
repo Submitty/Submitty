@@ -16,13 +16,10 @@ def main():
 
     for proc in psutil.process_iter():
         try:
-            pinfo = proc.as_dict(attrs=['name', 'pid', 'username'])
-            if pinfo['username'] == pwd.getpwuid(os.getuid())[0]:
-                print(
-                    f"a process to kill (except if its this script) "
-                    f"proc={proc} count={count}"
-                )
-                if pinfo['pid'] != current_pid:
+            pinfo = proc.as_dict(attrs=["name", "pid", "username"])
+            if pinfo["username"] == pwd.getpwuid(os.getuid())[0]:
+                print(f"a process to kill (except if its this script) proc={proc} count={count}")
+                if pinfo["pid"] != current_pid:
                     count += 1
                     proc.kill()
         except psutil.NoSuchProcess:
@@ -33,5 +30,5 @@ def main():
         sys.exit(count)  # non-zero exit code means that many things had to be killed
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -74,7 +74,7 @@
 
 
           <td>
-              <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} data-testid="toggle-queue-checkbox" />
+              <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']|e('js')}}')" {% if queue['open'] %} checked {% endif %} data-testid="toggle-queue-checkbox" />
           </td>
           <td>
             <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">

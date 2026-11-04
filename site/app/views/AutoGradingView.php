@@ -514,6 +514,7 @@ class AutoGradingView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.js'));
         $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),

@@ -63,6 +63,7 @@ function addConfetti() {
     }
 
     function randomColor() {
+        // eslint-disable-next-line no-useless-assignment
         let colors = [];
 
         // JS month : 0-11

@@ -168,7 +168,7 @@
     {% elseif user_group < 4 or folder_visibilities[current_path] %}
         <div class="folder-container">
             <div class="div-viewer view-row">
-                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setFolderCookie('{{ folder_path }}', '{{ id }}', toggleCMFolder('{{ id }}'))" tabindex="0">
+                <a class="openAllDiv key_to_click openAllDivsubmissions openable-element-submissions" id="{{ name }}" onclick="setFolderState('{{ folder_path }}', '{{ id }}', toggleCMFolder('{{ id }}'))" tabindex="0">
                     <span  class="fas fa-folder open-all-folder" style="vertical-align: text-top; font-size: 20px"></span>
                     {{ name }}
                 </a>
@@ -191,14 +191,14 @@
 {% endmacro %}
 
 <script>
-    function setFolderCookie(folderPath, id, open) {
-        const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
+    function setFolderState(folderPath, id, open) {
+        const folderData = JSON.parse(localStorage.getItem('cm_folder_data') || '{}');
         folderData[folderPath] = { id, open };
-        Cookies.set('cm_folder_data', JSON.stringify(folderData));
+        localStorage.setItem('cm_folder_data', JSON.stringify(folderData));
     }
 
     function toggleFoldersOpen(){
-        Cookies.remove('cm_folder_data');
+        localStorage.removeItem('cm_folder_data');
         Cookies.set("foldersOpen", toggleCMFolders());
     }
     {% if user_group == 1 %}
@@ -236,7 +236,11 @@
     window.onload = function () {
         //determine if folders have been left open or closed
         const foldersOpen = Boolean(JSON.parse(Cookies.get('foldersOpen') || 'false'));
-        const folderData = JSON.parse(Cookies.get('cm_folder_data') || '{}');
+        const folderData = JSON.parse(localStorage.getItem('cm_folder_data') || '{}');
+
+        // Folder state used to live in a cookie large enough to break websocket handshakes.
+        Cookies.remove('cm_folder_data');
+
         //open/close folders on screen as directed
         toggleCMFolders(foldersOpen);
         for (const data of Object.values(folderData)) {

@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, closePopup, displaySuccessMessage, showPopup */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, closePopup, displaySuccessMessage, showPopup */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function updateVisibility() {
@@ -297,7 +297,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 }
 
 function getCheckpointHistory(g_id) {
-    const history = Cookies.get(`${g_id}_history`);
+    const history = sessionStorage.getItem(`${g_id}_history`);
     try {
         return JSON.parse(history) || [0];
     }
@@ -306,11 +306,9 @@ function getCheckpointHistory(g_id) {
     }
 }
 
+// The history holds student ids and scores, so it is kept for the tab's lifetime only.
 function setCheckpointHistory(g_id, history) {
-    const DateTime = luxon.DateTime;
-    const now = DateTime.now();
-    const expiration_date = now.plus({ days: 1 });
-    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date.toJSDate() });
+    sessionStorage.setItem(`${g_id}_history`, JSON.stringify(history));
 }
 
 function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {

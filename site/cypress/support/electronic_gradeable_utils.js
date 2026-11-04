@@ -3,7 +3,7 @@
  * @param {string} gradeableName the name of the gradeable we are visiting
  */
 function visitGradeable(gradeableName) {
-    const course = Cypress.env('course');
+    const course = Cypress.expose('course');
     cy.visit([course, 'gradeable', gradeableName]);
     // wait 10 seconds for client JS to load - reduces flakyness
     cy.get('[data-testid="gradeable-time-remaining-text"]', { timeout: 10000 }).should('contain.text', 'days');
@@ -106,7 +106,7 @@ function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, ful
  * @returns {string} the full path to the file
  */
 const constructFileName = (gradeable, filePath) => {
-    const course = Cypress.env('course');
+    const course = Cypress.expose('course');
     if (course === 'development') {
         return `copy_of_more_autograding_examples/${gradeable}/submissions/${filePath}`;
     }

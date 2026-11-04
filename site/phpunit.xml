@@ -1,13 +1,6 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" convertDeprecationsToExceptions="true" bootstrap="./tests/bootstrap.php" colors="true" verbose="true">
-  <coverage processUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">./app</directory>
-      <directory suffix=".php">./tests/phpstan</directory>
-    </include>
-    <exclude>
-      <directory suffix=".php">./app/views</directory>
-    </exclude>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" bootstrap="./tests/bootstrap.php" colors="true" cacheDirectory=".phpunit.cache">
+  <coverage>
     <report>
       <clover outputFile="tests/report/clover.xml"/>
       <html outputDirectory="tests/report"/>
@@ -23,4 +16,13 @@
     </testsuite>
   </testsuites>
   <logging/>
+  <source>
+    <include>
+      <directory suffix=".php">./app</directory>
+      <directory suffix=".php">./tests/phpstan</directory>
+    </include>
+    <exclude>
+      <directory suffix=".php">./app/views</directory>
+    </exclude>
+  </source>
 </phpunit>

@@ -2,7 +2,7 @@
     <header>
         <h1>Manage Graders</h1>
         <div class="btn-wrapper">
-            <a href="javascript:toggleColumnsForm()" class="btn btn-primary">Toggle Columns</a>
+            <a href="javascript:toggleColumnsForm()" class="btn btn-primary" data-testid="toggle-columns">Toggle Columns</a>
             <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Graders</a>
             <a href="javascript:newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
             <a href="javascript:newGraderForm()" class="btn btn-primary">New Grader</a>
@@ -11,32 +11,39 @@
     </header>
 
     {# This is a data table #}
+    {# '#', 'User ID' and 'Edit Grader' are always shown #}
+    {% set count = 3 %}
     {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
-        <table id="grader-table" class="table table-striped mobile-table directory-table">
+        <table id="grader-table" class="table table-striped mobile-table directory-table" data-testid="grader-table">
             <caption>Course Graders</caption>
             <thead>
                <tr>
                 <th>#</th>
+                <th style="text-align:left;">User ID</th>
                 {% if active_grader_columns[0] %}
-                    <th style="text-align:left;">User ID</th>
+                    <th style="text-align:left;">Given Name</th>
+                    {% set count = count + 1 %}
                 {% endif %}
                 {% if active_grader_columns[1] %}
-                    <th style="text-align:left;">Given Name</th>
+                    <th style="text-align:left;">Family Name</th>
+                    {% set count = count + 1 %}
                 {% endif %}
                 {% if active_grader_columns[2] %}
-                    <th style="text-align:left;">Family Name</th>
+                    <th style="text-align:left;">User Group</th>
+                    {% set count = count + 1 %}
                 {% endif %}
                 {% if active_grader_columns[3] %}
-                    <th style="text-align:left;">User Group</th>
+                    <th style="text-align:left;">Registration Sections</th>
+                    {% set count = count + 1 %}
                 {% endif %}
                 {% if active_grader_columns[4] %}
-                    <th style="text-align:left;">Registration Sections</th>
+                    <th style="text-align:left;">Registration Subsection</th>
+                    {% set count = count + 1 %}
                 {% endif %}
+                <th style="text-align:left;">Edit Grader</th>
                 {% if active_grader_columns[5] %}
-                    <th style="text-align:left;">Edit Grader</th>
-                {% endif %}
-                {% if active_grader_columns[6] %}
                     <th style="text-align:left;">Demote Grader</th>
+                    {% set count = count + 1 %}
                 {% endif %}
                </tr>
             </thead>
@@ -44,35 +51,34 @@
                 <tbody id="section-{{ grading_group }}">
                     {% if graders[grading_group]|length > 0 %}
                         <tr class="info">
-                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</th>
+                            <th class="section-break" colspan="{{ count }}">{{groups[grading_group].name}}</th>
                         </tr>
                         {% for grader in graders[grading_group] %}
                             <tr id="user-{{ grader.getId() }}">
                                 <td></td>
+                                <td class="align-left td-grader-id" data-testid="grader-id-td">{{ grader.getId() }}</td>
                                 {% if active_grader_columns[0] %}
-                                     <td class="align-left td-grader-id">{{ grader.getId() }}</td>
+                                     <td class="align-left td-given-name" data-testid="grader-given-name">{{ grader.getDisplayedGivenName() }}</td>
                                 {% endif %}
                                 {% if active_grader_columns[1] %}
-                                     <td class="align-left td-given-name">{{ grader.getDisplayedGivenName() }}</td>
-                                {% endif %}
-                                {% if active_grader_columns[2] %}
                                      <td class="align-left td-family-name">{{ grader.getDisplayedFamilyName() }}</td>
                                 {% endif %}
-                                {% if active_grader_columns[3] %}
+                                {% if active_grader_columns[2] %}
                                      <td class="align-left td-grader-group">{{ groups[grader.getGroup()].name }}</td>
                                 {% endif %}
-                                {% if active_grader_columns[4] %}
+                                {% if active_grader_columns[3] %}
                                      <td class="align-left td-registration-section">{{ grader.getGradingRegistrationSections()|join(", ") ?: "None" }}</td>
                                 {% endif %}
-                                {% if active_grader_columns[5] %}
-                                     <td class="align-left td-edit-grader">
-                                        <a href="javascript:editUserForm('{{ grader.getId() }}');"
-                                        aria-label="edit grader {{grader.getDisplayedGivenName()}} {{grader.getDisplayedFamilyName()}}">
-                                            <i class="fas fa-pencil-alt" title="Edit Grader"></i>
-                                        </a>
-                                     </td>
+                                {% if active_grader_columns[4] %}
+                                     <td class="align-left td-registration-subsection" data-testid="registration-subsection-td">{{ grader.getRegistrationSubsection() }}</td>
                                 {% endif %}
-                                {% if active_grader_columns[6] %}
+                                <td class="align-left td-edit-grader" data-testid="edit-grader-td">
+                                    <a href="javascript:editUserForm('{{ grader.getId() }}');"
+                                    aria-label="edit grader {{grader.getDisplayedGivenName()}} {{grader.getDisplayedFamilyName()}}">
+                                        <i class="fas fa-pencil-alt" title="Edit Grader"></i>
+                                    </a>
+                                </td>
+                                {% if active_grader_columns[5] %}
                                      <td class="align-left td-demote-grader">
                                         <a href="javascript:demoteGraderForm('{{ grader.getId() }}', '{{ grader.getDisplayedGivenName() }}', '{{ grader.getDisplayedFamilyName() }}');"
                                             aria-label="">
@@ -84,7 +90,7 @@
                         {% endfor %}
                     {% else %}
                         <tr class="info">
-                            <td colspan="8" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
+                            <td colspan="{{ count }}" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
                         </tr>
                     {% endif %}
                 </tbody>

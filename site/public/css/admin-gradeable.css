@@ -185,6 +185,18 @@ a.nav-bar.active-btn {
     font-weight: bold;
 }
 
+.peer-results-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.peer-results-tabs .btn.active-btn {
+    background-color: var(--submitty-logo-blue);
+    color: var(--btn-text-white);
+    font-weight: bold;
+}
+
 /* align the radio, buttons and checkboxes with labels */
 input[type="radio"],
 input[type="checkbox"] {

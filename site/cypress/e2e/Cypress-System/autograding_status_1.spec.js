@@ -4,7 +4,7 @@ import { skipOn } from '@cypress/skip-test';
 const autograding_status_path = 'autograding_status';
 
 // Assumes autograding workers have been turned off
-skipOn(Cypress.env('run_area') === 'CI', () => {
+skipOn(Cypress.expose('run_area') === 'CI', () => {
     describe('Pre autograding test', () => {
         before(() => {
             cy.login();

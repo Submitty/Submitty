@@ -2,6 +2,7 @@
 None of the functions should be imported here directly, but from
 the class Course
 """
+
 from __future__ import print_function, division
 import hashlib
 import json
@@ -53,9 +54,7 @@ class Course_create:
         # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
         self.gradeables.sort(key=lambda g: (g.depends_on is not None, g.id))
-        self.course_path = os.path.join(
-            SUBMITTY_DATA_DIR, "courses", self.semester, self.code
-        )
+        self.course_path = os.path.join(SUBMITTY_DATA_DIR, "courses", self.semester, self.code)
         # To make Rainbow Grades testing possible, need to seed random
         m = hashlib.md5()
         m.update(bytes(self.code, "utf-8"))
@@ -73,8 +72,10 @@ class Course_create:
         add_to_group(course_group, "submitty_php")
         add_to_group(course_group, "submitty_daemon")
         add_to_group(course_group, "submitty_cgi")
-        archive = ' --archive ' if self.archived else ''
-        self_registration_type = ' --all-self-registration ' if self.self_registration_type == 2 else ''
+        archive = " --archive " if self.archived else ""
+        self_registration_type = (
+            " --all-self-registration " if self.self_registration_type == 2 else ""
+        )
         os.system(
             f"{SUBMITTY_INSTALL_DIR}/sbin/create_course.sh {self_registration_type} {archive} {self.semester} {self.code}"
             f" {self.instructor.id} {course_group}"
@@ -104,15 +105,15 @@ class Course_create:
 
         print("Creating registration sections ", end="")
 
-        table = Table("courses_registration_sections", submitty_metadata, autoload_with=submitty_engine)
+        table = Table(
+            "courses_registration_sections", submitty_metadata, autoload_with=submitty_engine
+        )
         print("(tables loaded)...")
         for section in range(1, self.registration_sections + 1):
             print(f"Create section {section}")
             submitty_conn.execute(
                 insert(table).values(
-                    term=self.semester,
-                    course=self.code,
-                    registration_section_id=str(section)
+                    term=self.semester, course=self.code, registration_section_id=str(section)
                 )
             )
         submitty_conn.commit()
@@ -121,9 +122,7 @@ class Course_create:
         if self.self_registration_type != 0:
             print("Setting course default section id to 1")
             submitty_conn.execute(
-                update(table)
-                .where(table.c.course == self.code)
-                .values(default_section_id=1)
+                update(table).where(table.c.course == self.code).values(default_section_id=1)
             )
             submitty_conn.commit()
         print("Creating rotating sections ", end="")
@@ -163,20 +162,17 @@ class Course_create:
                     user_id=user.get_detail(self.code, "id"),
                     user_group=user.get_detail(self.code, "group"),
                     registration_section=reg_section,
-                    manual_registration=user.get_detail(self.code, "manual")
+                    manual_registration=user.get_detail(self.code, "manual"),
                 )
             )
             submitty_conn.commit()
-            update_query = update(users_table).where(
-                users_table.c.user_id == bindparam("b_user_id")
-            ).values(
-                rotating_section=bindparam("rotating_section")
+            update_query = (
+                update(users_table)
+                .where(users_table.c.user_id == bindparam("b_user_id"))
+                .values(rotating_section=bindparam("rotating_section"))
             )
 
-            self.conn.execute(
-                update_query,
-                {"rotating_section": rot_section, "b_user_id": user.id}
-            )
+            self.conn.execute(update_query, {"rotating_section": rot_section, "b_user_id": user.id})
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(
@@ -241,9 +237,7 @@ class Course_create:
                 self.component_table,
                 self.mark_table,
             )
-            form = os.path.join(
-                self.course_path, "config", "form", f"form_{gradeable.id}.json"
-            )
+            form = os.path.join(self.course_path, "config", "form", f"form_{gradeable.id}.json")
             with open(form, "w") as open_file:
                 json.dump(gradeable.create_form(), open_file, indent=2)
         os.system(
@@ -259,7 +253,7 @@ class Course_create:
             os.system(f"chmod -R g+w {self.course_path}")
             os.system(
                 f"su {'submitty_daemon'} -c "
-                f"'{ os.path.join(self.course_path,f'BUILD_{self.code}.sh')}'"
+                f"'{os.path.join(self.course_path, f'BUILD_{self.code}.sh')}'"
             )
         os.system(
             f"chown -R {self.instructor.id}:{self.code}_tas_www "

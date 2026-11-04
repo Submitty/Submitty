@@ -239,4 +239,41 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
     public function testTimeIntoToString(int $time, string $expected): void {
         $this->assertSame($expected, DateUtils::timeIntToString($time));
     }
+
+    public function testGetDateTimeNowThrowsWithoutTimezone(): void {
+        $property = new \ReflectionProperty(DateUtils::class, 'timezone');
+        $property->setAccessible(true);
+        $original = $property->getValue();
+        $property->setValue(null, null);
+        try {
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessage('Need to call setTimezone before calling getDateTimeNow');
+            DateUtils::getDateTimeNow();
+        }
+        finally {
+            $property->setValue(null, $original);
+        }
+    }
+
+    public function testSetTimezoneAndGetDateTimeNow(): void {
+        DateUtils::setTimezone(new \DateTimeZone('America/New_York'));
+        $now = DateUtils::getDateTimeNow();
+        $this->assertInstanceOf(\DateTime::class, $now);
+        $this->assertSame('America/New_York', $now->getTimezone()->getName());
+    }
+
+    public function testGetOrderedTZWithUTCOffset(): void {
+        $result = DateUtils::getOrderedTZWithUTCOffset();
+        $this->assertIsArray($result);
+        $this->assertGreaterThan(1, count($result));
+        $this->assertSame('NOT_SET/NOT_SET', $result[0]);
+        foreach (array_slice($result, 1) as $entry) {
+            $this->assertMatchesRegularExpression('/^\(UTC[^)]*\) .+/', $entry);
+        }
+    }
+
+    public function testGetFileNameTimeStamp(): void {
+        $timestamp = DateUtils::getFileNameTimeStamp();
+        $this->assertMatchesRegularExpression('/^\d{14}$/', $timestamp);
+    }
 }

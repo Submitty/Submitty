@@ -4,7 +4,7 @@ import migrator
 
 class TestInit(unittest.TestCase):
     def test_get_all_environments(self):
-        expected = ['master', 'system', 'course']
+        expected = ["master", "system", "course"]
         self.assertListEqual(expected, migrator.ENVIRONMENTS)
         self.assertListEqual(expected, migrator.get_all_environments())
         self.assertEqual(migrator.ENVIRONMENTS, migrator.get_all_environments())
@@ -14,8 +14,8 @@ class TestInit(unittest.TestCase):
 
     def test_get_environments_all(self):
         self.assertEqual(
-            ['master', 'system', 'course'],
-            migrator.get_environments(['course', 'master', 'system'])
+            ["master", "system", "course"],
+            migrator.get_environments(["course", "master", "system"]),
         )
 
     def test_get_paths(self):
@@ -24,16 +24,16 @@ class TestInit(unittest.TestCase):
         self.assertEqual(migrator.TRIGGERS_PATH, migrator.get_triggers_path())
 
         old_dir = migrator.DIR_PATH
-        migrator.DIR_PATH = 'test1'
+        migrator.DIR_PATH = "test1"
         old_migration = migrator.MIGRATIONS_PATH
-        migrator.MIGRATIONS_PATH = 'test2'
+        migrator.MIGRATIONS_PATH = "test2"
         old_triggers = migrator.TRIGGERS_PATH
-        migrator.TRIGGERS_PATH = 'test3'
+        migrator.TRIGGERS_PATH = "test3"
 
         try:
-            self.assertEqual('test1', migrator.get_dir_path())
-            self.assertEqual('test2', migrator.get_migrations_path())
-            self.assertEqual('test3', migrator.get_triggers_path())
+            self.assertEqual("test1", migrator.get_dir_path())
+            self.assertEqual("test2", migrator.get_migrations_path())
+            self.assertEqual("test3", migrator.get_triggers_path())
         finally:
             migrator.DIR_PATH = old_dir
             migrator.MIGRATIONS_PATH = old_migration

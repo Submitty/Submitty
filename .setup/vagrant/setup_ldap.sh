@@ -13,9 +13,11 @@ echo "slapd slapd/purge_database boolean true" | debconf-set-selections
 echo "slapd slapd/allow_ldap_v2 boolean false" | debconf-set-selections
 echo "slapd slapd/move_old_database boolean true" | debconf-set-selections
 dpkg-reconfigure -f noninteractive slapd
-echo "" >> /etc/ldap/ldap.conf
-echo "BASE   dc=vagrant,dc=local" >> /etc/ldap/ldap.conf
-echo "URI    ldap://localhost" >> /etc/ldap/ldap.conf
+{
+    echo ""
+    echo "BASE   dc=vagrant,dc=local"
+    echo "URI    ldap://localhost"
+} >> /etc/ldap/ldap.conf
 
 echo -e "dn: ou=users,dc=vagrant,dc=local
 objectClass: organizationalUnit
