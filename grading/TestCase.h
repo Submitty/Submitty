@@ -65,17 +65,6 @@ public:
   nlohmann::json getGraphicsActions() const { return _json.value("actions", nlohmann::json::array());}
 
 
-  bool isSubmittyCount() const {
-    std::vector<std::string> commands = getCommands();
-    for (int i = 0; i < commands.size(); i++) {
-      const std::string command_name = "submitty_count";
-      if (commands[i].size() > command_name.size() &&
-          commands[i].substr(0,command_name.size()) == command_name) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   bool isCommentCount() const {
     std::vector<std::string> commands = getCommands();
