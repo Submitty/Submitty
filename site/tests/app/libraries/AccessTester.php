@@ -3,7 +3,6 @@
 namespace tests\app\libraries;
 
 use app\libraries\Access;
-use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\gradeable\GradedGradeable;
@@ -227,5 +226,64 @@ class AccessTester extends BaseUnitTest {
         // poll.view.histogram should be accessible to all groups if histogram is available
         $this->assertTrue($this->access->canUser($student, 'poll.view.histogram', ['poll' => $poll]));
         $this->assertTrue($this->access->canUser($instructor, 'poll.view.histogram', ['poll' => $poll]));
+    }
+
+    public function testMarkStatsPermissions() {
+        $student = $this->createMockModel(User::class);
+        $student->method('getGroup')->willReturn(User::GROUP_STUDENT);
+        $limited_grader = $this->createMockModel(User::class);
+        $limited_grader->method('getGroup')->willReturn(User::GROUP_LIMITED_ACCESS_GRADER);
+        $full_grader = $this->createMockModel(User::class);
+        $full_grader->method('getGroup')->willReturn(User::GROUP_FULL_ACCESS_GRADER);
+        $instructor = $this->createMockModel(User::class);
+        $instructor->method('getGroup')->willReturn(User::GROUP_INSTRUCTOR);
+        $gradeable = $this->createMockModel(
+            \app\models\gradeable\Gradeable::class
+        );
+        $gradeable->method('getMinGradingGroup')
+            ->willReturn(User::GROUP_LIMITED_ACCESS_GRADER);
+        $gradeable->method('hasPeerComponent')->willReturn(false);
+        $peer_gradeable = $this->createMockModel(
+            \app\models\gradeable\Gradeable::class
+        );
+        $peer_gradeable->method('getMinGradingGroup')
+            ->willReturn(User::GROUP_LIMITED_ACCESS_GRADER);
+        $peer_gradeable->method('hasPeerComponent')->willReturn(true);
+        $action = 'grading.electronic.get_marked_users';
+        // Students must not be allowed to view mark statistics.
+        $this->assertFalse(
+            $this->access->canUser($student, $action, ['gradeable' => $gradeable])
+        );
+        $this->assertFalse(
+            $this->access->canUser($student, $action, ['gradeable' => $peer_gradeable])
+        );
+        // Staff groups should be allowed when the minimum group is met.
+        foreach ([$limited_grader, $full_grader, $instructor] as $grader) {
+            $this->assertTrue(
+                $this->access->canUser($grader, $action, ['gradeable' => $gradeable])
+            );
+        }
+        // A limited-access grader is denied when the gradeable requires full access.
+        $full_access_gradeable = $this->createMockModel(
+            \app\models\gradeable\Gradeable::class
+        );
+        $full_access_gradeable->method('getMinGradingGroup')
+            ->willReturn(User::GROUP_FULL_ACCESS_GRADER);
+        $full_access_gradeable->method('hasPeerComponent')
+            ->willReturn(false);
+        $this->assertFalse(
+            $this->access->canUser(
+                $limited_grader,
+                $action,
+                ['gradeable' => $full_access_gradeable]
+            )
+        );
+        $this->assertTrue(
+            $this->access->canUser(
+                $full_grader,
+                $action,
+                ['gradeable' => $full_access_gradeable]
+            )
+        );
     }
 }
