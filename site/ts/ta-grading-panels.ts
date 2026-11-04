@@ -141,17 +141,17 @@ export function toggleFullScreenMode() {
 
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities() {
+    // Panels in positions the current layout doesn't use (e.g. the bottom ones
+    // after switching from 4 panels to 2) are remembered but stay hidden
+    const shownPanels = Object.keys(taLayoutDet.currentTwoPanels)
+        .filter((position) => taLayoutDet.currentActivePanels[position])
+        .map((position) => taLayoutDet.currentTwoPanels[position]);
     panelElements.forEach((panel) => {
         const id_str = document.getElementById(`#${panel.str}_btn`)
             ? `#${panel.str}_btn`
             : `#${panel.str}-btn`;
 
-        if (
-            taLayoutDet.currentTwoPanels.leftTop === panel.str
-            || taLayoutDet.currentTwoPanels.leftBottom === panel.str
-            || taLayoutDet.currentTwoPanels.rightTop === panel.str
-            || taLayoutDet.currentTwoPanels.rightBottom === panel.str
-        ) {
+        if (shownPanels.includes(panel.str)) {
             $(`#${panel.str}`).toggle(true);
             $(panel.icon).toggleClass('icon-selected', true);
             $(id_str).toggleClass('active', true);
