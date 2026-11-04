@@ -285,7 +285,12 @@ class MiscController extends AbstractController {
                 if ($newlines + $carriage_returns > 2000) {
                     return new WebResponse(MiscView::class, 'tooLarge');
                 }
-                $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
+                if (strtolower(pathinfo($file_name, PATHINFO_EXTENSION)) === 'md') {
+                    $this->core->getOutput()->renderOutput('Misc', 'displayMarkdown', $contents);
+                }
+                else {
+                    $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
+                }
             }
             else {
                 $this->core->getOutput()->renderOutput('Misc', 'displayFile', $contents);
