@@ -175,6 +175,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         commands = list()
         shipperutil_path = os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "shipper_utils")
         script_directory = os.path.join(shipperutil_path, 'docker_command_wrapper.py')
+        venv_python = os.path.join(SUBMITTY_INSTALL_DIR, "venv", "bin", "python3")
 
         # Prevent removal of system docker containers
         with open(os.path.join(SUBMITTY_REPOSITORY_DIR, ".setup", "data", "system_docker_containers.json")) as json_file:
@@ -185,14 +186,14 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         system_images_str = " ".join(system_docker_containers)
 
         # Pass in arguments for docker_command_wrapper.py (Remove unnecessary images)
-        image_removal_command = (f"python3 {script_directory} --remove "
+        image_removal_command = (f"{venv_python} {script_directory} --remove "
                            f"--required-images {required_images_str} "
                            f"--system-images {system_images_str}")
         commands.append(image_removal_command)
         # Add the commands to pull the images
         for image in images_to_update:
-            commands.append(f'python3 {script_directory} --pull {image}')
-        commands.append(f"python3 {os.path.join(shipperutil_path, 'get_sysinfo.py')} docker osinfo")
+            commands.append(f'{venv_python} {script_directory} --pull {image}')
+        commands.append(f"{venv_python} {os.path.join(shipperutil_path, 'get_sysinfo.py')} docker osinfo")
         success = run_commands_on_worker(user, host, machine, commands, operation='docker image update', thread_object=thread_object)
 
     return success
