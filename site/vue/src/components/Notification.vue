@@ -74,42 +74,58 @@ function markSeen(course: string, id: number) {
     tabindex="0"
     class="notification"
     :class="{ unseen: !notification.seen }"
+    data-testid="notification-item"
   >
     <a
       class="main-notification-content"
+      data-testid="notification-link"
       :href="props.notification.url"
     >
       <i
         v-if="notification.component === 'forum'"
         class="fas fa-comments notification-type"
+        data-testid="notification-icon-forum"
         title="Forum"
       />
       <i
         v-else-if="notification.component === 'grading'"
         class="fas fa-star notification-type"
+        data-testid="notification-icon-grading"
         title="Gradeable"
       />
       <i
         v-else-if="notification.component === 'team'"
         class="fas fa-users notification-type"
+        data-testid="notification-icon-team"
         title="Team Action"
       />
       <i
         v-else-if="notification.component === 'student'"
         class="fas fa-hand-paper notification-type"
+        data-testid="notification-icon-student"
         title="Grade Inquiry"
       />
 
-      <div class="notification-content">
-        <p class="notification-text">
+      <div
+        class="notification-content"
+        data-testid="notification-content"
+      >
+        <p
+          class="notification-text"
+          data-testid="notification-text"
+        >
           {{ notification.content }}
         </p>
-        <div class="notification-time">
+        <div
+          class="notification-time"
+          data-testid="notification-time"
+        >
           <span
             v-if="!course"
           >
             <span
               class="course-notification-link"
+              data-testid="course-notification-link"
               title="Go to notifications"
               @click.stop.prevent="goToCourseNotifications(notification.course)"
             >
@@ -124,12 +140,16 @@ function markSeen(course: string, id: number) {
     <button
       v-if="!notification.seen"
       class="notification-seen"
+      data-testid="notification-seen-button"
       title="Mark as seen"
       aria-label="Mark as seen"
       @click.stop.prevent="markSeen(notification.course, Number(notification.id))"
       @keydown.enter.stop.prevent="markSeen(notification.course, Number(notification.id))"
     >
-      <i class="far fa-envelope-open notification-seen-icon" />
+      <i
+        class="far fa-envelope-open notification-seen-icon"
+        data-testid="notification-seen-icon"
+      />
     </button>
   </div>
 </template>
