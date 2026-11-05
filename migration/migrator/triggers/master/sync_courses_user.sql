@@ -28,6 +28,9 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         user_email,
                         user_email_secondary,
                         user_email_secondary_notify,
+                        user_personal_webpage,
+                        user_github_username, 
+                        user_linkedin_username,
                         time_zone,
                         user_preferred_locale,
                         display_image_state,
@@ -51,6 +54,9 @@ CREATE OR REPLACE FUNCTION public.sync_courses_user() RETURNS trigger
                         || quote_literal(user_row.user_email) || ', ' 
                         || quote_literal(user_row.user_email_secondary) || ', ' 
                         || quote_literal(user_row.user_email_secondary_notify) || ', ' 
+                        || quote_nullable(user_row.user_personal_webpage) || ', '
+                        || quote_nullable(user_row.user_github_username) || ', '
+                        || quote_nullable(user_row.user_linkedin_username) || ', '
                         || quote_literal(user_row.time_zone) || ', '
                         || quote_nullable(user_row.user_preferred_locale) || ', '
                         || quote_literal(user_row.display_image_state) || ', '
