@@ -38,6 +38,8 @@ describe('Peer graders should not see grade inquiry indicators', () => {
             }
         });
 
+        cy.contains('Only Assigned Sections').click();
+
         cy.get('[data-testid="grade-button"]')
             .its('length')
             .should('be.greaterThan', 0);
