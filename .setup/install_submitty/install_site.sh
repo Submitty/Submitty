@@ -137,6 +137,11 @@ if [ ${VAGRANT} == 1 ]; then
     chmod 740 ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
 fi
 
+# Change the shebang of the cgi scripts to use the global submitty Python venv
+for f in "${SUBMITTY_INSTALL_DIR}"/site/cgi-bin/*.cgi; do
+    replace_fillin_variables "$f"
+done
+
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
 # run, but it could be someone just deleted the folders to try and fix some

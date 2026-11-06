@@ -1,4 +1,4 @@
-#!/usr/local/submitty/venv/bin/python3
+#!__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/venv/bin/python3
 
 import cgi
 import json
