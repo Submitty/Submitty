@@ -71,14 +71,17 @@ CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON public.courses_
 
 
 class TestDumper(TestCase):
-    @patch('migrator.dumper.check_output', side_effect=[
-        DB_FRAGMENT,
-    ])
+    @patch(
+        "migrator.dumper.check_output",
+        side_effect=[
+            DB_FRAGMENT,
+        ],
+    )
     def test_dump_database(self, subprocess):
         with TemporaryDirectory() as tmp_dirname:
-            data_dir = Path(tmp_dirname, 'data')
+            data_dir = Path(tmp_dirname, "data")
             data_dir.mkdir()
-            submitty_db = data_dir / 'submitty_db.sql'
-            self.assertTrue(dump_database('submitty', submitty_db))
+            submitty_db = data_dir / "submitty_db.sql"
+            self.assertTrue(dump_database("submitty", submitty_db))
             self.assertTrue(submitty_db.exists())
             self.assertEqual(DB_EXPECTED, submitty_db.read_text())

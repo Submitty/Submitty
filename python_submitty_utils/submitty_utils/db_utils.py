@@ -9,11 +9,11 @@ def generate_connect_string(
     password: str,
 ) -> str:
     conn_string = f"postgresql://{user}:{password}@"
-    if not host.startswith('/'):
+    if not host.startswith("/"):
         conn_string += f"{host}:{port}"
     conn_string += f"/{db}"
 
-    if host.startswith('/'):
+    if host.startswith("/"):
         conn_string += f"?host={host}"
 
     return conn_string

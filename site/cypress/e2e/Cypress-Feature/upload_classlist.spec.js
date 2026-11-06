@@ -42,20 +42,13 @@ describe('Test cases revolving around uploading a classlist on the Manage Studen
         // path to the downloaded file
         const downloadedFilePath = `${DOWNLOAD_PATH}/${getCurrentSemester()}_sample_users_data.csv`;
 
-        // verify the file exists
-        cy.readFile(downloadedFilePath);
+        // Normalize line endings (\r\n to \n) and trim whitespace
+        const normalize = (csvString) => csvString.replace(/\r\n/g, '\n').trim();
 
-        // compare the file against the fixture with the expected values
+        // An earlier download leaves a file at the same path, so retry the read until the new one matches
         cy.readFile(`${FIXTURE_PATH}/${filePath}`).then((expectedCsv) => {
-            cy.readFile(downloadedFilePath).then((downloadedCsv) => {
-                // Normalize line endings (\r\n to \n) and trim whitespace
-                const normalize = (csvString) => csvString.replace(/\r\n/g, '\n').trim();
-
-                const expected = normalize(expectedCsv);
-                const actual = normalize(downloadedCsv);
-
-                // Assert that the entire file contents match exactly
-                expect(actual).to.equal(expected);
+            cy.readFile(downloadedFilePath).should((downloadedCsv) => {
+                expect(normalize(downloadedCsv)).to.equal(normalize(expectedCsv));
             });
         });
     }

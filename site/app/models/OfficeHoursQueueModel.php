@@ -126,7 +126,8 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getPastQueue() {
-        return $this->core->getQueries()->getPastQueue();
+        // Students only see their own history
+        return $this->core->getQueries()->getPastQueue($this->isGrader() ? null : $this->getUserId());
     }
 
     public function getAllQueues() {

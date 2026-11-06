@@ -2,6 +2,7 @@
 None of the functions should be imported here directly, but from
 the class Course
 """
+
 import hashlib
 import random
 import os
@@ -82,9 +83,7 @@ class Course_generate_utils:
         gradeables_percentages = []
         gradeable_percentage_left = 100 - len(gradeables)
         for _ in range(len(gradeables)):
-            gradeables_percentages.append(
-                random.randint(1, max(1, gradeable_percentage_left)) + 1
-            )
+            gradeables_percentages.append(random.randint(1, max(1, gradeable_percentage_left)) + 1)
             gradeable_percentage_left -= gradeables_percentages[-1] - 1
         if gradeable_percentage_left > 0:
             gradeables_percentages[-1] += gradeable_percentage_left
@@ -146,10 +145,7 @@ class Course_generate_utils:
                                     for test_case in gradeable_json["testcases"]:
                                         if "extra_credit" in test_case:
                                             continue
-                                        if (
-                                            "points" in test_case
-                                            and test_case["points"] > 0
-                                        ):
+                                        if "points" in test_case and test_case["points"] > 0:
                                             max_auto += test_case["points"]
                         except EnvironmentError:
                             print("Failed to load JSON")
@@ -206,12 +202,8 @@ class Course_generate_utils:
         gradeables_json_output["display_benchmark"] = ["average", "stddev", "perfect"]
         gradeables_json_output["benchmark_percent"] = {}
         for i in range(len(benchmarks)):
-            gradeables_json_output["display_benchmark"].append(
-                "lowest_" + benchmarks[i]
-            )
-            gradeables_json_output["benchmark_percent"][
-                "lowest_" + benchmarks[i]
-            ] = 0.9 - (0.1 * i)
+            gradeables_json_output["display_benchmark"].append("lowest_" + benchmarks[i])
+            gradeables_json_output["benchmark_percent"]["lowest_" + benchmarks[i]] = 0.9 - (0.1 * i)
 
         gradeables_json_output["section"] = section_ta_mapping
         messages = [
@@ -239,9 +231,7 @@ class Course_generate_utils:
                     "with additional documentation online.\n"
                     "*/\n"
                 )
-            temp_custom_path = os.path.join(
-                customization_path, f"customization_{course_id}.json"
-            )
+            temp_custom_path = os.path.join(customization_path, f"customization_{course_id}.json")
             json.dump(gradeables_json_output, open(temp_custom_path, "a"), indent=2)
         except EnvironmentError as e:
             print(f"Failed to write to customization file: {e}")
@@ -260,17 +250,15 @@ class Course_generate_utils:
         json_team_history = {}
         gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload_with=self.conn)
         teams_table = Table("teams", self.metadata, autoload_with=self.conn)
-        ucounter = self.conn.execute(
-            select(func.count()).select_from(gradeable_teams_table)
-        ).scalar() or 0
+        ucounter = (
+            self.conn.execute(select(func.count()).select_from(gradeable_teams_table)).scalar() or 0
+        )
         anon_team_ids = []
         for user in self.users:
             # the unique team id is made up of 5 digits, an underline, and the
             # team creater's userid.
             # example: 00001_aphacker
-            unique_team_id = (
-                str(ucounter).zfill(5) + "_" + user.get_detail(self.code, "id")
-            )
+            unique_team_id = str(ucounter).zfill(5) + "_" + user.get_detail(self.code, "id")
             # also need to create and save the anonymous team id
             anon_team_id = generate_random_user_id(15)
             if anon_team_id in anon_team_ids:
@@ -308,15 +296,11 @@ class Course_generate_utils:
                         team_id_section = team_in_section["team_id"]
                         temp_json_team_history = {
                             "action": "admin_create",
-                            "time": dateutils.write_submitty_date(
-                                gradeable.submission_open_date
-                            ),
+                            "time": dateutils.write_submitty_date(gradeable.submission_open_date),
                             "admin_user": "instructor",
                             "added_user": user.get_detail(self.code, "id"),
                         }
-                        json_team_history[team_id_section].append(
-                            temp_json_team_history
-                        )
+                        json_team_history[team_id_section].append(temp_json_team_history)
                         added = True
             if not added:
                 # if the team the user tried to join is full, make a new team
@@ -339,9 +323,7 @@ class Course_generate_utils:
                 json_team_history[unique_team_id] = [
                     {
                         "action": "admin_create",
-                        "time": dateutils.write_submitty_date(
-                            gradeable.submission_open_date
-                        ),
+                        "time": dateutils.write_submitty_date(gradeable.submission_open_date),
                         "admin_user": "instructor",
                         "first_user": user.get_detail(self.code, "id"),
                     }

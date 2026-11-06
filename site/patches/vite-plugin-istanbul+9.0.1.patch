@@ -1,0 +1,27 @@
+diff --git a/node_modules/vite-plugin-istanbul/dist/index.mjs b/node_modules/vite-plugin-istanbul/dist/index.mjs
+index cca947e..4b91aa2 100644
+--- a/node_modules/vite-plugin-istanbul/dist/index.mjs
++++ b/node_modules/vite-plugin-istanbul/dist/index.mjs
+@@ -194,22 +194,6 @@ To hide this message set build.sourcemap to true, 'inline' or 'hidden'.`)}`);
+ 			if (testExclude.shouldInstrument(filename)) {
+ 				const rawCombinedSourceMap = this.getCombinedSourcemap();
+ 				const combinedSourceMap = sanitizeSourceMap(rawCombinedSourceMap);
+-				if (id.endsWith(".vue") || /\?vue&type=script/.test(id)) {
+-					let originalSource = null;
+-					if (rawCombinedSourceMap.sourcesContent && rawCombinedSourceMap.sourcesContent[0]) originalSource = rawCombinedSourceMap.sourcesContent[0];
+-					const completeSourceMap = sanitizeSourceMap(createCompleteSourceMap(filename, srcCode, originalSource, {
+-						file: combinedSourceMap.file,
+-						sourceRoot: combinedSourceMap.sourceRoot
+-					}));
+-					const code = instrumenter.instrumentSync(srcCode, filename, completeSourceMap);
+-					const map = instrumenter.lastSourceMap();
+-					const fileCoverage = instrumenter.fileCoverage;
+-					if (opts.onCover) opts.onCover(filename, fileCoverage);
+-					return {
+-						code,
+-						map
+-					};
+-				}
+ 				const code = instrumenter.instrumentSync(srcCode, filename, combinedSourceMap);
+ 				const identitySourceMap = sanitizeSourceMap(createIdentitySourceMap(filename, srcCode, {
+ 					file: combinedSourceMap.file,

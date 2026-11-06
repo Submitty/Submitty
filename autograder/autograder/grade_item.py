@@ -7,12 +7,12 @@ import socket
 import traceback
 
 from . import autograding_utils, testcase
-from . execution_environments import jailed_sandbox
+from .execution_environments import jailed_sandbox
 
 
 def get_item_from_item_pool(complete_config_obj, item_name):
-    for item in complete_config_obj['item_pool']:
-        if item['item_name'] == item_name:
+    for item in complete_config_obj["item_pool"]:
+        if item["item_name"] == item_name:
             return item
     return None
 
@@ -24,14 +24,14 @@ def get_testcases(
     working_directory,
     which_untrusted,
     item_name,
-    notebook_data=None
+    notebook_data=None,
 ):
-    '''
+    """
     Retrieve testcases from a config obj. If notebook_data is
     not null, return testcases corresponding to it, else return all testcases.
-    '''
+    """
     testcase_objs = []
-    testcase_specs = complete_config_obj['testcases']
+    testcase_specs = complete_config_obj["testcases"]
 
     if notebook_data is not None:
         # Gather the testcase specifications for all itempool testcases
@@ -46,18 +46,18 @@ def get_testcases(
                     jobname=item_name,
                 )
                 continue
-            testcase_specs += item_dict['testcases']
+            testcase_specs += item_dict["testcases"]
     else:
-        for item in complete_config_obj['item_pool']:
-            testcase_specs += item['testcases']
+        for item in complete_config_obj["item_pool"]:
+            testcase_specs += item["testcases"]
 
-    is_vcs = queue_obj.get('vcs_checkout', False)
+    is_vcs = queue_obj.get("vcs_checkout", False)
 
     # Construct the testcase objects
     for t in testcase_specs:
         tmp_test = testcase.Testcase(
             config,
-            t['testcase_id'],
+            t["testcase_id"],
             queue_obj,
             complete_config_obj,
             t,
@@ -67,10 +67,10 @@ def get_testcases(
             queue_obj["job_id"],
             working_directory,
             testcase_objs,
-            '',
+            "",
             config.log_path,
             config.error_path,
-            is_test_environment=False
+            is_test_environment=False,
         )
         testcase_objs.append(tmp_test)
 
@@ -78,21 +78,18 @@ def get_testcases(
 
 
 def killall(config, which_untrusted, log_file):
-    ''' Killalll removes any stray processes belonging to the untrusted user '''
+    """Killalll removes any stray processes belonging to the untrusted user"""
     killall_success = subprocess.call(
         [
-            os.path.join(config.submitty['submitty_install_dir'], "sbin", "untrusted_execute"),
+            os.path.join(config.submitty["submitty_install_dir"], "sbin", "untrusted_execute"),
             which_untrusted,
-            os.path.join(config.submitty['submitty_install_dir'], "sbin", "killall.py")
+            os.path.join(config.submitty["submitty_install_dir"], "sbin", "killall.py"),
         ],
-        stdout=log_file
+        stdout=log_file,
     )
 
     if killall_success != 0:
-        print(
-            f'KILLALL: had to kill {killall_success} process(es)',
-            file=log_file
-        )
+        print(f"KILLALL: had to kill {killall_success} process(es)", file=log_file)
     log_file.flush()
 
 
@@ -101,12 +98,12 @@ def run_compilation(testcases, config, which_untrusted, separator, log_file):
     print(f"{separator}COMPILATION STARTS", file=log_file)
     log_file.flush()
     for tc in testcases:
-        if tc.type != 'Execution' and not os.path.exists(tc.secure_environment.directory):
+        if tc.type != "Execution" and not os.path.exists(tc.secure_environment.directory):
             tc.execute()
             killall(config, which_untrusted, log_file)
 
     log_file.flush()
-    subprocess.call(['ls', '-lR', '.'], stdout=log_file)
+    subprocess.call(["ls", "-lR", "."], stdout=log_file)
     log_file.flush()
 
 
@@ -118,7 +115,7 @@ def generate_input(testcases, config, which_untrusted, separator, log_file):
             tc.generate_random_inputs()
             killall(config, which_untrusted, log_file)
 
-    subprocess.call(['ls', '-lR', '.'], stdout=log_file)
+    subprocess.call(["ls", "-lR", "."], stdout=log_file)
     log_file.flush()
 
 
@@ -127,11 +124,11 @@ def run_execution(testcases, config, which_untrusted, separator, log_file):
     print(f"{separator}RUNNER STARTS", file=log_file)
     log_file.flush()
     for tc in testcases:
-        if tc.type == 'Execution' and not os.path.exists(tc.secure_environment.directory):
+        if tc.type == "Execution" and not os.path.exists(tc.secure_environment.directory):
             tc.execute()
             killall(config, which_untrusted, log_file)
 
-    subprocess.call(['ls', '-lR', '.'], stdout=log_file)
+    subprocess.call(["ls", "-lR", "."], stdout=log_file)
     log_file.flush()
 
 
@@ -143,7 +140,7 @@ def generate_output(testcases, config, which_untrusted, separator, log_file):
             tc.generate_random_outputs()
             killall(config, which_untrusted, log_file)
 
-    subprocess.call(['ls', '-lR', '.'], stdout=log_file)
+    subprocess.call(["ls", "-lR", "."], stdout=log_file)
     log_file.flush()
 
 
@@ -160,7 +157,7 @@ def run_validation(
     submission_string,
     log_file,
     tmp_logs,
-    generate_all_output
+    generate_all_output,
 ):
     # VALIDATE STUDENT OUTPUT
     print(f"{separator}VALIDATION STARTS", file=log_file)
@@ -179,7 +176,7 @@ def run_validation(
         working_directory,
         config.log_path,
         config.error_path,
-        False
+        False,
     )
 
     # Copy sensitive expected output files into tmp_work.
@@ -192,41 +189,35 @@ def run_validation(
         queue_obj["job_id"],
     )
 
-    with open(os.path.join(tmp_logs, "validator_log.txt"), 'w') as logfile:
+    with open(os.path.join(tmp_logs, "validator_log.txt"), "w") as logfile:
         arguments = [
             queue_obj["gradeable"],
             queue_obj["who"],
             str(queue_obj["version"]),
-            submission_string
+            submission_string,
         ]
         if generate_all_output:
-            arguments.append('--generate_all_output')
+            arguments.append("--generate_all_output")
         success = validation_environment.execute(
-            which_untrusted,
-            'my_validator.out',
-            arguments,
-            logfile,
-            cwd=tmp_work
+            which_untrusted, "my_validator.out", arguments, logfile, cwd=tmp_work
         )
 
         if success == 0:
             print(socket.gethostname(), which_untrusted, "VALIDATOR OK")
         else:
             print(socket.gethostname(), which_untrusted, "VALIDATOR FAILURE")
-    subprocess.call(['ls', '-lR', '.'], stdout=log_file)
+    subprocess.call(["ls", "-lR", "."], stdout=log_file)
     log_file.flush()
 
     # Remove the temporary .submit.notebook from tmp_work (not to be confused
     # with the copy tmp_submission/submission/.submit.notebook)
-    submit_notebook_path = os.path.join(tmp_work, '.submit.notebook')
+    submit_notebook_path = os.path.join(tmp_work, ".submit.notebook")
     if os.path.exists(submit_notebook_path):
         os.remove(submit_notebook_path)
 
     os.chdir(working_directory)
     autograding_utils.untrusted_grant_rwx_access(
-        config.submitty['submitty_install_dir'],
-        which_untrusted,
-        tmp_work
+        config.submitty["submitty_install_dir"], which_untrusted, tmp_work
     )
     autograding_utils.add_all_permissions(tmp_work)
 
@@ -241,7 +232,7 @@ def archive(
     complete_config_obj,
     gradeable_config_obj,
     separator,
-    log_file
+    log_file,
 ):
     # ARCHIVE STUDENT RESULTS
     print(f"{separator}ARCHIVING STARTS", file=log_file)
@@ -260,36 +251,32 @@ def archive(
             complete_config_obj,
             gradeable_config_obj,
             queue_obj,
-            False
+            False,
         )
     except Exception:
         print("\n\nERROR: Grading incomplete -- could not archive autograding results")
         config.logger.log_message(
             "ERROR: could not archive autograding results. See stack trace for more info.",
-            job_id=queue_obj['job_id'],
+            job_id=queue_obj["job_id"],
             is_batch=queue_obj["regrade"],
             which_untrusted=which_untrusted,
             jobname=item_name,
         )
         config.logger.log_stack_trace(
             traceback.format_exc(),
-            job_id=queue_obj['job_id'],
+            job_id=queue_obj["job_id"],
             is_batch=queue_obj["regrade"],
             which_untrusted=which_untrusted,
             jobname=item_name,
         )
-    subprocess.call(['ls', '-lR', '.'], stdout=log_file)
+    subprocess.call(["ls", "-lR", "."], stdout=log_file)
 
 
 def grade_from_zip(
-    config,
-    working_directory,
-    which_untrusted,
-    autograding_zip_file,
-    submission_zip_file
+    config, working_directory, which_untrusted, autograding_zip_file, submission_zip_file
 ):
 
-    os.chdir(config.submitty['submitty_data_dir'])
+    os.chdir(config.submitty["submitty_data_dir"])
 
     # Removes the working directory if it exists, creates subdirectories and unzips files.
     autograding_utils.prepare_directory_for_autograding(
@@ -316,16 +303,16 @@ def grade_from_zip(
     separator = "====================================\n"
 
     # Open the JSON and timestamp files needed to grade. Initialize needed variables.
-    with open(os.path.join(tmp_submission, "queue_file.json"), 'r') as infile:
+    with open(os.path.join(tmp_submission, "queue_file.json"), "r") as infile:
         queue_obj = json.load(infile)
     waittime = queue_obj["waittime"]
     is_batch_job = queue_obj["regrade"]
     job_id = queue_obj["job_id"]
 
-    with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
+    with open(os.path.join(tmp_autograding, "complete_config.json"), "r") as infile:
         complete_config_obj = json.load(infile)
 
-    with open(os.path.join(tmp_autograding, "form.json"), 'r') as infile:
+    with open(os.path.join(tmp_autograding, "form.json"), "r") as infile:
         gradeable_config_obj = json.load(infile)
     is_vcs = gradeable_config_obj["upload_type"] == "repository"
 
@@ -338,27 +325,22 @@ def grade_from_zip(
         term_or_semester = "semester"
 
     if "generate_output" in queue_obj and queue_obj["generate_output"]:
-        ''' Cache the results when there are solution commands be no input generation commands'''
+        """ Cache the results when there are solution commands be no input generation commands"""
         item_name = os.path.join(
             queue_obj[term_or_semester],
             queue_obj["course"],
             "generated_output",
-            queue_obj["gradeable"]
+            queue_obj["gradeable"],
         )
 
         testcases = list()
         for tmp_test in get_testcases(
-            complete_config_obj,
-            config,
-            queue_obj,
-            working_directory,
-            which_untrusted,
-            item_name
+            complete_config_obj, config, queue_obj, working_directory, which_untrusted, item_name
         ):
             if tmp_test.has_solution_commands and not tmp_test.has_input_generator_commands:
                 testcases.append(tmp_test)
 
-        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
+        with open(os.path.join(tmp_logs, "overall.txt"), "a") as overall_log:
             os.chdir(tmp_work)
 
             generate_output(testcases, config, which_untrusted, separator, overall_log)
@@ -373,11 +355,11 @@ def grade_from_zip(
                 complete_config_obj,
                 gradeable_config_obj,
                 separator,
-                overall_log
+                overall_log,
             )
     else:
-        sub_timestamp_path = os.path.join(tmp_submission, 'submission', ".submit.timestamp")
-        with open(sub_timestamp_path, 'r') as submission_time_file:
+        sub_timestamp_path = os.path.join(tmp_submission, "submission", ".submit.timestamp")
+        with open(sub_timestamp_path, "r") as submission_time_file:
             submission_string = submission_time_file.read().rstrip()
 
         item_name = os.path.join(
@@ -386,7 +368,7 @@ def grade_from_zip(
             "submissions",
             queue_obj["gradeable"],
             queue_obj["who"],
-            str(queue_obj["version"])
+            str(queue_obj["version"]),
         )
 
         config.logger.log_message(
@@ -399,10 +381,10 @@ def grade_from_zip(
             elapsed_time=waittime,
         )
 
-        notebook_data_path = os.path.join(tmp_submission, 'submission', ".submit.notebook")
+        notebook_data_path = os.path.join(tmp_submission, "submission", ".submit.notebook")
         if os.path.exists(notebook_data_path):
-            with open(notebook_data_path, 'r') as infile:
-                notebook_data = json.load(infile).get('item_pools_selected', [])
+            with open(notebook_data_path, "r") as infile:
+                notebook_data = json.load(infile).get("item_pools_selected", [])
         else:
             notebook_data = []
 
@@ -414,10 +396,10 @@ def grade_from_zip(
             working_directory,
             which_untrusted,
             item_name,
-            notebook_data=notebook_data
+            notebook_data=notebook_data,
         )
 
-        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
+        with open(os.path.join(tmp_logs, "overall.txt"), "a") as overall_log:
             os.chdir(tmp_work)
 
             run_compilation(testcases, config, which_untrusted, separator, overall_log)
@@ -437,7 +419,7 @@ def grade_from_zip(
                 submission_string,
                 overall_log,
                 tmp_logs,
-                False
+                False,
             )
             archive(
                 testcases,
@@ -449,7 +431,7 @@ def grade_from_zip(
                 complete_config_obj,
                 gradeable_config_obj,
                 separator,
-                overall_log
+                overall_log,
             )
 
     # Zip the results
@@ -464,13 +446,13 @@ def grade_from_zip(
     except Exception:
         config.logger.log_stack_trace(
             traceback.format_exc(),
-            job_id=queue_obj['job_id'],
+            job_id=queue_obj["job_id"],
             is_batch=queue_obj["regrade"],
             which_untrusted=which_untrusted,
-            jobname=item_name
+            jobname=item_name,
         )
     return my_results_zip_file
 
 
 if __name__ == "__main__":
-    raise SystemExit('ERROR: Do not call this script directly')
+    raise SystemExit("ERROR: Do not call this script directly")

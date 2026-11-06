@@ -1016,6 +1016,10 @@ PDF);
                 ['page' => 'chatrooms', 'term' => 's26', 'course' => 'cs101'],
                 's26-cs101-chatrooms'
             ],
+            'polls_index' => [
+                ['page' => 'polls_index', 'term' => 's26', 'course' => 'cs101'],
+                's26-cs101-polls_index'
+            ],
             'polls missing poll_id' => [
                 ['page' => 'polls', 'term' => 's26', 'course' => 'cs101', 'instructor' => 'true'],
                 null

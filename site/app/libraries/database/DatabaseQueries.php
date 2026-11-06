@@ -5081,6 +5081,65 @@ SQL;
     }
 
     /**
+     * Get the peer feedback from a student left for others on a gradeable, grouped by the student they graded
+     *
+     * @param string $grader_id
+     * @param string $gradeable_id
+     * @return array<string, array{overall_comment: ?string, components: array<int, array{title: string, score: ?float, max: float}>}>
+     */
+    public function getPeerParticipationForGrader(string $grader_id, string $gradeable_id): array {
+        $result = [];
+        $this->course_db->query(
+            "SELECT gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, 
+                CASE
+                    WHEN COUNT(gcm.gcm_id) = 0 AND gcd.gcd_score = 0 THEN NULL
+                    ELSE LEAST(GREATEST(
+                    gc.gc_default + COALESCE(SUM(gcm.gcm_points), 0) + gcd.gcd_score,
+                    gc.gc_lower_clamp), gc.gc_upper_clamp)
+                END AS total_score
+            FROM gradeable_component_data gcd
+            JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
+            JOIN gradeable_component gc ON gc.gc_id = gcd.gc_id
+            LEFT JOIN gradeable_component_mark_data gcmd
+                ON gcmd.gc_id = gcd.gc_id AND gcmd.gd_id = gcd.gd_id
+                AND gcmd.gcd_grader_id = gcd.gcd_grader_id
+            LEFT JOIN gradeable_component_mark gcm ON gcm.gcm_id = gcmd.gcm_id
+            WHERE gcd.gcd_grader_id = ? AND gd.g_id = ? AND gc.gc_is_peer = true
+                AND gd.gd_user_id IS NOT NULL
+            GROUP BY gd.gd_user_id, gc.gc_id, gc.gc_title, gc.gc_max_value, gc.gc_order,
+                gc.gc_default, gc.gc_lower_clamp, gc.gc_upper_clamp,
+                gcd.gcd_score
+            ORDER BY gd.gd_user_id, gc.gc_order",
+            [$grader_id, $gradeable_id]
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['gd_user_id']]['overall_comment'] ??= null;
+            $result[$row['gd_user_id']]['components'][] = [
+                'title' => $row['gc_title'],
+                'score' => $row['total_score'] !== null ? (float) $row['total_score'] : null,
+                'max' => (float) $row['gc_max_value'],
+            ];
+        }
+
+        $this->course_db->query(
+            "SELECT goc_user_id, goc_overall_comment
+            FROM gradeable_data_overall_comment
+            WHERE goc_grader_id = ? AND g_id = ? AND goc_user_id IS NOT NULL
+            ORDER BY goc_user_id",
+            [$grader_id, $gradeable_id]
+        );
+
+        foreach ($this->course_db->rows() as $row) {
+            $result[$row['goc_user_id']]['overall_comment'] = $row['goc_overall_comment'];
+            $result[$row['goc_user_id']]['components'] ??= [];
+        }
+
+        ksort($result);
+        return $result;
+    }
+
+    /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
      * If the $archived parameter is false, then we run the check:
@@ -8380,8 +8439,11 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getPastQueue() {
-
+    /**
+     * @param string|null $user_id only return this user's entries, or everyone's when null
+     */
+    public function getPastQueue(?string $user_id = null) {
+        $user_filter = $user_id === null ? "" : "AND queue.user_id = ?";
         $query = "
         SELECT Row_number()
             OVER (ORDER BY time_out DESC, time_in DESC),
@@ -8426,11 +8488,15 @@ AND gc_id IN (
             )
             AS h1
             ON queue.user_id = h1.uid AND queue.queue_code = h1.qc
-            WHERE time_in > ? AND current_state IN ('done')
+            WHERE time_in > ? AND current_state IN ('done') {$user_filter}
             ORDER BY row_number
         ";
         $current_date = $this->core->getDateTimeNow()->format('Y-m-d');
-        $this->course_db->query($query, [$current_date, $current_date, $current_date]);
+        $params = [$current_date, $current_date, $current_date];
+        if ($user_id !== null) {
+            $params[] = $user_id;
+        }
+        $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
 

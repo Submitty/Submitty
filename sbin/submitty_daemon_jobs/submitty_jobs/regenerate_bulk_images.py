@@ -15,24 +15,24 @@ def process_single_submission(submitter_dir_str, redactions):
         settings_path = submitter_dir / "user_assignment_settings.json"
 
         if not settings_path.exists():
-            return ('skipped', 0, f"Skipped {submitter_dir.name} - no settings")
+            return ("skipped", 0, f"Skipped {submitter_dir.name} - no settings")
 
         with open(settings_path, "r") as f:
             settings = json.load(f)
             active_version = settings.get("active_version", None)
 
             if active_version is None:
-                return ('skipped', 0, f"Skipped {submitter_dir.name} - no active version")
+                return ("skipped", 0, f"Skipped {submitter_dir.name} - no active version")
 
             active_version_path = submitter_dir / str(active_version)
             # Check if the active version is a directory
             if not active_version_path.is_dir():
-                return ('skipped', 0, f"Skipped {submitter_dir.name} - invalid active version path")
+                return ("skipped", 0, f"Skipped {submitter_dir.name} - invalid active version path")
 
             # Check if PDF exists
             pdf_path = active_version_path / "upload.pdf"
             if not pdf_path.exists():
-                return ('skipped', 0, f"Skipped {submitter_dir.name} - no PDF file")
+                return ("skipped", 0, f"Skipped {submitter_dir.name} - no PDF file")
 
             # Run the generate_pdf_images job on the active version
             results_path = str(active_version_path).replace("submissions", "submissions_processed")
@@ -45,10 +45,10 @@ def process_single_submission(submitter_dir_str, redactions):
             )
 
             elapsed = time.time() - start_time
-            return ('processed', elapsed, f"Processed {submitter_dir.name} in {elapsed:.2f}s")
+            return ("processed", elapsed, f"Processed {submitter_dir.name} in {elapsed:.2f}s")
 
     except Exception as e:
-        return ('errors', 0, f"Error processing {submitter_dir.name}: {str(e)}")
+        return ("errors", 0, f"Error processing {submitter_dir.name}: {str(e)}")
 
 
 def main(folder, redactions, max_workers=None):
@@ -68,12 +68,7 @@ def main(folder, redactions, max_workers=None):
     print(f"Found {len(submitter_dirs)} submissions to process")
 
     # Statistics tracking
-    stats = {
-        'processed': 0,
-        'skipped': 0,
-        'errors': 0,
-        'total_time': 0
-    }
+    stats = {"processed": 0, "skipped": 0, "errors": 0, "total_time": 0}
 
     # Determine optimal number of workers (default to CPU count, but cap at 4 to avoid overwhelming system)
     if max_workers is None:
@@ -94,8 +89,8 @@ def main(folder, redactions, max_workers=None):
             status, elapsed, message = future.result()
             print(message)
             stats[status] += 1
-            if status == 'processed':
-                stats['total_time'] += elapsed
+            if status == "processed":
+                stats["total_time"] += elapsed
 
     # Print final statistics
     total_elapsed = time.time() - start_time
@@ -103,7 +98,7 @@ def main(folder, redactions, max_workers=None):
     print(f"Processed: {stats['processed']}")
     print(f"Skipped: {stats['skipped']}")
     print(f"Errors: {stats['errors']}")
-    if stats['processed'] > 0:
-        avg_time = stats['total_time'] / stats['processed']
+    if stats["processed"] > 0:
+        avg_time = stats["total_time"] / stats["processed"]
         print(f"Average time per submission: {avg_time:.2f} seconds")
         print(f"Parallel efficiency: {(stats['total_time'] / total_elapsed):.2f}x")

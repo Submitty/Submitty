@@ -4,42 +4,46 @@ import json
 import os
 import shutil
 
-parser = argparse.ArgumentParser(description='Submitty config generation script',
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--worker', action='store_true', default=False,
-                    help='Generate configs for only autograding')
-parser.add_argument('--install-dir', default='/usr/local/submitty',
-                    help='Set the install directory for Submitty')
+parser = argparse.ArgumentParser(
+    description="Submitty config generation script",
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+)
+parser.add_argument(
+    "--worker", action="store_true", default=False, help="Generate configs for only autograding"
+)
+parser.add_argument(
+    "--install-dir", default="/usr/local/submitty", help="Set the install directory for Submitty"
+)
 
 args = parser.parse_args()
 
-SUBMITTY_DATA_DIR = '/var/local/submitty'
+SUBMITTY_DATA_DIR = "/var/local/submitty"
 
-CONFIG_INSTALL_DIR = os.path.join(args.install_dir, 'config')
+CONFIG_INSTALL_DIR = os.path.join(args.install_dir, "config")
 
-CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, 'config')
+CONFIG_DATA_DIR = os.path.join(SUBMITTY_DATA_DIR, "config")
 
-SETUP_REPOSITORY_DIR = os.path.join(args.install_dir, 'GIT_CHECKOUT/Submitty/.setup')
+SETUP_REPOSITORY_DIR = os.path.join(args.install_dir, "GIT_CHECKOUT/Submitty/.setup")
 
-CONFIG_REPOSITORY = os.path.join(SETUP_REPOSITORY_DIR, 'data/configs')
+CONFIG_REPOSITORY = os.path.join(SETUP_REPOSITORY_DIR, "data/configs")
 
 VAR_CONFIG_REPOSITORY = os.path.join(CONFIG_REPOSITORY, "var_configs")
 
 if args.worker:
-    CONFIG_REPOSITORY = os.path.join(SETUP_REPOSITORY_DIR, 'data/configs/worker')
+    CONFIG_REPOSITORY = os.path.join(SETUP_REPOSITORY_DIR, "data/configs/worker")
 
-SETUP_INSTALL_DIR = os.path.join(args.install_dir, '.setup')
+SETUP_INSTALL_DIR = os.path.join(args.install_dir, ".setup")
 
 os.makedirs(SETUP_INSTALL_DIR, exist_ok=True)
 os.makedirs(SETUP_REPOSITORY_DIR, exist_ok=True)
 os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 os.makedirs(CONFIG_DATA_DIR, exist_ok=True)
 
-PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, 'preserve_file_list.json')
+PRESERVE_LIST_JSON = os.path.join(CONFIG_INSTALL_DIR, "preserve_file_list.json")
 # Rescue preserve list
 preserve_list = OrderedDict()
 try:
-    with open(PRESERVE_LIST_JSON, 'r') as json_file:
+    with open(PRESERVE_LIST_JSON, "r") as json_file:
         content = json_file.read().strip()
         if content:
             preserve_list = json.loads(content, object_pairs_hook=OrderedDict)
@@ -49,14 +53,11 @@ print("preserve list", preserve_list)
 
 # preserve_list users json
 
-with open(PRESERVE_LIST_JSON, 'w') as json_file:
+with open(PRESERVE_LIST_JSON, "w") as json_file:
     json.dump(preserve_list, json_file, indent=2)
 
 # Copy all files from .setup/data/configs to the install config directory
-CONFIGS = {
-    CONFIG_REPOSITORY: CONFIG_INSTALL_DIR,
-    VAR_CONFIG_REPOSITORY: CONFIG_DATA_DIR
-}
+CONFIGS = {CONFIG_REPOSITORY: CONFIG_INSTALL_DIR, VAR_CONFIG_REPOSITORY: CONFIG_DATA_DIR}
 
 for source, dest in CONFIGS.items():
     for item in os.listdir(source):

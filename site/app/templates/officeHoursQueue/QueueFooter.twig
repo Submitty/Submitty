@@ -257,10 +257,10 @@
             case "full_update":
                 {% if viewer.isGrader() %}
                     updateCurrentQueue();
+                    updateHistory();
                 {% else %}
                     updateQueueStatus();
                 {% endif %}
-                updateHistory();
                 break;
             case "announcement_update":
                 updateAnnouncement();
@@ -282,6 +282,13 @@
     } catch (e) {
         console.error(e);
     }
+  {% else %}
+    // A tab can miss history changes made in another tab, so refresh it when it is shown again
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            updateHistory();
+        }
+    });
   {% endif %}
 
   function toggleAudibleAlert() {
@@ -316,12 +323,18 @@
 
   function updateQueueStatus() {
       $.get("{{base_url}}/new_status", function(newStatus) {
+          // Students only see their own history, so it changes only when they leave a queue
+          // or are restored to one. The join form is only shown to students who are not in a queue.
+          const was_in_queue = $('#add_to_queue').length === 0;
           if ($('#queue_status').length !== 0) {
             $("#queue_status").replaceWith(newStatus);
             setupStudentTimer();
           }
           else {
             $("#add_to_queue").replaceWith(newStatus);
+          }
+          if (was_in_queue !== ($('#add_to_queue').length === 0)) {
+            updateHistory();
           }
       });
   }

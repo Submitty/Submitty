@@ -318,7 +318,12 @@ STRING;
             ['file\".txt', false],
             ['<file', false],
             ['file>', false],
-            ['file\\', false]
+            ['file\\', false],
+            ['dir/file.txt', true],
+            ['/abs/file.txt', false],
+            ['../file.txt', false],
+            ['dir/../../file.txt', false],
+            ['dir//file.txt', false]
         ];
     }
 
@@ -346,6 +351,64 @@ STRING;
 
     public function testValidFileNameNumeric() {
         $this->assertFalse(FileUtils::isValidFileName(0));
+    }
+
+    public function testValidFileNameEmpty() {
+        $this->assertFalse(FileUtils::isValidFileName(''));
+    }
+
+    public static function submitterDirectoryProvider(): array {
+        return [
+            'submissions' => ['submissions/hw1/alice/1/file.txt', 'hw1', 'alice', true],
+            'submissions_processed' => ['submissions_processed/hw1/alice/1/file.txt', 'hw1', 'alice', true],
+            'checkout' => ['checkout/hw1/alice/1/file.txt', 'hw1', 'alice', true],
+            'results' => ['results/hw1/alice/1/file.txt', 'hw1', 'alice', true],
+            'results_public' => ['results_public/hw1/alice/1/file.txt', 'hw1', 'alice', true],
+            'dot segments resolving inside' => ['submissions/hw1/alice/1/../1/file.txt', 'hw1', 'alice', true],
+            'other submitter' => ['submissions/hw1/bob/1/file.txt', 'hw1', 'alice', false],
+            'submitter sharing a prefix' => ['submissions/hw1/alice2/1/file.txt', 'hw1', 'alice', false],
+            'other gradeable' => ['submissions/hw2/alice/1/file.txt', 'hw1', 'alice', false],
+            'other course directory' => ['uploads/hw1/alice/1/file.txt', 'hw1', 'alice', false],
+            'traversal out of submitter' => ['submissions/hw1/alice/1/../../../../secret.txt', 'hw1', 'alice', false],
+            'symlink out of submitter' => ['submissions/hw1/alice/1/link_secret', 'hw1', 'alice', false],
+            'symlink to other submitter' => ['submissions/hw1/alice/1/link_bob', 'hw1', 'alice', false],
+            'submitter directory itself' => ['submissions/hw1/alice', 'hw1', 'alice', false],
+            'missing file' => ['submissions/hw1/alice/1/missing.txt', 'hw1', 'alice', false],
+            'empty submitter id' => ['submissions/hw1/alice/1/file.txt', 'hw1', '', false],
+            'parent submitter id' => ['submissions/hw1/alice/1/file.txt', 'hw1', '..', false],
+            'empty gradeable id' => ['submissions/hw1/alice/1/file.txt', '', 'hw1', false],
+            'empty path' => ['', 'hw1', 'alice', false]
+        ];
+    }
+
+    /**
+     * @dataProvider submitterDirectoryProvider
+     */
+    public function testIsInSubmitterDirectory(string $path, string $gradeable_id, string $submitter_id, bool $expected) {
+        $course_path = FileUtils::joinPaths($this->path, 'course');
+        $files = [
+            'submissions/hw1/alice/1/file.txt',
+            'submissions_processed/hw1/alice/1/file.txt',
+            'checkout/hw1/alice/1/file.txt',
+            'results/hw1/alice/1/file.txt',
+            'results_public/hw1/alice/1/file.txt',
+            'submissions/hw1/bob/1/file.txt',
+            'submissions/hw1/alice2/1/file.txt',
+            'submissions/hw2/alice/1/file.txt',
+            'uploads/hw1/alice/1/file.txt',
+            'secret.txt'
+        ];
+        foreach ($files as $file) {
+            $file = FileUtils::joinPaths($course_path, $file);
+            FileUtils::createDir(dirname($file), true);
+            file_put_contents($file, 'contents');
+        }
+        $alice_dir = FileUtils::joinPaths($course_path, 'submissions/hw1/alice/1');
+        symlink(FileUtils::joinPaths($course_path, 'secret.txt'), FileUtils::joinPaths($alice_dir, 'link_secret'));
+        symlink(FileUtils::joinPaths($course_path, 'submissions/hw1/bob/1/file.txt'), FileUtils::joinPaths($alice_dir, 'link_bob'));
+
+        $full_path = $path === '' ? '' : FileUtils::joinPaths($course_path, $path);
+        $this->assertSame($expected, FileUtils::isInSubmitterDirectory($full_path, $course_path, $gradeable_id, $submitter_id));
     }
 
     public static function validImageProvider() {

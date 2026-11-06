@@ -27,17 +27,17 @@ def main(args):
 
     try:
         # check that all pages are divisible
-        with open(filename, 'rb') as pdfFileObj:
+        with open(filename, "rb") as pdfFileObj:
             pdfReader = PyPDF2.PdfReader(pdfFileObj, strict=False)
             total_pages = len(pdfReader.pages)
-            if (total_pages % num != 0):
+            if total_pages % num != 0:
                 msg = filename + " not divisible by " + str(num)
                 print(msg)
                 logger.write_to_log(log_file_path, log_msg + msg)
                 return
 
             # recalculate the total # of pages for each file
-            pdfFileObj = open(filename, 'rb')
+            pdfFileObj = open(filename, "rb")
             pdfReader = PyPDF2.PdfReader(pdfFileObj, strict=False)
             total_pages = len(pdfReader.pages)
             max_length = len(str(total_pages - num))
@@ -52,28 +52,29 @@ def main(args):
                 cover_writer = PdfWriter()
                 cover_writer.add_page(pdfReader.pages[i])
                 prepended_index = str(i).zfill(max_length)
-                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], prepended_index)
-                output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
+                cover_filename = "{}_{}_cover.pdf".format(filename[:-4], prepended_index)
+                output_filename = "{}_{}.pdf".format(filename[:-4], prepended_index)
                 pdf_writer = PdfWriter()
                 start = i
-                for j in range(start, start+num):
+                for j in range(start, start + num):
                     pdf_writer.add_page(pdfReader.pages[j])
                     i += 1
-                with open(output_filename, 'wb') as out:
+                with open(output_filename, "wb") as out:
                     pdf_writer.write(out)
 
-                with open(cover_filename, 'wb') as out:
+                with open(cover_filename, "wb") as out:
                     cover_writer.write(out)
 
                 buff += "Splitting PDF at page " + str(i) + ", "
 
-                with open(cover_filename, 'rb') as out:
+                with open(cover_filename, "rb") as out:
                     # save cover as image
                     pdf_images = convert_from_bytes(out.read(), dpi=200)
-                    pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]),
-                                       "JPEG", quality=20, optimize=True)
+                    pdf_images[0].save(
+                        "{}.jpg".format(cover_filename[:-4]), "JPEG", quality=20, optimize=True
+                    )
 
-            buff += "Finished splitting into " + str(int(total_pages/num)) + " files"
+            buff += "Finished splitting into " + str(int(total_pages / num)) + " files"
             logger.write_to_log(log_file_path, buff)
     except Exception as err:
         print(err)
