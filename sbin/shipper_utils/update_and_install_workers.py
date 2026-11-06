@@ -176,7 +176,6 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         commands = list()
         shipperutil_path = os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "shipper_utils")
         script_directory = os.path.join(shipperutil_path, 'docker_command_wrapper.py')
-        venv_python = os.path.join(SUBMITTY_INSTALL_DIR, "venv", "bin", "python3")
 
         # Prevent removal of system docker containers
         with open(os.path.join(SUBMITTY_REPOSITORY_DIR, ".setup", "data", "system_docker_containers.json")) as json_file:
