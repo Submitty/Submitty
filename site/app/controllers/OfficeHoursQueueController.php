@@ -66,7 +66,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
         $regex_pattern = isset($_POST['regex']) ? trim($_POST['regex']) : '';
-        if ($this->core->getQueries()->openQueue($queue_code, $token, $regex_pattern, $require_contact_info)) {
+        if ($this->core->getQueries()->openQueue($queue_code, $token, $regex_pattern, $require_contact_info, "#888888")) {
             $this->core->addSuccessMessage("New queue added");
             Logger::logQueueActivity($this->core->getConfig()->getTerm(), $this->core->getDisplayedCourseName(), $queue_code, "CREATED");
         }
