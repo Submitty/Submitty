@@ -39,6 +39,9 @@ fi
 # GIT_CHECKOUT/Submitty/.setup/bin -> GIT_CHECKOUT/Submitty
 cd ../../
 
+# shellcheck disable=SC1091
+source /usr/local/submitty/venv/bin/activate
+
 python3 ./.setup/bin/partial_reset.py
 # FLAG and COURSES are intentionally unquoted to word-split COURSES into separate arguments
 # shellcheck disable=SC2086

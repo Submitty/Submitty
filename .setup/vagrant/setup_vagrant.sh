@@ -11,7 +11,7 @@ SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 # We only need to reset the system only if we've installed pip3,
 # which only happens after we've installed the system
 if [ -x "$(command -v pip3)" ]; then
-    python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
+    /usr/local/submitty/venv/bin/python3 ${SUBMITTY_REPOSITORY}/.setup/bin/reset_system.py
 fi
 
 CI=0
