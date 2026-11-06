@@ -16,7 +16,7 @@ def up(config, database, semester, course):
     """
     database.execute("""
         ALTER TABLE queue
-        ADD COLUMN IF NOT EXISTS color VARCHAR(255) DEFAULT NULL
+        ADD COLUMN IF NOT EXISTS color VARCHAR(255) DEFAULT '#000000'
     """)
     pass
 
