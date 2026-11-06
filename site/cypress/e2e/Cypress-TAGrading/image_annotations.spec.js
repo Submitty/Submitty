@@ -54,6 +54,7 @@ function visitGradingPage(user) {
 
 // Panel buttons toggle based on the remembered layout, so force the panel open instead
 function showPanel(panelId) {
+    cy.window().its('setPanelsVisibilities').should('be.a', 'function');
     cy.window().then((win) => win.setPanelsVisibilities(panelId, true));
     cy.get(`#${panelId}`).should('be.visible');
 }
@@ -108,6 +109,43 @@ function drawBox(left, color) {
         cy.get('#global-annotation-editor').trigger('editorsave', { detail: { state, dataUrl: 'data:,' }, force: true });
     });
     cy.get('#annotation-status').should('have.text', 'Annotations modified (not saved)');
+}
+
+function editorShadow() {
+    return cy.get('#global-annotation-editor').shadow();
+}
+
+// The marker area's drawing canvas sits inside the editor's shadow root
+function editorCanvas() {
+    return editorShadow().find('mjs-marker-area').shadow().find('svg')
+        .filter('[style*="pointer-events: auto"]').first();
+}
+
+// Drags out a rectangle in the editor, with corners given as fractions of the image size
+function drawRectangleInEditor(from, to) {
+    // The editor has a wide and a narrow toolbar, and only one of them is laid out.
+    // Each shape group also lists its shapes again in a dropdown, so only take the group's own button.
+    editorShadow().find('[aria-label="Basic shapes"] > [title="Rectangle"]')
+        .filter((_index, button) => button.getClientRects().length > 0)
+        .should('have.length', 1)
+        .click();
+    editorCanvas().then(($canvas) => {
+        const rect = $canvas[0].getBoundingClientRect();
+        const pointer = ([x, y]) => ({
+            eventConstructor: 'PointerEvent',
+            pointerId: 1,
+            pointerType: 'mouse',
+            isPrimary: true,
+            button: 0,
+            clientX: rect.left + (rect.width * x),
+            clientY: rect.top + (rect.height * y),
+        });
+        cy.wrap($canvas).trigger('pointerdown', pointer(from));
+        // The editor listens for the rest of the drag on the window
+        cy.document().trigger('pointermove', pointer([(from[0] + to[0]) / 2, (from[1] + to[1]) / 2]));
+        cy.document().trigger('pointermove', pointer(to));
+        cy.document().trigger('pointerup', pointer(to));
+    });
 }
 
 function saveAnnotations() {
@@ -206,6 +244,91 @@ function assertViewGradeHighlighted(highlighted) {
     cy.get(`[data-testid="${gradeable}"] .btn-nav-submit`).should(highlighted ? 'have.class' : 'not.have.class', 'btn-success');
 }
 
+// Unchecks every mark on the first component so the next run starts without a grade
+function resetComponentGrade() {
+    // gradeUrl is only set once the before hook's commands run
+    cy.then(() => {
+        if (gradeUrl === undefined) {
+            return;
+        }
+        resetComponentGradeAt(gradeUrl);
+    });
+}
+
+function resetComponentGradeAt(url) {
+    // The page reopens the last open component from this cookie, so start with every component closed
+    cy.clearCookie('open_component_id');
+    cy.visit(url);
+    showPanel('grading_rubric');
+    cy.get('[data-testid="component-container"]').first().click(20, 25);
+    cy.get('[data-testid="save-tools-save"]', { timeout: 20000 }).should('contain', 'Save');
+    cy.get('[data-testid="component-container"]').first().find('[data-testid="mark-selector"]').should('exist');
+    cy.get('[data-testid="component-container"]').first().then(($component) => {
+        $component.find('[data-testid="mark-selector"]:has(.mark-selected)').each((_index, mark) => {
+            cy.wrap(mark).click();
+        });
+    });
+    // Saving a component with no marks deletes its grade. Saving also closes the component,
+    // which matters because the page reopens it on the next visit and jumps to its PDF page.
+    cy.get('[data-testid="save-tools-save"]').click();
+    cy.get('[data-testid="save-tools-save"]').should('not.exist');
+}
+
+// The rubric editor is rendered after the page loads, so wait for it before looking for components
+function visitRubricEditor() {
+    cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=2']);
+    cy.get('[data-testid="add-new-peer-component"]', { timeout: 10000 }).should('be.visible');
+}
+
+function addPeerGrader(grader) {
+    visitRubricEditor();
+    cy.get('[data-testid="add-new-peer-component"]').click();
+    cy.get('[data-testid="peer-component-container"]').should('exist');
+    cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=4']);
+    cy.get('[data-testid="peer-control"]').should('be.visible');
+    cy.get('body').then(($body) => {
+        // The matrix may still have the grader if an earlier run stopped before cleanup
+        if ($body.find(`.peer-table-grader:contains("${grader}")`).length > 0) {
+            return;
+        }
+        cy.get('[data-testid="add-peer-grader"]').click();
+        cy.get('[data-testid="new-peer-grader"]').type(grader);
+        cy.get('[data-testid="add-user-id-0"]').type(student);
+        // Close the autocomplete list before submitting
+        cy.get('[data-testid="new-peer-grader"]').click();
+        cy.get('[data-testid="admin-gradeable-add-peers-submit"]').click();
+    });
+    cy.get('.peer-table-grader').should('contain', grader);
+}
+
+function deletePeerComponents() {
+    cy.get('body').then(($body) => {
+        const count = $body.find('[data-testid="peer-component-container"]').length;
+        if (count === 0) {
+            return;
+        }
+        cy.get('[data-testid="peer-component-container"]').first().find('[data-testid="delete-gradable-component"]').click();
+        cy.get('[data-testid="peer-component-container"]').should('have.length', count - 1);
+        deletePeerComponents();
+    });
+}
+
+// Turns the gradeable back into a non-peer gradeable, if a peer test left it as one
+function removePeerGrading() {
+    visitRubricEditor();
+    cy.get('body').then(($body) => {
+        if ($body.find('[data-testid="peer-component-container"]').length === 0) {
+            return;
+        }
+        cy.visit(['sample', 'gradeable', gradeable, 'update?nav_tab=4']);
+        cy.intercept('POST', '**/RandomizePeers').as('clearPeers');
+        cy.get('[data-testid="clear-peer-matrix"]').click();
+        cy.wait('@clearPeers');
+        visitRubricEditor();
+        deletePeerComponents();
+    });
+}
+
 describe('Test cases for image annotations', () => {
     before(() => {
         cy.visit(['sample', 'gradeable', gradeable]);
@@ -231,11 +354,11 @@ describe('Test cases for image annotations', () => {
         cy.intercept('POST', '**/split_pdf/upload?*').as('assignPdf');
         cy.get('[data-testid="bulk-user-id-1"]').type(student);
         cy.get('[data-testid="bulk-submit-1"]').click();
-        cy.wait('@verifySubmitter');
         // Asks whether to keep old files when the student already has a submission, e.g. from an earlier run
-        cy.get('#previous-submission-form').then(($form) => {
-            if ($form.is(':visible')) {
-                cy.wrap($form).find('input[type="submit"]').click();
+        cy.wait('@verifySubmitter').its('response.body').then((body) => {
+            const response = typeof body === 'string' ? JSON.parse(body) : body;
+            if (response.data.previous_submission) {
+                cy.get('#previous-submission-form').should('be.visible').find('input[type="submit"]').click();
             }
         });
         cy.wait('@assignPdf');
@@ -254,12 +377,17 @@ describe('Test cases for image annotations', () => {
         cy.waitAndReloadUntil(() => {
             return cy.get('body').then(($body) => $body.find('a.image-file.openable-element-submissions_processed').length > 0);
         }, 60000, 2000);
+        // Undo anything an earlier run left behind if it stopped before its after hook finished
+        removePeerGrading();
+        resetComponentGrade();
         cy.logout();
     });
 
     after(() => {
         cy.visit(['sample', 'gradeable', gradeable, 'update']);
         cy.login('instructor');
+        removePeerGrading();
+        resetComponentGrade();
         setDates(originalDates);
     });
 
@@ -415,7 +543,9 @@ describe('Test cases for image annotations', () => {
         clearAndSave('ta');
         cy.logout();
 
+        // Removing an annotation also counts as a new grade
         loginStudent();
+        assertViewGradeHighlighted(true);
         visitStudentGradeable();
         stubPopup();
         cy.get('[data-testid="annotation-popup-button"]').click();
@@ -427,7 +557,93 @@ describe('Test cases for image annotations', () => {
         cy.logout();
 
         loginStudent();
+        assertViewGradeHighlighted(true);
         visitStudentGradeable();
         cy.get('[data-testid="annotation-popup-button"]').should('not.exist');
+    });
+
+    it('should save and clear multiple annotations drawn in the editor', () => {
+        const boxes = [
+            { from: [0.1, 0.1], to: [0.3, 0.2] },
+            { from: [0.5, 0.4], to: [0.8, 0.6] },
+        ];
+
+        // The editor's canvas is as large as the image is in the panel, so give the panel room to draw in
+        cy.viewport(1600, 1200);
+        visitGradingPage('instructor');
+        openProcessedImage();
+        // Start from a blank image even if an earlier test left an annotation behind
+        clearAnnotations();
+        assertImageAnnotated(false);
+        cy.get('#annotatable-image').invoke('outerWidth').should('be.greaterThan', 200);
+
+        cy.get('#add-annotations-btn').click();
+        // Once the editor's copy of the image loads, it restores the state it was opened with, wiping
+        // anything drawn before then. markerjs has no public event for this, so wait on its load flag.
+        cy.get('#global-annotation-editor').should(($editor) => {
+            expect($editor[0].markerArea._targetImageLoaded).to.equal(true);
+        });
+        editorCanvas().should(($canvas) => {
+            expect(parseFloat($canvas[0].style.width)).to.be.greaterThan(200);
+        });
+        boxes.forEach(({ from, to }) => drawRectangleInEditor(from, to));
+        cy.get('#global-annotation-editor').should(($editor) => {
+            expect($editor[0].markerArea.getState().markers).to.have.length(boxes.length);
+        });
+        editorShadow().find('[aria-label="OK"]').click();
+        cy.get('#annotation-status').should('have.text', 'Annotations modified (not saved)');
+        saveAnnotations();
+
+        // Each box is shown where it was drawn on the image
+        cy.reload();
+        openProcessedImage();
+        cy.get('#annotation-marker-view').should(($view) => {
+            const view = $view[0];
+            expect(view.markers).to.have.length(boxes.length);
+            const image = view.shadowRoot.querySelector('img').getBoundingClientRect();
+            const markers = view.markers
+                .map((marker) => marker.container.getBoundingClientRect())
+                .sort((a, b) => a.left - b.left);
+            boxes.forEach(({ from, to }, i) => {
+                expect((markers[i].left - image.left) / image.width).to.be.closeTo(from[0], 0.03);
+                expect((markers[i].top - image.top) / image.height).to.be.closeTo(from[1], 0.03);
+                expect((markers[i].right - image.left) / image.width).to.be.closeTo(to[0], 0.03);
+                expect((markers[i].bottom - image.top) / image.height).to.be.closeTo(to[1], 0.03);
+            });
+        });
+
+        cy.intercept('POST', '**/img/annotations').as('saveCleared');
+        clearAnnotations();
+        cy.wait('@saveCleared').then(({ request }) => {
+            const annotations = new URLSearchParams(request.body).get('annotations');
+            expect(JSON.parse(annotations)).to.equal(null);
+        });
+        cy.reload();
+        openProcessedImage();
+        assertImageAnnotated(false);
+    });
+
+    it('should hide the annotation toolbar from peer graders', () => {
+        visitGradingPage('instructor');
+        addPeerGrader('student');
+
+        // Staff can still annotate once the gradeable has a peer component
+        cy.visit(gradeUrl);
+        openProcessedImage();
+        cy.get('.annotation-toolbar').should('be.visible');
+        cy.logout();
+
+        cy.visit(['sample', 'gradeable', gradeable, 'grading', 'details']);
+        cy.login('student');
+        // Peer graders are shown the grading instructions the first time they visit
+        cy.get('body').then(($body) => {
+            if ($body.find('[data-testid="popup-save-button"]').length > 0) {
+                cy.get('[data-testid="popup-save-button"]').click();
+            }
+        });
+        cy.get('[data-testid="grade-button"]').should('have.length', 1).click();
+        openProcessedImage();
+        cy.get('.annotation-toolbar').should('not.exist');
+        cy.get('#add-annotations-btn').should('not.exist');
     });
 });

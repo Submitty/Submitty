@@ -8,6 +8,7 @@ use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
+use app\models\gradeable\GradedGradeable;
 
 class ImageController extends AbstractController {
     public function __construct(Core $core) {
@@ -223,6 +224,7 @@ class ImageController extends AbstractController {
             // No markers found - delete the annotation file if it exists
             if (file_exists($annotation_file_path)) {
                 if (unlink($annotation_file_path)) {
+                    $this->markAnnotationUnviewed($graded_gradeable);
                     return JsonResponse::getSuccessResponse('Empty annotation removed successfully!');
                 }
                 else {
@@ -246,7 +248,15 @@ class ImageController extends AbstractController {
             return JsonResponse::getErrorResponse('Failed to save annotation file');
         }
 
-        // Annotation added or updated, and the student hasn't seen it yet
+        $this->markAnnotationUnviewed($graded_gradeable);
+
+        return JsonResponse::getSuccessResponse('Image annotation saved successfully!');
+    }
+
+    /**
+     * An annotation was added, updated, or removed, and the student hasn't seen the change yet
+     */
+    private function markAnnotationUnviewed(GradedGradeable $graded_gradeable): void {
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
         $ta_graded_gradeable->resetUserViewedDate();
         // save this change to the database
@@ -255,7 +265,5 @@ class ImageController extends AbstractController {
         if ($submitter->isTeam()) {
             $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
         }
-
-        return JsonResponse::getSuccessResponse('Image annotation saved successfully!');
     }
 }
