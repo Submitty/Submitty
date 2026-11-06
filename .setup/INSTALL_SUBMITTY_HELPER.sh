@@ -213,7 +213,6 @@ echo -e "Install python_submitty_utils"
 rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
 pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
 
-# pip creates files with the process umask, so this is what makes the package world-readable
 (umask 022 && pip3 install .)
 
 # sometimes, pip will set the permissions incorrectly, depending on what they were previously
