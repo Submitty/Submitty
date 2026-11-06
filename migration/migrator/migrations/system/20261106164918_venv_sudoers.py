@@ -16,7 +16,7 @@ def up(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
-    sudoers_path = "/etc/sudoers"
+    SUDOERS_PATH = "/etc/sudoers"
 
     COURSE_BUILDERS_GROUP = "submitty_course_builders"
     SUBMITTY_INSTALL_DIR = Path(config.submitty["submitty_install_dir"])
@@ -31,7 +31,7 @@ def up(config):
 
     temp_fd, temp_sudoers_path = tempfile.mkstemp()
     try:
-        shutil.copy2(sudoers_path, temp_sudoers_path)
+        os.replace(SUDOERS_PATH, temp_sudoers_path)
 
         # Append the new rules to the temp file
         with open(temp_sudoers_path, "a") as file:
@@ -50,11 +50,6 @@ def up(config):
             file.write(
                 f"%{COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/regrade.py *\n"
             )
-            # If in worker mode, also append submitty user to /etc/sudoers
-            if WORKER == "1" and SUPERVISOR_USER:
-                file.write(
-                    f"{SUPERVISOR_USER} ALL = (root) NOPASSWD: /usr/local/submitty/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py *\n"
-                )
 
         # Use visudo to validate the temp file using -c to check syntax
         result = subprocess.run(
@@ -67,7 +62,7 @@ def up(config):
             )
 
         # Overwrite /etc/sudoers
-        shutil.copy2(temp_sudoers_path, sudoers_path)
+        os.replace(temp_sudoers_path, SUDOERS_PATH)
 
     finally:
         # Clean up temporary file
