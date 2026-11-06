@@ -283,7 +283,7 @@ def main() -> None:
     if (not NO_GRADING) or TEST_ONLY_GRADING:
         # queue up all of the newly created submissions to grade!
         os.system(
-            f"python3 {SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}"
+            f"{SUBMITTY_INSTALL_DIR}/venv/bin/python3 {SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}"
         )
 
 

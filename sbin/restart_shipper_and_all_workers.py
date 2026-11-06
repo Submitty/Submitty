@@ -16,6 +16,8 @@ import subprocess
 import sys
 import time
 
+SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
+VENV_PATH = "/usr/local/submitty/venv/bin/python3"
 
 SYSTEMCTL_WRAPPER_SCRIPT = path.join(
     path.dirname(path.realpath(__file__)), "shipper_utils", "systemctl_wrapper.py"
@@ -60,7 +62,7 @@ if __name__ == "__main__":
     print("Stopping the local shipper daemon...")
     subprocess.call(
         [
-            "/usr/local/submitty/venv/bin/python3",
+            VENV_PATH,
             SYSTEMCTL_WRAPPER_SCRIPT,
             "stop",
             "--daemon",
@@ -73,7 +75,7 @@ if __name__ == "__main__":
     print("Stopping all local worker daemon...")
     subprocess.call(
         [
-            "/usr/local/submitty/venv/bin/python3",
+            VENV_PATH,
             SYSTEMCTL_WRAPPER_SCRIPT,
             "stop",
             "--daemon",
@@ -84,7 +86,7 @@ if __name__ == "__main__":
     )
 
     print("Stopping all remote worker daemons...")
-    cmd = "/usr/local/submitty/venv/bin/python3 {0} stop --daemon worker --target perform_on_all_workers"
+    cmd = f"{VENV_PATH} {{0}} stop --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
@@ -95,7 +97,7 @@ if __name__ == "__main__":
     print("Starting the local shipper daemon...")
     subprocess.call(
         [
-            "/usr/local/submitty/venv/bin/python3",
+            VENV_PATH,
             SYSTEMCTL_WRAPPER_SCRIPT,
             "start",
             "--daemon",
@@ -108,7 +110,7 @@ if __name__ == "__main__":
     print("Starting the local worker daemon...")
     subprocess.call(
         [
-            "/usr/local/submitty/venv/bin/python3",
+            VENV_PATH,
             SYSTEMCTL_WRAPPER_SCRIPT,
             "start",
             "--daemon",
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     )
 
     print("Starting all worker daemons...")
-    cmd = "/usr/local/submitty/venv/bin/python3 {0} start --daemon worker --target perform_on_all_workers"
+    cmd = f"{VENV_PATH} {{0}} start --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     subprocess.call(["su", "-", "submitty_daemon", "-c", cmd])
@@ -128,7 +130,7 @@ if __name__ == "__main__":
     time.sleep(delay_in_seconds)
 
     print("Verifying all worker daemons...")
-    cmd = "/usr/local/submitty/venv/bin/python3 {0} status --daemon worker --target perform_on_all_workers"
+    cmd = f"{VENV_PATH} {{0}} status --daemon worker --target perform_on_all_workers"
     cmd = cmd.format(SYSTEMCTL_WRAPPER_SCRIPT)
 
     result = subprocess.run(
@@ -166,7 +168,7 @@ if __name__ == "__main__":
 
             subprocess.run(
                 [
-                    "/usr/local/submitty/venv/bin/python3",
+                    VENV_PATH,
                     "-x",
                     "-c",
                     f"""import restart_shipper_and_all_workers as r;    \
