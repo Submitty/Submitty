@@ -137,7 +137,7 @@ if [ ${VAGRANT} == 1 ]; then
     chmod 740 ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
 fi
 
-# Change the shebang of the cgi scripts to use the global submitty Python venv
+# CGI Python scripts use the global Submitty venv at ${SUBMITTY_INSTALL_DIR}/venv
 for f in "${SUBMITTY_INSTALL_DIR}"/site/cgi-bin/*.cgi; do
     replace_fillin_variables "$f"
 done
