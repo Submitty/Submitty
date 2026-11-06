@@ -159,3 +159,44 @@ test('resizes the MarkerView target and retains zoom when cleaning up annotation
     expect(img.style.height).toBe('140px');
     expect(localStorage.getItem('image-scale')).toBe('1.4');
 });
+
+test('updates MarkerView dimensions when the annotation container resizes', () => {
+    let resizeCallback;
+    global.ResizeObserver = jest.fn((callback) => {
+        resizeCallback = callback;
+        return {
+            observe: jest.fn(),
+            disconnect: jest.fn(),
+        };
+    });
+
+    const container = document.createElement('div');
+    container.className = 'image-annotation-container';
+    Object.defineProperties(container, {
+        clientWidth: { configurable: true, value: 500 },
+        clientHeight: { configurable: true, value: 400 },
+    });
+    document.body.appendChild(container);
+
+    const img = addImage();
+    container.appendChild(img);
+    document.getElementById('file-content').appendChild(container);
+    localStorage.setItem('image-scale', '1.3');
+    window.initImageZoom();
+
+    const markerView = document.createElement('div');
+    markerView.id = 'annotation-marker-view';
+    markerView.targetImage = img;
+    img.dataset.originalId = img.id;
+    img.replaceWith(markerView);
+    window.initImageZoom();
+    window.zoomImage(0.1);
+
+    // Simulate the annotation panel becoming wider.
+    Object.defineProperty(container, 'clientWidth', { value: 800 });
+    resizeCallback();
+
+    expect(img.dataset.zoom).toBe('1.4');
+    expect(markerView.targetWidth).toBeGreaterThan(280);
+    expect(markerView.targetHeight).toBeGreaterThan(140);
+});

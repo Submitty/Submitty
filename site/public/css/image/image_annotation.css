@@ -16,7 +16,8 @@
 
 /* Annotation Image CSS */
 
-#annotatable-image {
+#annotatable-image,
+#annotation-marker-view {
     max-width: 90%;
     max-height: calc(100% - 120px); /* Account for toolbar and padding */
     height: auto;
