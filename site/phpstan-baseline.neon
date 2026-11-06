@@ -5131,12 +5131,6 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/libraries/Access.php
-
-		-
 			rawMessage: 'Loose comparison via "!=" between string and mixed is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1

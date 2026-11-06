@@ -228,4 +228,55 @@ class AccessTester extends BaseUnitTest {
         $this->assertTrue($this->access->canUser($student, 'poll.view.histogram', ['poll' => $poll]));
         $this->assertTrue($this->access->canUser($instructor, 'poll.view.histogram', ['poll' => $poll]));
     }
+
+    public function testGradeInquiryPermissions() {
+        $gradeable = $this->createMockModel(\app\models\gradeable\Gradeable::class);
+        $gradeable->method('hasPeerComponent')->willReturn(true);
+        $gradeable->method('getMinGradingGroup')->willReturn(User::GROUP_FULL_ACCESS_GRADER);
+        $gradeable->method('getGradeStartDate')->willReturn(new \DateTime('2000-01-01'));
+
+        $full_access_grader = $this->createMockModel(User::class);
+        $full_access_grader->method('getGroup')->willReturn(User::GROUP_FULL_ACCESS_GRADER);
+        $full_access_grader->method('accessGrading')->willReturn(true);
+
+        $instructor = $this->createMockModel(User::class);
+        $instructor->method('getGroup')->willReturn(User::GROUP_INSTRUCTOR);
+        $instructor->method('accessGrading')->willReturn(true);
+
+        $limited_access_grader = $this->createMockModel(User::class);
+        $limited_access_grader->method('getGroup')->willReturn(User::GROUP_LIMITED_ACCESS_GRADER);
+        $limited_access_grader->method('accessGrading')->willReturn(true);
+
+        // Full-access graders and instructors should be allowed.
+        $this->assertTrue($this->access->canUser(
+            $full_access_grader,
+            'grading.electronic.grade_inquiry',
+            ['gradeable' => $gradeable]
+        ));
+
+        $this->assertTrue($this->access->canUser(
+            $instructor,
+            'grading.electronic.grade_inquiry',
+            ['gradeable' => $gradeable]
+        ));
+
+        // Limited-access graders should not access grade inquiries.
+        $this->assertFalse($this->access->canUser(
+            $limited_access_grader,
+            'grading.electronic.grade_inquiry',
+            ['gradeable' => $gradeable]
+        ));
+
+        // Peer-only full-access graders should not access grade inquiries.
+        $peer_only_gradeable = $this->createMockModel(\app\models\gradeable\Gradeable::class);
+        $peer_only_gradeable->method('hasPeerComponent')->willReturn(true);
+        $peer_only_gradeable->method('getMinGradingGroup')->willReturn(User::GROUP_INSTRUCTOR);
+        $peer_only_gradeable->method('getGradeStartDate')->willReturn(new \DateTime('2000-01-01'));
+
+        $this->assertFalse($this->access->canUser(
+            $full_access_grader,
+            'grading.electronic.grade_inquiry',
+            ['gradeable' => $peer_only_gradeable]
+        ));
+    }
 }
