@@ -561,7 +561,7 @@ class Access {
                 $view_annotated_file = filter_var($args['view_annotated_file'] ?? false, FILTER_VALIDATE_BOOL);
                 $dir = $args['dir'] ?? '';
                 $path = $args['path'] ?? '';
-                if ($view_annotated_file && $dir === 'submissions_processed' && strpos($path, $user->getId()) !== false) {
+                if ($view_annotated_file && in_array($dir, ImageAnnotationUtils::ANNOTATABLE_DIRS, true) && strpos($path, $user->getId()) !== false) {
                     $grading_checks = true;
                 }
             }

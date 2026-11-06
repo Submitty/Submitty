@@ -82,14 +82,14 @@ $( document ).ready(function() {
 
         {% if uploaded_imgs|length >= 1 %}
             <div class = "no-border-box">
-                {% if img_annotation_paths|length > 0 %}
+                {% if annotated_img_keys|length > 0 %}
                     <div class="row">
                         <div class="no-border-box">
                             <b>Annotated Feedback</b>
                         </div>
                     </div>
                     {% for file in uploaded_imgs %}
-                        {% if file.name in img_annotation_paths|keys %}
+                        {% if file.annotation_key in annotated_img_keys %}
                             <div class="row" style="flex-wrap: nowrap;">
                                 <div class="no-border-box md-4 file-annotation">
                                     <p>{{ file.relative_name }}</p>
