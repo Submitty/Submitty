@@ -158,6 +158,25 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
                                 </td>
                             </tr>
                         {% endfor %}
+                                                {% set no_credit_peers = component.peer_results|filter(peer =>
+                            peer.total_score == 0
+                            and (peer.comment != '' or peer.custom_mark_score != 0)
+                            and peer.marks|filter(mark => mark.earned)|length == 0
+                        ) %}
+
+                        {% if no_credit_peers|length > 0 %}
+                            <tr>
+                                <td class="peer-table-data">
+                                    {{ no_credit_peers|length }}
+                                </td>
+                                <td class="peer-table-data">
+                                    0
+                                </td>
+                                <td class="peer-table-title-data">
+                                    No Credit Awarded
+                                </td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
                 </p>
