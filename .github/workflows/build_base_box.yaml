@@ -1,0 +1,70 @@
+name: Build Base Box
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BOX_NAME: SubmittyBot/ubuntu22-base
+  R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: ${{ secrets.R2_BUCKET }}
+  R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}
+
+jobs:
+  amd64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install packer and VirtualBox
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor -o /usr/share/keyrings/oracle-virtualbox.gpg
+          echo "deb [signed-by=/usr/share/keyrings/oracle-virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" \
+            | sudo tee /etc/apt/sources.list.d/virtualbox.list
+          sudo apt-get update
+          sudo apt-get install -y packer "linux-headers-$(uname -r)" virtualbox-7.1
+
+      # VirtualBox can't use VT-x while KVM holds it.
+      - name: Unload KVM
+        run: sudo modprobe -r kvm_intel kvm_amd kvm || true
+
+      - name: Build and publish box
+        run: |
+          bash .setup/vagrant/base-box/build-base-box.sh -A amd64 -n 4 -m 8192 -o "$RUNNER_TEMP/base.box" \
+            -w 25s -t 120m -k -N "$BOX_NAME" -p "$(date -u +%Y.%m.%d%H%M)"
+
+      # -k leaves the VM running on failure, so capture what its screen shows and VirtualBox's logs.
+      - name: Collect VM diagnostics
+        if: failure()
+        run: |
+          mkdir -p "$RUNNER_TEMP/diagnostics"
+          VBoxManage controlvm ubuntu-22.04-amd64-base screenshotpng "$RUNNER_TEMP/diagnostics/screen.png" || true
+          VBoxManage showvminfo ubuntu-22.04-amd64-base > "$RUNNER_TEMP/diagnostics/vminfo.txt" || true
+          find "$HOME/VirtualBox VMs" -name 'VBox*.log*' -exec cp {} "$RUNNER_TEMP/diagnostics/" \; || true
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: amd64-vm-diagnostics
+          path: ${{ runner.temp }}/diagnostics
+
+  notify-failure:
+    needs: amd64
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send zulip message on failure
+        run: |
+          curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }} \
+            --data-urlencode 'type=stream' \
+            --data-urlencode 'to=Submitty Developer Studio' \
+            --data-urlencode 'topic=Vagrant Up Failures' \
+            --data-urlencode 'content=The Build Base Box Github Action has failed, this means the base box was not updated, and requires attention. View here: https://github.com/Submitty/Submitty/actions/runs/${{ github.run_id }}'
