@@ -41,7 +41,7 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
 
-        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 3), 'cache', 'routes');
+        $cache_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'cache', 'routes');
         $cache = new FilesystemAdapter("", 0, $cache_path);
 
         // This will fetch the cache for routes. If it doesn't find it then it will
