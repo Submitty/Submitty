@@ -100,7 +100,7 @@ class CalendarView extends AbstractView {
             "is_superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
             "colors" => $info->getColors(),
             "instructor_courses" => $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId()),
-            "view_cookie" => $_COOKIE['view'] ?? $_COOKIE['view'] ?? "month",
+            "view_cookie" => $_COOKIE['calendar_view'] ?? "month",
             "month_cookie" => $_COOKIE['calendar_month'] ?? $month,
             "year_cookie" => $_COOKIE['calendar_year'] ?? $year,
             "course_names" => $courseWithName,

@@ -1032,7 +1032,7 @@ class ElectronicGraderController extends AbstractController {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
-        $view_all = isset($_COOKIE['view']) && $_COOKIE['view'] === 'all';
+        $view_all = ($_COOKIE['grading_view_sections'] ?? '') === 'all';
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $current_user = $this->core->getUser();
         if ($gradeable === false) {
