@@ -21,9 +21,10 @@ class LateDayInfo extends AbstractModel {
     const STATUS_GOOD = 1;
     const STATUS_LATE = 2;
     const STATUS_BAD = 3;
+    const STATUS_OVERRIDDEN = 4;
 
     public static function isValidStatus(int $status): bool {
-        return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
+        return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD, self::STATUS_OVERRIDDEN]);
     }
 
     /** @var GradedGradeable */
@@ -61,6 +62,8 @@ class LateDayInfo extends AbstractModel {
     /** @prop
      * @var string id of the late day event */
     protected $id = null;
+    /** @var bool True when this user has a grade override for the gradeable */
+    private bool $grade_overridden = false;
 
     /**
      * LateDayInfo constructor.
@@ -82,6 +85,8 @@ class LateDayInfo extends AbstractModel {
         $this->reason_for_exception = $event_info['reason_for_exception'] ?? null;
         $this->late_days_remaining = $event_info['late_days_remaining']  ?? null;
         $this->late_days_change = $event_info['late_days_change']  ?? null;
+        $this->grade_overridden = ($event_info['grade_overridden'] ?? false) === true
+            || (int) ($event_info['late_day_status'] ?? 0) === self::STATUS_OVERRIDDEN;
 
         // Set Autograded gradeable info
         $auto_graded_gradeable = $this->graded_gradeable !== null ? $this->graded_gradeable->getAutoGradedGradeable() : null;
@@ -112,10 +117,14 @@ class LateDayInfo extends AbstractModel {
         $submission_days_late = $auto_graded_gradeable->hasActiveVersion() ? $auto_graded_gradeable->getActiveVersionInstance()->getDaysLate() : 0;
         $exceptions = $graded_gradeable->getLateDayException($user);
         $reason = $graded_gradeable->getReasonForException($user);
+        $grade_overridden = $core->getQueries()->getAUserWithOverriddenGrades(
+            $graded_gradeable->getGradeableId(),
+            $user->getId()
+        ) !== null;
 
         $late_days_charged = 0;
         $assignment_budget = min($late_days_allowed, $late_days_remaining) + $exceptions;
-        if ($submission_days_late <= $assignment_budget) {
+        if (!$grade_overridden && $submission_days_late <= $assignment_budget) {
             // clamp the days charged to be the days late minus exceptions above zero.
             $late_days_charged = max(0, min($submission_days_late, $assignment_budget) - $exceptions);
         }
@@ -130,7 +139,8 @@ class LateDayInfo extends AbstractModel {
             'late_day_exceptions' => $exceptions,
             'reason_for_exception' => $reason,
             'late_days_remaining' => $late_days_remaining,
-            'late_days_change' => -$late_days_charged
+            'late_days_change' => -$late_days_charged,
+            'grade_overridden' => $grade_overridden
         ];
 
         return new LateDayInfo($core, $user, $event_info);
@@ -221,7 +231,8 @@ class LateDayInfo extends AbstractModel {
             return true;
         }
 
-        return $this->getStatus() == self::STATUS_GOOD || $this->getStatus() == self::STATUS_LATE;
+        $status = $this->getStatus();
+        return $status === self::STATUS_GOOD || $status === self::STATUS_LATE || $status === self::STATUS_OVERRIDDEN;
     }
 
     /**
@@ -299,9 +310,13 @@ class LateDayInfo extends AbstractModel {
     /**
      * Gets the late status of the gradeable
      * @param int $days_late optional - calculate the late day status based on if the gradeable used $days_late late days
-     * @return int One of self::STATUS_NO_ACTIVE_VERSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
+     * @return int One of self::STATUS_NO_ACTIVE_VERSION, self::STATUS_BAD, self::STATUS_LATE, self::STATUS_GOOD, or self::STATUS_OVERRIDDEN
      */
     public function getStatus(int $days_late = null) {
+        if ($this->grade_overridden) {
+            return self::STATUS_OVERRIDDEN;
+        }
+
         // No late days info, so NO_SUBMISSION
         if (!$this->hasLateDaysInfo()) {
             return self::STATUS_NO_ACTIVE_VERSION;
@@ -350,6 +365,8 @@ class LateDayInfo extends AbstractModel {
                 else {
                     return 'Bad (too many late days used on this assignment)';
                 }
+            case self::STATUS_OVERRIDDEN:
+                return 'Overridden';
             default:
                 return 'INTERNAL ERROR';
         }
@@ -364,7 +381,8 @@ class LateDayInfo extends AbstractModel {
             self::STATUS_NO_ACTIVE_VERSION => 'No Submission',
             self::STATUS_GOOD => 'Good',
             self::STATUS_LATE => 'Late',
-            self::STATUS_BAD => 'Bad'
+            self::STATUS_BAD => 'Bad',
+            self::STATUS_OVERRIDDEN => 'Overridden'
         ];
     }
 

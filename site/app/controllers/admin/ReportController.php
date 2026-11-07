@@ -715,6 +715,8 @@ class ReportController extends AbstractController {
                 return 'Late';
             case LateDayInfo::STATUS_BAD:
                 return 'Bad';
+            case LateDayInfo::STATUS_OVERRIDDEN:
+                return 'Overridden';
             case LateDayInfo::STATUS_NO_ACTIVE_VERSION:
                 if ($ldi->getGradedGradeable()->getAutoGradedGradeable()->hasSubmission()) {
                     return 'Cancelled';
