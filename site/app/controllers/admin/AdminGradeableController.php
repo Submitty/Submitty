@@ -1418,6 +1418,9 @@ class AdminGradeableController extends AbstractController {
         // Create the gradeable with good default information
         //
         $gradeable_type = GradeableType::stringToType($details['type']);
+        if (array_key_exists('team_size_max', $details) && !preg_match('/^\d+$/', (string) $details['team_size_max'])) {
+            throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
+        }
         $gradeable_create_data = [
             'type' => $gradeable_type,
             'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
@@ -1814,6 +1817,11 @@ class AdminGradeableController extends AbstractController {
 
             if (in_array($prop, $numeric_properties, true) && !is_numeric($post_val)) {
                 $errors[$prop] = "{$prop} must be a number";
+                continue;
+            }
+
+            if ($prop === 'team_size_max' && !preg_match('/^\d+$/', (string) $post_val)) {
+                $errors[$prop] = 'Max team size must be a non-negative integer!';
                 continue;
             }
 
