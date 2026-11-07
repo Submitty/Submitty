@@ -193,15 +193,8 @@ class ElectronicGraderView extends AbstractView {
             }
             if ($peer) {
                 $peer_count = count($gradeable->getPeerComponents());
-                $peer_review_components_total = 0;
                 $total_students_submitted = 0;
                 $total_grading_percentage = 0;
-                $peer_review_components_completed = 0;
-                $peer_review_components_percentage = 0;
-                $peer_review_assignments_total = 0;
-                $peer_graders_started = 0;
-                $peer_graders_assigned = 0;
-                $peer_grader_participation_percentage = 0;
                 if ($peer_count > 0 && array_key_exists("peer_stu_grad", $sections)) {
                     if ($num_peer_components > 0) {
                         $total_students_submitted =  floor(($sections['peer_stu_grad']['total_who_submitted']));

@@ -655,11 +655,13 @@ class ElectronicGraderController extends AbstractController {
         if ($isPeerGradeable) {
             $total_users_who_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key, $include_withdrawn_students);
             $peer_graded_components = 0;
-            $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+            $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
             $student_array = [];
             $student_registration_types = [];
             $student_list = [];
-            $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
+            $students = $gradeable->isGradeByRegistration()
+                ? $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames())
+                : $this->core->getQueries()->getUsersByRotatingSections($order->getSectionNames());
             foreach ($students as $student) {
                 $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
                 $sorted_students[$reg_sec][] = $student;
