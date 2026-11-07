@@ -70,6 +70,7 @@ describe('Bulk upload PDF page assignments', () => {
     it('opens the configured PDF page for each rubric component', () => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'bulk_upload_page_assignment', 'grading', 'details']);
+        cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="grade-table"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-testid="grade-table"]')
             .find('[data-testid="grade-button"]')
