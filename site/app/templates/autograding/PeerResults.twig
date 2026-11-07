@@ -241,7 +241,8 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
                                 <h4>{{ component.title|escape }}</h4>
                                 <p>
                                     {% for mark in component.marks %}
-                                        {% if mark.earned[anon_grader_id_mapping[grader]] %}
+                                        {# A component with no graders yet (partial grading) has an empty earned map #}
+                                        {% if mark.earned[anon_grader_id_mapping[grader]] is defined and mark.earned[anon_grader_id_mapping[grader]] %}
                                             <i class="far fa-check-square fa-1g"></i>
                                         {% else %}
                                             <i class="far fa-square fa-1g"></i>

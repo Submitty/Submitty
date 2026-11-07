@@ -517,13 +517,14 @@ class AutoGradingView extends AbstractView {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
-            'been_ta_graded' => $ta_graded_gradeable->isComplete(),
+            'been_ta_graded' => $ta_graded_gradeable->isComplete() || $ta_graded_gradeable->getGradedGradeable()->isTaGradingPartiallyReleased(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'ta_components' => $ta_component_data,
             'grade_inquiry_start_date' => $gradeable->getGradeInquiryStartDate(),
             'grade_inquiry_due_date' => $gradeable->getGradeInquiryDueDate(),
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
-            'grading_complete' => $grading_complete,
+            // Partially released grades are shown even though some components are ungraded
+            'grading_complete' => $grading_complete || $ta_graded_gradeable->getGradedGradeable()->isTaGradingPartiallyReleased(),
             'ta_score' => $ta_grading_earned,
             'ta_max' => $ta_max,
             'active_same_as_graded' => $active_same_as_graded,
@@ -706,7 +707,7 @@ class AutoGradingView extends AbstractView {
         $gradeable_id = $gradeable->getId();
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/PeerResults.twig', [
-            'been_ta_graded' => $ta_graded_gradeable->isComplete(),
+            'been_ta_graded' => $ta_graded_gradeable->isComplete() || $ta_graded_gradeable->getGradedGradeable()->isTaGradingPartiallyReleased(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'grader_info' => $grader_info,
             'is_peer' => $gradeable->hasPeerComponent(),
@@ -714,7 +715,8 @@ class AutoGradingView extends AbstractView {
             'peer_aliases' => $peer_aliases,
             'ordered_graders' => $ordered_graders,
             'date_time_format' => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
-            'grading_complete' => $grading_complete,
+            // Partially released grades are shown even though some components are ungraded
+            'grading_complete' => $grading_complete || $ta_graded_gradeable->getGradedGradeable()->isTaGradingPartiallyReleased(),
             'peer_score' => $peer_grading_earned,
             #'peer_anon_component_data' => $peer_anon_component_data,
             'anon_grader_id_mapping' => $anon_grader_id_mapping,

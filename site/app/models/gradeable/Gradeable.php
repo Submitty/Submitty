@@ -151,6 +151,9 @@ class Gradeable extends AbstractModel {
      * @var bool If students can only view submissions after grades released date */
     protected $student_view_after_grades = false;
     /** @prop
+     * @var bool If students can see partial grades when manual grading is incomplete */
+    protected $release_incomplete_manual_grading = false;
+    /** @prop
      * @var bool If students can download submission files */
     protected $student_download = false;
     /** @prop
@@ -352,6 +355,7 @@ class Gradeable extends AbstractModel {
             $this->setTaGradingInternal($details['ta_grading']);
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
+            $this->setReleaseIncompleteManualGrading($details['release_incomplete_manual_grading'] ?? false);
             $this->setStudentDownload($details['student_download']);
             $this->setStudentSubmit($details['student_submit']);
             $this->setHasDueDate($details['has_due_date']);
@@ -2506,6 +2510,20 @@ class Gradeable extends AbstractModel {
 
     public function setStudentViewAfterGrades(bool $can_student_view_after_grades): void {
         $this->student_view_after_grades = $can_student_view_after_grades;
+        $this->modified = true;
+    }
+
+    /**
+     * If true, students see the partial manual grading total (ungraded components count as zero)
+     * once grades are released, even if some components remain ungraded. If false, students see
+     * no manual grading until every component is graded.
+     */
+    public function getReleaseIncompleteManualGrading(): bool {
+        return $this->release_incomplete_manual_grading;
+    }
+
+    public function setReleaseIncompleteManualGrading(bool $release_incomplete_manual_grading): void {
+        $this->release_incomplete_manual_grading = $release_incomplete_manual_grading;
         $this->modified = true;
     }
 
