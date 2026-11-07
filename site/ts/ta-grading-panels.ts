@@ -247,6 +247,13 @@ function checkForTwoPanelLayoutChange(
 ) {
     // update the global variable
     if (isPanelAdded) {
+        // A panel can only be in one position, so forget any other position it was
+        // remembered in (e.g. a bottom one that a smaller layout doesn't use)
+        for (const position in taLayoutDet.currentTwoPanels) {
+            if (taLayoutDet.currentTwoPanels[position] === panelId) {
+                taLayoutDet.currentTwoPanels[position] = null;
+            }
+        }
         taLayoutDet.currentTwoPanels[panelPosition!] = panelId;
     }
     else {

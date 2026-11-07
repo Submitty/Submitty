@@ -140,7 +140,7 @@ describe('TA Grading Panel Switcher', () => {
         });
     });
 
-    it('Should hide panels that a smaller layout has no room for', () => {
+    it('Should hide and remember panels that a smaller layout has no room for', () => {
         cy.login('ta');
         cy.visit(`/courses/${getCurrentSemester()}/sample/gradeable/no_due_date_no_release/grading/grade?who_id=UVSFkMDuolWBQtO&sort=id&direction=ASC`);
 
@@ -165,5 +165,18 @@ describe('TA Grading Panel Switcher', () => {
         cy.get('#submission_browser').should('be.visible');
         cy.get('#grading_rubric').should('have.css', 'display', 'none');
         cy.get('#student_info').should('have.css', 'display', 'none');
+
+        // a hidden panel opened again only takes its new position
+        cy.get('[data-testid="student-info-panel-toggle"]').click();
+        cy.get('#student_info_btn').find('[data-testid="panel-position-select"]').select('rightTop');
+        cy.get('#student_info').should('be.visible');
+        cy.get('#submission_browser').should('have.css', 'display', 'none');
+
+        cy.get('[data-testid="panel-selector-toggle"]').click();
+        cy.get('[data-testid="layout-four-panel-equal-apply"]').scrollIntoView({ block: 'center' });
+        cy.get('[data-testid="layout-four-panel-equal-apply"]').click();
+        cy.get('.two-panel-right .right-top #student_info').should('be.visible');
+        cy.get('.two-panel-right .right-bottom #student_info').should('not.exist');
+        cy.get('.two-panel-left .left-bottom #grading_rubric').should('be.visible');
     });
 });
