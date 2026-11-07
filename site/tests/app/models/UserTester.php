@@ -88,6 +88,29 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($details['registration_type'], $user->getRegistrationType());
     }
 
+    public function testPronouns() {
+        $details = [
+            'user_id' => 'test',
+            'user_givenname' => 'User',
+            'user_familyname' => 'Tester',
+            'user_pronouns' => 'they/them',
+            'display_pronouns' => true,
+            'user_email' => 'test@example.com',
+            'user_email_secondary' => 'test@exampletwo.com',
+            'user_email_secondary_notify' => false,
+        ];
+        $user = new User($this->core, $details);
+
+        $this->assertSame($details['user_pronouns'], $user->getPronouns());
+        $this->assertTrue($user->getDisplayPronouns());
+
+        $user->setPronouns('she/her');
+        $user->setDisplayPronouns(false);
+
+        $this->assertSame('she/her', $user->getPronouns());
+        $this->assertFalse($user->getDisplayPronouns());
+    }
+
     public function testPassword() {
         $details = [
             'user_id' => "test",
@@ -126,8 +149,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_preferred_givenname' => null,
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
-            'user_pronouns' => '',
-            'display_pronouns' => false,
+            'user_pronouns' => 'they/them',
+            'display_pronouns' => true,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -147,8 +170,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $expected = [
             'displayed_given_name' => 'User',
             'displayed_family_name' => 'Tester',
-            'pronouns' => '',
-            'display_pronouns' => false,
+            'pronouns' => 'they/them',
+            'display_pronouns' => true,
             'email' => 'test@example.com',
             'secondary_email' => "test@exampletwo.com",
             'email_both' => false,
@@ -314,6 +337,11 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             ['registration_section', 'Section_1-2', true],
             ['user_password', '', false],
             ['user_password', 'test', true],
+            ['user_pronouns', '', true],
+            ['user_pronouns', 'they/them', true],
+            ['user_pronouns', str_repeat('a', 30), true],
+            ['user_pronouns', str_repeat('a', 31), false],
+            ['user_pronouns', 'they|them', false],
         ];
 
         foreach (['givenname', 'familyname'] as $key) {
