@@ -324,6 +324,38 @@ const MAX_IMAGE_ZOOM = 5;
 
 // The original <img> holds the zoom state because it survives swaps with the MarkerView.
 // Only the submission panel has zoom controls, so lookups are scoped to its #file-content.
+let imageResizeObserver: ResizeObserver | null = null;
+function observeImageContainerResize(): void {
+    const container = document.querySelector<HTMLElement>('.image-annotation-container');
+    if (!container || typeof ResizeObserver === 'undefined') {
+        return;
+    }
+    imageResizeObserver?.disconnect();
+    imageResizeObserver = new ResizeObserver(() => {
+        const { img, markerView } = getZoomableImage();
+        if (!img || !markerView || !img.naturalWidth || !img.naturalHeight) {
+            return;
+        }
+        // Calculate the available image space inside the annotation container.
+        const availableWidth = (container.clientWidth - 20) * 0.9;
+        const availableHeight = container.clientHeight - 140;
+        if (availableWidth <= 0 || availableHeight <= 0) {
+            return;
+        }
+        // Preserve the original aspect ratio.
+        const scale = Math.min(
+            1,
+            availableWidth / img.naturalWidth,
+            availableHeight / img.naturalHeight,
+        );
+        // Update the base dimensions while preserving the current zoom.
+        img.dataset.fitWidth = `${img.naturalWidth * scale}px`;
+        img.dataset.fitHeight = `${img.naturalHeight * scale}px`;
+        applyImageZoom();
+    });
+    imageResizeObserver.observe(container);
+}
+
 function getZoomableImage(): { img: HTMLImageElement | null; markerView: MarkerView | null } {
     const markerView = document.querySelector<MarkerView>('#file-content #annotation-marker-view');
     const img = markerView?.targetImage ?? document.querySelector<HTMLImageElement>('#file-content #annotatable-image');
@@ -362,6 +394,7 @@ function initImageZoom(): void {
     else {
         img.addEventListener('load', restoreZoom, { once: true });
     }
+    observeImageContainerResize();
 }
 
 // Returns false when no image is open, so the caller can zoom a PDF instead.
@@ -489,6 +522,7 @@ function renderAnnotationsOnImage(): void {
 
         // Show the annotations
         markerView.show(annotationManager.currentAnnotations);
+        observeImageContainerResize();
     }
     catch (error) {
         console.error('Error in renderAnnotationsOnImage:', error);
