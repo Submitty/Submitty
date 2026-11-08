@@ -960,6 +960,17 @@ jobs:
             ${{ (matrix.containers == 'Autograding-Development' || matrix.containers == 'Autograding-Tutorial') && '--no_submissions' ||
                 '--test_only_grading' }}
 
+      # Grading several docker network submissions at once appears to overload the runner,
+      # making this job's page loads flaky. The shipper updates the worker's config when it
+      # starts, so the worker must not restart until that has happened.
+      - name: Limit autograding to one worker
+        if: matrix.containers == 'Autograding-Tutorial'
+        run: |
+          sudo sed -i -E 's/("num_autograding_workers": )[0-9]+/\11/' "${SUBMITTY_INSTALL_DIR}/config/autograding_workers.json"
+          sudo systemctl restart submitty_autograding_shipper
+          timeout 60 bash -c "until sudo jq -e '.primary.num_autograding_workers == 1' ${SUBMITTY_DATA_DIR}/autograding_TODO/autograding_worker.json > /dev/null; do sleep 1; done"
+          sudo systemctl restart submitty_autograding_worker
+
       - name: Cache Node Modules
         uses: actions/cache@v6
         with:
