@@ -53,7 +53,7 @@
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
     "@babel/preset-typescript": "^7.28.5",
-    "@cypress/code-coverage": "^4.0.3",
+    "@cypress/code-coverage": "^4.1.2",
     "@cypress/skip-test": "^2.6.1",
     "@cypress/vite-dev-server": "^6.0.1",
     "@cypress/vue": "^7.0.1",
