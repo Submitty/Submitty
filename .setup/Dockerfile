@@ -21,9 +21,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install NodeJS
-# Node 20 manually installed since it's not avb in default Ubuntu 22.04 packages
+# Node 26 manually installed since it's not avb in default Ubuntu 22.04 packages
 RUN apt-get update \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
