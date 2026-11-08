@@ -1009,6 +1009,7 @@ CREATE TABLE public.electronic_gradeable (
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
+    CONSTRAINT eg_max_team_size_check CHECK ((eg_max_team_size > 0)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT late_days_positive CHECK ((eg_late_days >= 0))
