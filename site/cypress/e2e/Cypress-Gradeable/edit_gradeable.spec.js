@@ -28,11 +28,17 @@ const logoutLogin = (user, url) => {
 };
 
 const updateDates = (inputSelector, date, saveText) => {
-    cy.get(inputSelector).clear();
-    cy.get(inputSelector).type(date);
-    // clicks out of the calendar
-    cy.get('body').click(0, 0);
-    cy.get('#save_status').should('have.text', saveText);
+    cy.get(inputSelector).then(($input) => {
+        // A retried test can find this date already saved, and retyping it triggers no save
+        if ($input.val() === date) {
+            return;
+        }
+        cy.get(inputSelector).clear();
+        cy.get(inputSelector).type(date);
+        // clicks out of the calendar
+        cy.get('body').click(0, 0);
+        cy.get('#save_status').should('have.text', saveText);
+    });
 };
 
 describe('Tests cases revolving around modifying gradeables', () => {
