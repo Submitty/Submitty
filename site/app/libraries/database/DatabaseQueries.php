@@ -8526,7 +8526,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern, contact_information, color) VALUES (TRUE, TRIM(?), TRIM(?), ?, ?)", [$queue_code,$token,$regex_pattern,$require_contact_info,$color]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern, contact_information, color) VALUES (TRUE, TRIM(?), TRIM(?), ?, ?, ?)", [$queue_code,$token,$regex_pattern,$require_contact_info,$color]);
         return true;
     }
 
