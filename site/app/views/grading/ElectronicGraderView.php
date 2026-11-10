@@ -2027,6 +2027,7 @@ HTML;
                 $submitter->getId(),
                 $gradeable_id
             );
+<<<<<<< HEAD
             if ($participation !== []) {
                 // One batched query for both modes
                 $anon_ids = $this->core->getQueries()->getAnonId(array_keys($participation), $gradeable_id);
@@ -2042,6 +2043,16 @@ HTML;
                 if ($anonymize) {
                     usort($entries, static fn (array $a, array $b): int => strcmp($a['display_id'], $b['display_id']));
                 }
+=======
+            if ($anonymize && $participation !== []) {
+                $anon_ids = $this->core->getQueries()->getAnonId(array_keys($participation), $gradeable_id);
+                $anonymized = [];
+                foreach ($participation as $user_id => $data) {
+                    $anonymized[$anon_ids[$user_id] ?? 'Unknown'] = $data;
+                }
+                ksort($anonymized);
+                $participation = $anonymized;
+>>>>>>> upstream/main
             }
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
