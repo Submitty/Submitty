@@ -177,7 +177,7 @@ function createSaveIndicators() {
         title.parentNode.insertBefore(titleRow, title);
         titleRow.appendChild(title);
 
-        const saveDiv = document.createElement('div');
+        const saveDiv = document.createElement('span');
         saveDiv.id = `${indicatorId}-save-div`;
         saveDiv.classList.add('save-indicator', 'save-indicator-unchanged');
         saveDiv.setAttribute('data-testid', `${indicatorId}-save-indicator`);

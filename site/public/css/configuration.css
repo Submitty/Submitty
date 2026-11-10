@@ -21,7 +21,7 @@
 }
 
 .title-row {
-    display: flex;
+    display: inline-flex;
     align-items: center;
 }
 .save-indicator {
