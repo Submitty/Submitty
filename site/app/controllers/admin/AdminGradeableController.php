@@ -150,7 +150,8 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
-            $values['has_due_date'] = $dates['has_due_date'] ?? true;
+            // Bulk upload (scanned exam) gradeables default to no due date, matching the create form
+            $values['has_due_date'] = $dates['has_due_date'] ?? !($values['bulk_upload'] ?? false);
             $values['has_release_date'] = $dates['has_release_date'] ?? true;
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
@@ -1418,6 +1419,7 @@ class AdminGradeableController extends AbstractController {
         // Create the gradeable with good default information
         //
         $gradeable_type = GradeableType::stringToType($details['type']);
+        $is_bulk_upload = Utils::getBooleanValue($details['bulk_upload'] ?? false);
         $gradeable_create_data = [
             'type' => $gradeable_type,
             'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
@@ -1578,7 +1580,9 @@ class AdminGradeableController extends AbstractController {
                 'peer_blind' => 3,
                 'depends_on' => null,
                 'depends_on_points' => null,
-                'has_due_date' => $details['has_due_date'] ?? true,
+                // Scanned exams that are bulk uploaded by instructors/TAs default to no due date,
+                // but still have a grades released date so grades can be held back until then
+                'has_due_date' => $details['has_due_date'] ?? !$is_bulk_upload,
                 'has_release_date' => $details['has_release_date'] ?? true
             ]);
         }
@@ -1635,7 +1639,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
 
         // Setup student permissions specially for scanned exams
-        if (Utils::getBooleanValue($details['bulk_upload'])) {
+        if ($is_bulk_upload) {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
@@ -1899,10 +1903,6 @@ class AdminGradeableController extends AbstractController {
                 // If something goes wrong, record it so we can tell the user
                 $errors[$prop] = $e->getMessage();
             }
-        }
-
-        if (!$gradeable->hasDueDate() && $gradeable->hasReleaseDate()) {
-            $gradeable->setHasReleaseDate(false);
         }
 
         // Set the dates last just in case the request contained parameters that
