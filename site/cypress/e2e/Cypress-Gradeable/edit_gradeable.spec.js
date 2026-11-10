@@ -25,6 +25,10 @@ const logoutLogin = (user, url) => {
     cy.logout();
     cy.login(user);
     cy.visit(url);
+    // Let the edit page finish its background loading before the test interacts with it or leaves
+    if (url.includes('open_peer_homework') && url.some((part) => part.startsWith('update'))) {
+        cy.wait('@redactions');
+    }
 };
 
 const updateDates = (inputSelector, date, saveText) => {
@@ -77,8 +81,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
     });
 
     beforeEach(() => {
+        cy.intercept('GET', '**/gradeable/open_peer_homework/redactions').as('redactions');
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update']);
+        cy.wait('@redactions');
     });
 
     after(() => {
