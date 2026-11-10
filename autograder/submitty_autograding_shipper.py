@@ -919,6 +919,7 @@ def checkout_vcs_repo(config, my_file):
     shutil.rmtree(checkout_path, ignore_errors=True)
 
     job_id = "~VCS~"
+    checkout_included_symlinks = False
 
     try:
         # This is for external, instructor specified repositories
@@ -1031,6 +1032,13 @@ def checkout_vcs_repo(config, my_file):
                 # copy the subdirectory we want to the
                 # original checkout path and remove the extra files
                 try:
+                    # Remove symlinks while they are still inside the temporary clone.
+                    # Copying them out would replace them with the files they point to,
+                    # which can be outside of the student's repository.
+                    (_, checkout_included_symlinks) = calculate_size_cleanup_symlinks(
+                        sub_checkout_path
+                    )
+
                     if using_subdirectory:
                         if vcs_subdirectory[0] == "/":
                             vcs_subdirectory = vcs_subdirectory[1:]
@@ -1131,10 +1139,10 @@ def checkout_vcs_repo(config, my_file):
     shutil.rmtree(git_path, ignore_errors=True)
 
     # calculate total file size, and remove symlinks
-    (checkout_size, checkout_included_symlinks) = calculate_size_cleanup_symlinks(checkout_path)
+    (checkout_size, remaining_symlinks) = calculate_size_cleanup_symlinks(checkout_path)
 
     obj["checkout_total_size"] = checkout_size
-    obj["checkout_included_symlinks"] = checkout_included_symlinks
+    obj["checkout_included_symlinks"] = checkout_included_symlinks or remaining_symlinks
 
     return obj
 
