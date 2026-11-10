@@ -29,34 +29,47 @@ function verifyIndicator(fieldId, indicatorType) {
                 }
             });
         });
-    }) ;
+    });
 }
 
 function changeField(fieldTestId, fieldType, input) {
     const selector = `[data-testid="${fieldTestId}"]`;
 
     if (fieldType === FieldType.Text) {
-        if(input === '' || input === undefined){
-            cy.get(selector).clear().blur();
-        }else{
-            cy.get(selector).clear().type(input, {parseSpecialCharSequences: false}).blur({force: true});
+        if (input === '' || input === undefined) {
+            cy.get(selector).clear();
+            cy.get(selector).blur();
+        }
+        else {
+            cy.get(selector).clear();
+            cy.get(selector).blur();
+            cy.get(selector).type(input, { parseSpecialCharSequences: false });
+            cy.get(selector).blur({ force: true });
         }
     }
     else if (fieldType === FieldType.Checkbox) {
         if (input === true) {
-            cy.get(selector).uncheck({force: true}).blur({force: true});
-            cy.get(selector).check({force: true}).blur({force: true});
+            cy.get(selector).uncheck({ force: true });
+            cy.get(selector).blur({ force: true });
+            cy.get(selector).check({ force: true });
+            cy.get(selector).blur({ force: true });
         }
         else if (!input) {
-            cy.get(selector).check({force: true}).blur({force: true});
-            cy.get(selector).uncheck({force: true}).blur({force: true});
+            cy.get(selector).check({ force: true });
+            cy.get(selector).blur({ force: true });
+            cy.get(selector).uncheck({ force: true });
+            cy.get(selector).blur({ force: true });
         }
     }
     else if (fieldType === FieldType.Select) {
-        cy.get(selector).focus().select(input).blur({force: true});
+        cy.get(selector).select(input);
+        cy.get(selector).blur({ force: true });
     }
 }
 
+function verifyPageIsReady() {
+    cy.get('[data-testid="course-name"]').should('have.attr', 'data-usesaveindicator');
+}
 
 describe('test editing each setting on course settings page', () => {
     const allFields = {
@@ -67,36 +80,38 @@ describe('test editing each setting on course settings page', () => {
             'default-hw-late-days', 'course-email', 'grade-inquiry-message',
         ],
         [FieldType.Select]: [
-            'default-section-id'
+            'default-section-id',
         ],
         [FieldType.Checkbox]: [
             'forum-enabled', 'queue-enabled', 'polls-enabled',
             'chat-enabled', 'seek-message-enabled', 'submission-clustering-enabled',
             'display-rainbow-grades-summary', 'auto-rainbow-grades',
-            'display-custom-message', 'all-self-registration', 'seating-only-for-instructor'
-        ]
+            'display-custom-message', 'all-self-registration', 'seating-only-for-instructor',
+        ],
     };
     const defaultFieldValues = {};
-
 
     before(() => {
         cy.login('instructor');
         cy.visit(['sample', 'config']);
 
-        //Save default values
-        for(const [fieldType, arrOfFieldIds] of Object.entries(allFields)){
-            arrOfFieldIds.forEach(function(fieldId){
+        verifyPageIsReady();
+
+        // Save default values
+        for (const [fieldType, arrOfFieldIds] of Object.entries(allFields)) {
+            arrOfFieldIds.forEach((fieldId) => {
                 cy.get(`[data-testid="${fieldId}"]`).then(($field) => {
                     const fieldTypeN = Number(fieldType);
                     let originalVal = $field.val();
-                    if(fieldTypeN == FieldType.Select){
+                    if (fieldTypeN === FieldType.Select) {
                         originalVal = $field[0].selectedIndex;
-                    }else if(fieldTypeN == FieldType.Checkbox){
+                    }
+                    else if (fieldTypeN === FieldType.Checkbox) {
                         originalVal = $field[0].checked;
                     }
                     defaultFieldValues[fieldId] = {
                         FieldType: fieldTypeN,
-                        OriginalValue: originalVal 
+                        OriginalValue: originalVal,
                     };
                 });
             });
@@ -108,39 +123,36 @@ describe('test editing each setting on course settings page', () => {
         cy.login('instructor');
         cy.visit(['sample', 'config']);
 
-        //Restore default values after testing
-        for(const [fieldId, field] of Object.entries(defaultFieldValues)){
+        // Restore default values after testing
+        for (const [fieldId, field] of Object.entries(defaultFieldValues)) {
             cy.get(`[data-testid="${fieldId}"]`).then(($field) => {
                 const fieldTypeN = field.FieldType;
                 let currentVal = $field.val();
-                if(fieldTypeN == FieldType.Select){
+                if (fieldTypeN === FieldType.Select) {
                     currentVal = $field[0].selectedIndex;
-                }else if(fieldTypeN == FieldType.Checkbox){
+                }
+                else if (fieldTypeN === FieldType.Checkbox) {
                     currentVal = $field[0].checked;
                 }
-                if(currentVal != field.OriginalValue){
+                if (currentVal !== field.OriginalValue) {
                     changeField(fieldId, field.FieldType, field.OriginalValue);
                     verifyIndicator(fieldId, IndicatorType.Saved);
                 }
-            })
+            });
         }
 
         cy.logout();
     });
 
-
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'config']);
 
-        //Ensure that save indicators have been created before running tests
-        cy.get(`[data-testid="course-name"]`).should('have.attr', 'data-usesaveindicator');
+        verifyPageIsReady();
     });
     afterEach(() => {
         cy.logout();
     });
-
-
 
     /*
         TODO:
@@ -152,7 +164,7 @@ describe('test editing each setting on course settings page', () => {
     it('generic verify successful field saves', () => {
         const testFields = {
             [FieldType.Text]: [
-                //fieldId, testInput
+                // fieldId, testInput
                 ['course-name', 'Testing'],
                 ['course-home-url', 'https://www.google.com/'],
                 ['create-thread-message', 'Testing'],
@@ -164,10 +176,10 @@ describe('test editing each setting on course settings page', () => {
                 ['default-student-late-days', '10'],
                 ['default-hw-late-days', '10'],
                 ['course-email', 'Testing'],
-                ['grade-inquiry-message', 'Testing']
+                ['grade-inquiry-message', 'Testing'],
             ],
             [FieldType.Select]: [
-                ['default-section-id', 2]
+                ['default-section-id', 2],
             ],
             [FieldType.Checkbox]: [
                 ['forum-enabled', true],
@@ -180,29 +192,28 @@ describe('test editing each setting on course settings page', () => {
                 ['auto-rainbow-grades', true],
                 ['display-custom-message', true],
                 ['all-self-registration', true],
-                ['seating-only-for-instructor', true]
-            ]
+                ['seating-only-for-instructor', true],
+            ],
         };
 
-        for(const [fieldType, arrOfFields] of Object.entries(testFields)){
-            arrOfFields.forEach(function(fieldArr){
+        for (const [fieldType, arrOfFields] of Object.entries(testFields)) {
+            arrOfFields.forEach((fieldArr) => {
                 const fieldId = fieldArr[0];
                 const input = fieldArr[1];
-                cy.log("Setting " + fieldId + " to " + input);
+                cy.log(`Setting ${fieldId} to ${input}`);
                 changeField(fieldId, Number(fieldType), input);
                 verifyIndicator(fieldId, IndicatorType.Saved);
-            })
+            });
         }
-    })
-
+    });
 
     it('test failed save on text fields', () => {
         const textTests = [
             ['course-home-url', 'Bad'],
             ['default-student-late-days', 'Bad'],
-            ['default-hw-late-days', 'Bad']
-        ]
-        textTests.forEach(function(val){
+            ['default-hw-late-days', 'Bad'],
+        ];
+        textTests.forEach((val) => {
             const fieldId = val[0];
             const input = val[1];
             cy.get(`[data-testid="${fieldId}"]`).then(($field) => {
@@ -211,6 +222,5 @@ describe('test editing each setting on course settings page', () => {
                 verifyIndicator(fieldId, IndicatorType.Failed);
             });
         });
-    })
-
+    });
 });
