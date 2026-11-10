@@ -91,3 +91,7 @@ def down(config, database, semester, course):
     UPDATE categories_list 
     SET color = '#000080' 
     WHERE(color = 'var(--colorblind-friendly-blue)')""")
+
+    database.execute("""
+    ALTER TABLE categories_list
+    ALTER COLUMN color SET DEFAULT '#000080'""")

@@ -1521,7 +1521,7 @@ function addNewCategory(newCategory, visibleDate) {
             displaySuccessMessage(`Successfully created category ${escapeSpecialChars(newCategory)}.`);
             // Create new item in #ui-category-list using dummy category
             const category_id = json['data']['new_id'];
-            const category_color_code = 'var(--colorblind-friendly-red)';
+            const category_color_code = '#000080';
             const category_desc = escapeSpecialChars(newCategory);
             // eslint-disable-next-line no-undef
             newelement = $($('#ui-category-template li')[0]).clone(true);
