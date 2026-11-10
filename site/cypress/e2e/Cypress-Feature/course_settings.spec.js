@@ -196,12 +196,35 @@ describe('test editing each setting on course settings page', () => {
             ],
         };
 
+        // Set each field's value to the above defined test value
         for (const [fieldType, arrOfFields] of Object.entries(testFields)) {
             arrOfFields.forEach((fieldArr) => {
                 const fieldId = fieldArr[0];
                 const input = fieldArr[1];
                 changeField(fieldId, Number(fieldType), input);
                 verifyIndicator(fieldId, IndicatorType.Saved);
+            });
+        }
+
+        cy.reload();
+        verifyPageIsReady();
+
+        // Verify field actually saved by seeing if the field is the same
+        for (const [fieldType, arrOfFields] of Object.entries(testFields)) {
+            arrOfFields.forEach((fieldArr) => {
+                const fieldId = fieldArr[0];
+                const input = fieldArr[1];
+                const fieldTypeN = Number(fieldType);
+                const selector = `[data-testid="${fieldId}"]`;
+                if (fieldTypeN === FieldType.Text) {
+                    cy.get(selector).should('have.value', input);
+                }
+                else if (fieldTypeN === FieldType.Checkbox) {
+                    cy.get(selector).should(input ? 'be.checked' : 'not.be.checked');
+                }
+                else if (fieldTypeN === FieldType.Select) {
+                    cy.get(selector).should('have.prop', 'selectedIndex', input);
+                }
             });
         }
     });
