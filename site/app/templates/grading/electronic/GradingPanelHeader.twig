@@ -210,7 +210,12 @@
             'color': error_color
         },
         'events': {
-            'color-change': '(event) => { document.body.style.background = event; }'
+            'color-change': '(event) => {
+                $(\'#electronic-gradeable-container\').css(\'box-shadow\',
+                    \'20px 20px 50px \'+event+\' inset,\' +
+                    \'-20px -20px 50px \'+event+\' inset\'
+                );
+            }'
         }
     } %}
 {% endif %}
