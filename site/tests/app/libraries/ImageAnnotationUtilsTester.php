@@ -17,6 +17,7 @@ class ImageAnnotationUtilsTester extends TestCase {
         $files = [
             'submissions/hw1/alice/1/image.png',
             'submissions/hw1/alice/1/folder/image.png',
+            'submissions/hw1/alice/2/image.png',
             'submissions_processed/hw1/alice/1/image.png',
             'results/hw1/alice/1/image.png',
             'submissions/hw1/bob/1/image.png'
@@ -46,6 +47,14 @@ class ImageAnnotationUtilsTester extends TestCase {
         $this->assertSame('submissions/image.png', $this->getKey('submissions/hw1/alice/1/image.png'));
         $this->assertSame('submissions/folder/image.png', $this->getKey('submissions/hw1/alice/1/folder/image.png'));
         $this->assertSame('submissions_processed/image.png', $this->getKey('submissions_processed/hw1/alice/1/image.png'));
+    }
+
+    public function testAnnotationVersion() {
+        $version = fn (string $path) => ImageAnnotationUtils::getAnnotationVersion(FileUtils::joinPaths($this->course_path, $path), $this->course_path, 'hw1', 'alice');
+        $this->assertSame('1', $version('submissions/hw1/alice/1/folder/image.png'));
+        $this->assertSame('2', $version('submissions/hw1/alice/2/image.png'));
+        $this->assertNull($version('results/hw1/alice/1/image.png'));
+        $this->assertNull($version('submissions/hw1/bob/1/image.png'));
     }
 
     public function testInvalidAnnotationKeys() {

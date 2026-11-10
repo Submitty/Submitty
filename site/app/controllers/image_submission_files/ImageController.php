@@ -64,17 +64,14 @@ class ImageController extends AbstractController {
         if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
-        $submitter = $this->core->getQueries()->getSubmitterById($id);
-        $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
-        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-
         $real_path = $this->getSubmittedFilePath($path, $id, true);
         $annotation_key = ImageAnnotationUtils::getAnnotationKey($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id);
         if ($annotation_key === null) {
             return JsonResponse::getErrorResponse('The image file could not be found');
         }
+        $version = ImageAnnotationUtils::getAnnotationVersion($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id);
 
-        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $version);
         $annotation_jsons = ImageAnnotationUtils::loadAnnotationJsons($annotation_path, $annotation_key, [$path, $anon_path]);
 
         // Construct the image URL for display_file endpoint
@@ -132,9 +129,10 @@ class ImageController extends AbstractController {
         // to determine if we should show a button to download the image.
         $is_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->hasPeerComponent();
 
-        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-        $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_key = ImageAnnotationUtils::getAnnotationKey($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id);
+        // Annotations belong to the version of the image being viewed, not the active version
+        $version = ImageAnnotationUtils::getAnnotationVersion($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id);
+        $annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $version ?? '');
         // Images outside of the annotatable directories are view only
         $annotation_jsons = $annotation_key === null ? [] : ImageAnnotationUtils::loadAnnotationJsons($annotation_dir, $annotation_key, [$file_path, $real_path]);
 
@@ -182,7 +180,8 @@ class ImageController extends AbstractController {
             return JsonResponse::getErrorResponse('This file cannot be annotated');
         }
 
-        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        // Annotations belong to the version of the image being annotated, not the active version
+        $version = ImageAnnotationUtils::getAnnotationVersion($real_path, $course_path, $gradeable_id, $user_id);
 
         $annotation_gradeable_path = FileUtils::joinPaths($course_path, $target_dir, $gradeable_id);
         if (!is_dir($annotation_gradeable_path) && !FileUtils::createDir($annotation_gradeable_path)) {
@@ -192,7 +191,7 @@ class ImageController extends AbstractController {
         if (!is_dir($annotation_user_path) && !FileUtils::createDir($annotation_user_path)) {
             return JsonResponse::getErrorResponse('Creating annotation user folder failed');
         }
-        $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $active_version);
+        $annotation_version_path = FileUtils::joinPaths($annotation_user_path, $version);
         if (!is_dir($annotation_version_path) && !FileUtils::createDir($annotation_version_path)) {
             return JsonResponse::getErrorResponse('Creating annotation version folder failed');
         }

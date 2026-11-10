@@ -5,7 +5,7 @@ namespace app\libraries;
 /**
  * Helpers for matching image annotation files to the submitted images they belong to.
  *
- * Annotations are stored in annotations/{gradeable}/{submitter}/{active_version}/ as
+ * Annotations are stored in annotations/{gradeable}/{submitter}/{version}/ as
  * "{md5(key)}_{grader_id}.json", where the key is the image's path relative to its
  * version directory, prefixed with the top level directory (e.g. "submissions/folder/img.png").
  * Older annotations were named using the md5 of the full (real or anonymous) path instead.
@@ -13,6 +13,30 @@ namespace app\libraries;
 class ImageAnnotationUtils {
     /** Top level directories whose images can be annotated */
     const ANNOTATABLE_DIRS = ['submissions', 'submissions_processed'];
+
+    /**
+     * Split an annotatable image path into its top level directory, submission version and path within the version.
+     * @return array{string, string, string}|null
+     */
+    private static function splitPath(string $real_path, string $course_path, string $gradeable_id, string $submitter_id): ?array {
+        if (!FileUtils::isInSubmitterDirectory($real_path, $course_path, $gradeable_id, $submitter_id)) {
+            return null;
+        }
+        $resolved_path = realpath($real_path);
+        foreach (self::ANNOTATABLE_DIRS as $dir) {
+            $base = realpath(FileUtils::joinPaths($course_path, $dir, $gradeable_id, $submitter_id));
+            if ($base === false || !str_starts_with($resolved_path, $base . DIRECTORY_SEPARATOR)) {
+                continue;
+            }
+            $relative_parts = explode(DIRECTORY_SEPARATOR, substr($resolved_path, strlen($base) + 1));
+            $version = array_shift($relative_parts);
+            if (count($relative_parts) === 0 || !ctype_digit($version)) {
+                return null;
+            }
+            return [$dir, $version, implode('/', $relative_parts)];
+        }
+        return null;
+    }
 
     /**
      * Get the annotation key for an image, or null if the image cannot be annotated.
@@ -23,24 +47,15 @@ class ImageAnnotationUtils {
      * @return string|null
      */
     public static function getAnnotationKey(string $real_path, string $course_path, string $gradeable_id, string $submitter_id): ?string {
-        if (!FileUtils::isInSubmitterDirectory($real_path, $course_path, $gradeable_id, $submitter_id)) {
-            return null;
-        }
-        $resolved_path = realpath($real_path);
-        foreach (self::ANNOTATABLE_DIRS as $dir) {
-            $base = realpath(FileUtils::joinPaths($course_path, $dir, $gradeable_id, $submitter_id));
-            if ($base === false || !str_starts_with($resolved_path, $base . DIRECTORY_SEPARATOR)) {
-                continue;
-            }
-            // The first path section is the submission version
-            $relative_parts = explode(DIRECTORY_SEPARATOR, substr($resolved_path, strlen($base) + 1));
-            array_shift($relative_parts);
-            if (count($relative_parts) === 0) {
-                return null;
-            }
-            return $dir . '/' . implode('/', $relative_parts);
-        }
-        return null;
+        $parts = self::splitPath($real_path, $course_path, $gradeable_id, $submitter_id);
+        return $parts === null ? null : $parts[0] . '/' . $parts[2];
+    }
+
+    /**
+     * Get the submission version an image belongs to, or null if the image cannot be annotated.
+     */
+    public static function getAnnotationVersion(string $real_path, string $course_path, string $gradeable_id, string $submitter_id): ?string {
+        return self::splitPath($real_path, $course_path, $gradeable_id, $submitter_id)[1] ?? null;
     }
 
     /**
