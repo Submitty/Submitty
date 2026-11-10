@@ -334,4 +334,70 @@ class UserProfileController extends AbstractController {
             return JsonResponse::getErrorResponse("Secondary email and secondary email notify must both be set");
         }
     }
+    #[Route("/user_profile/change_github_username", methods: ["POST"])]
+    public function changeGithubUsername(): JsonResponse {
+        $user = $this->core->getUser();
+        if (isset($_POST['github_username'])) {
+            $newGithubUsername = trim($_POST['github_username']);
+            if ($user->validateUserData('user_github_username', $newGithubUsername) === true) {
+                $user->setGithubUsername($newGithubUsername);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Github username updated successfully",
+                    'github_username' => $newGithubUsername,
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("Github username is not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("Github username does not exist");
+        }
+    }
+    #[Route("/user_profile/change_linkedin_username", methods: ["POST"])]
+    public function changeLinkedinUsername(): JsonResponse {
+        $user = $this->core->getUser();
+        if (isset($_POST['linkedin_username'])) {
+            $newLinkedinUsername = trim($_POST['linkedin_username']);
+            if ($user->validateUserData('user_linkedin_username', $newLinkedinUsername) === true) {
+                $user->setLinkedinUsername($newLinkedinUsername);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "LinkedIn username updated successfully",
+                    'linkedin_username' => $newLinkedinUsername,
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("LinkedIn username is not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("LinkedIn username does not exist");
+        }
+    }
+    #[Route("/user_profile/change_personal_webpage", methods: ["POST"])]
+    public function changePersonalWebpage(): JsonResponse {
+        $user = $this->core->getUser();
+        if (isset($_POST['personal_webpage'])) {
+            $newPersonalWebpage = trim($_POST['personal_webpage']);
+            if ($user->validateUserData('user_personal_webpage', $newPersonalWebpage) === true) {
+                $user->setPersonalWebpage($newPersonalWebpage);
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
+                return JsonResponse::getSuccessResponse([
+                    'message' => "Personal Webpage updated successfully",
+                    'personal_webpage' => $newPersonalWebpage,
+                ]);
+            }
+            else {
+                return JsonResponse::getErrorResponse("Personal Webpage is not valid");
+            }
+        }
+        else {
+            return JsonResponse::getErrorResponse("Personal Webpage does not exist");
+        }
+    }
 }

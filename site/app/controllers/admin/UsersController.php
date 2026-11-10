@@ -64,6 +64,9 @@ class UsersController extends AbstractController {
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
+                'linkedin_username' => $student-> getLinkedinUsername(),
+                'github_username' => $student-> getGithubUsername(),
+                'personal_webpage' => $student-> getPersonalWebpage(),
                 'utc_offset' => $student->getUTCOffset(),
                 'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
@@ -170,6 +173,9 @@ class UsersController extends AbstractController {
                 'user_id' => $grader->getId(),
                 'email' => $grader->getEmail(),
                 'secondary_email' => $grader->getSecondaryEmail(),
+                'linkedin_username' => $grader-> getLinkedinUsername(),
+                'github_username' => $grader-> getGithubUsername(),
+                'personal_webpage' => $grader-> getPersonalWebpage(),
                 'reg_section' => $reg_sec,
                 'rot_section' => $rot_sec,
                 'group' => $grp
@@ -247,6 +253,9 @@ class UsersController extends AbstractController {
             'user_display_pronouns' => $user->getDisplayPronouns(),
             'user_email' => $user->getEmail(),
             'user_email_secondary' => $user->getSecondaryEmail(),
+            'linkedin_username' => $user-> getLinkedinUsername(),
+            'github_username' => $user-> getGithubUsername(),
+            'personal_webpage' => $user-> getPersonalWebpage(),
             'user_group' => $user->getGroup(),
             'registration_section' => $user->getRegistrationSection(),
             'registration_subsection' => $user->getRegistrationSubsection(),
@@ -282,6 +291,9 @@ class UsersController extends AbstractController {
                 'display_pronoun' => $user->getDisplayPronouns(),
                 'user_email' => $user->getEmail(),
                 'user_email_secondary' => $user->getSecondaryEmail(),
+                'linkedin_username' => $user-> getLinkedinUsername(),
+                'github_username' => $user-> getGithubUsername(),
+                'personal_webpage' => $user-> getPersonalWebpage(),
                 'user_group' => $user->getGroup(),
                 'registration_section' => $user->getRegistrationSection(),
                 'course_section_id' => $user->getCourseSectionId(),
@@ -328,6 +340,12 @@ class UsersController extends AbstractController {
         $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"" . strip_tags($_POST['user_email']) . "\"<br>";
         //Check secondary email address for appropriate format.
         $error_message .= User::validateUserData('user_email_secondary', trim($_POST['user_email_secondary'])) ? "" : "Error in secondary email: \"" . strip_tags($_POST['user_email_secondary']) . "\"<br>";
+        //LinkedIn username must be alpha characters, white-space, or certain punctuation.
+        $error_message .= User::validateUserData('user_linkedin_username', trim($_POST['user_linkedin_username'])) ? "" : "Error in LinkedIn username: \"" . strip_tags($_POST['user_linkedin_username']) . "\"<br>";
+        //GitHub username must be alpha characters, white-space, or certain punctuation.
+        $error_message .= User::validateUserData('user_github_username', trim($_POST['user_github_username'])) ? "" : "Error in GitHub username: \"" . strip_tags($_POST['user_github_username']) . "\"<br>";
+        //Check personal webpage for appropriate format.
+        $error_message .= User::validateUserData('user_personal_webpage', trim($_POST['user_personal_webpage'])) ? "" : "Error in Personal webpage: \"" . strip_tags($_POST['user_personal_webpage']) . "\"<br>";
         //Preferred given name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
             $error_message .= User::validateUserData('user_preferred_givenname', trim($_POST['user_preferred_givenname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_givenname']) . "\"<br>";
@@ -378,6 +396,12 @@ class UsersController extends AbstractController {
         $user->setDisplayPronouns($_POST['display_pronouns']);
 
         $user->setEmail(trim($_POST['user_email']));
+
+        $user->setLinkedinUsername(trim($_POST['user_linkedin_username']));
+
+        $user->setGithubUsername(trim($_POST['user_github_username']));
+
+        $user->setPersonalWebpage(trim($_POST['user_personal_webpage']));
 
         $user->setSecondaryEmail(trim($_POST['user_email_secondary']));
 
@@ -1416,6 +1440,21 @@ class UsersController extends AbstractController {
                                 $user->setSecondaryEmail($value);
                             }
                             break;
+                        case "LinkedIn Username":
+                            if (!empty($row[$col_num])) {
+                                $user->setLinkedinUsername($value);
+                            }
+                            break;
+                        case "GitHub Username":
+                            if (!empty($row[$col_num])) {
+                                $user->setGithubUsername($value);
+                            }
+                            break;
+                        case "Personal Webpage":
+                            if (!empty($row[$col_num])) {
+                                $user->setPersonalWebpage($value);
+                            }
+                            break;
                         case "UTC Offset":
                             // Ignore UTC Offset column from exported lists.
                             break;
@@ -1530,6 +1569,12 @@ class UsersController extends AbstractController {
                         case "Email":
                             break;
                         case "Secondary Email":
+                            break;
+                        case "LinkedIn Username":
+                            break;
+                        case "GitHub Username":
+                            break;
+                        case "Personal Webpage":
                             break;
                         case "UTC Offset":
                             // Ignore UTC Offset column from exported lists.
