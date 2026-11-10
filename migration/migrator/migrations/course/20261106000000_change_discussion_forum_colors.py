@@ -52,6 +52,10 @@ def up(config, database, semester, course):
     SET color = 'var(--colorblind-friendly-blue)' 
     WHERE(color = '#000000')""")
 
+    database.execute("""
+    ALTER TABLE categories_list
+    ALTER COLUMN color SET DEFAULT 'var(--colorblind-friendly-red)'""")
+
 
 def down(config, database, semester, course):
     """
