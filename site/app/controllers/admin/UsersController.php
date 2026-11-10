@@ -185,9 +185,7 @@ class UsersController extends AbstractController {
         }
         else {
             //Expires 10 years from today (functionally indefinite)
-            if (setcookie('active_grader_columns', $default_grader_columns, time() + (10 * 365 * 24 * 60 * 60))) {
-                $active_grader_columns = $default_grader_columns;
-            }
+            setcookie('active_grader_columns', $default_grader_columns, time() + (10 * 365 * 24 * 60 * 60));
         }
 
         return new MultiResponse(
