@@ -39,6 +39,8 @@ function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigO
 export default defineConfig({
     video: true,
     pageLoadTimeout: 120000,
+    forceHttp1: true,
+    keystrokeDelay: 10,
     retries: {
         runMode: 2,
         openMode: 0,
