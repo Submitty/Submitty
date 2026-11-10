@@ -151,7 +151,7 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
             // Bulk upload (scanned exam) gradeables default to no due date, matching the create form
-            $values['has_due_date'] = $dates['has_due_date'] ?? !($values['bulk_upload'] ?? false);
+            $values['has_due_date'] = $dates['has_due_date'] ?? !$values['bulk_upload'];
             $values['has_release_date'] = $dates['has_release_date'] ?? true;
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
