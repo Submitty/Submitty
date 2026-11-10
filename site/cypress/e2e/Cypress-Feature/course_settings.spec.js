@@ -38,11 +38,10 @@ function changeField(fieldTestId, fieldType, input) {
     if (fieldType === FieldType.Text) {
         if (input === '' || input === undefined) {
             cy.get(selector).clear();
-            cy.get(selector).blur();
+            cy.get(selector).blur({ force: true });
         }
         else {
             cy.get(selector).clear();
-            cy.get(selector).blur();
             cy.get(selector).type(input, { parseSpecialCharSequences: false });
             cy.get(selector).blur({ force: true });
         }
