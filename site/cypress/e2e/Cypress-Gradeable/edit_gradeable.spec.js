@@ -42,6 +42,40 @@ const updateDates = (inputSelector, date, saveText) => {
 };
 
 describe('Tests cases revolving around modifying gradeables', () => {
+    // These tests change open_peer_homework as they run and only partly undo it, so restore the
+    // settings from the sample data first. That way the spec still passes after an earlier run.
+    before(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update']);
+        cy.window().then((win) => {
+            cy.request({
+                method: 'POST',
+                url: win.buildCourseUrl(['gradeable', 'open_peer_homework', 'update']),
+                form: true,
+                body: {
+                    csrf_token: win.csrfToken,
+                    student_view: 'true',
+                    student_view_after_grades: 'false',
+                    student_download: 'true',
+                    student_submit: 'true',
+                    depends_on: '',
+                    has_due_date: 'true',
+                    has_release_date: 'true',
+                    ta_view_start_date: '1970-01-01 23:59:59',
+                    submission_open_date: '1971-01-01 23:59:59',
+                    submission_due_date: '9996-12-31 23:59:59',
+                    grade_start_date: '9997-12-31 23:59:59',
+                    grade_due_date: '9998-12-31 23:59:59',
+                    grade_released_date: '9998-12-31 23:59:59',
+                },
+            }).then((response) => {
+                const body = typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
+                expect(body.status).to.eq('success');
+            });
+        });
+        cy.logout();
+    });
+
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'gradeable', 'open_peer_homework', 'update']);
