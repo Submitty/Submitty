@@ -1,5 +1,5 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
-showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm, showUpdateGithubUsernameForm, showUpdateLinkedinUsernameForm, showUpdatePersonalWebpageForm,
 updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
@@ -69,6 +69,27 @@ function showUpdateSecondaryEmailForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#edit-secondary-email-form');
     showPopup('#edit-secondary-email-form');
+    form.find('.form-body').scrollTop(0);
+}
+
+function showUpdateGithubUsernameForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-github-username-form');
+    showPopup('#edit-github-username-form');
+    form.find('.form-body').scrollTop(0);
+}
+
+function showUpdateLinkedinUsernameForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-linkedin-username-form');
+    showPopup('#edit-linkedin-username-form');
+    form.find('.form-body').scrollTop(0);
+}
+
+function showUpdatePersonalWebpageForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-personal-webpage-form');
+    showPopup('#edit-personal-webpage-form');
     form.find('.form-body').scrollTop(0);
 }
 
@@ -402,6 +423,111 @@ function changeSecondaryEmail() {
         checkbox.prop('disabled', true);
         checkbox.prop('checked', false);
     }
+}
+
+function updateUserLinkedin() {
+    const newVal = ($('#user-linkedin-username-change').val());
+    const data = new FormData();
+    data.append('csrf_token', $('#user-linkedin-csrf').val());
+    data.append('linkedin_username', newVal);
+    const url = buildUrl(['user_profile', 'change_linkedin_username']);
+    $.ajax({
+        url,
+        type: 'POST',
+        data,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const { data } = response;
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                // eslint-disable-next-line no-restricted-syntax
+                $('#linkedin-username-row .icon').html(`${icon} ${data.linkedin_username}`);
+                $('#user-linkedin-username-change').data('default', data.linkedin_username);
+            }
+            else {
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function () {
+            displayErrorMessage('Something went wrong!');
+        },
+    });
+    // hide the form form view
+    $('.popup-form').css('display', 'none');
+    return false;
+}
+
+function updateUserGithub() {
+    const newVal = ($('#user-github-username-change').val());
+    const data = new FormData();
+    data.append('csrf_token', $('#user-github-csrf').val());
+    data.append('github_username', newVal);
+    const url = buildUrl(['user_profile', 'change_github_username']);
+    $.ajax({
+        url,
+        type: 'POST',
+        data,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const { data } = response;
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                // eslint-disable-next-line no-restricted-syntax
+                $('#github-username-row .icon').html(`${icon} ${data.github_username}`);
+                $('#user-github-username-change').data('default', data.github_username);
+            }
+            else {
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function () {
+            displayErrorMessage('Something went wrong!');
+        },
+    });
+    // hide the form form view
+    $('.popup-form').css('display', 'none');
+    return false;
+}
+
+function updateUserWebpage() {
+    const newVal = ($('#user-personal-webpage-change').val());
+    const data = new FormData();
+    data.append('csrf_token', $('#user-webpage-csrf').val());
+    data.append('personal_webpage', newVal);
+    const url = buildUrl(['user_profile', 'change_personal_webpage']);
+    $.ajax({
+        url,
+        type: 'POST',
+        data,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const { data } = response;
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                // eslint-disable-next-line no-restricted-syntax
+                $('#personal-webpage-row .icon').html(`${icon} ${data.personal_webpage}`);
+                $('#user-personal-webpage-change').data('default', data.personal_webpage);
+            }
+            else {
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function () {
+            displayErrorMessage('Something went wrong!');
+        },
+    });
+    // hide the form form view
+    $('.popup-form').css('display', 'none');
+    return false;
 }
 
 function previewUserLastInitialFormat() {
