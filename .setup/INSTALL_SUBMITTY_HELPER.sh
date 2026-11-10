@@ -650,13 +650,6 @@ for i in "${ALL_DAEMONS[@]}"; do
     fi
 done
 
-if [ "${IS_WORKER}" == 0 ]; then
-    # Stop all workers on remote machines
-    echo -e -n "Stopping all remote machine workers...\n"
-    sudo -H -u "${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
-    echo -e "done"
-fi
-
 # force kill any other shipper processes that may be manually running on the primary machine
 if [ "${IS_WORKER}" == 0 ]; then
     for i in $(ps -ef | grep submitty_autograding_shipper | grep -v grep | awk '{print $2}'); do
