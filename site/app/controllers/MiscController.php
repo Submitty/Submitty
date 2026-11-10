@@ -193,23 +193,23 @@ class MiscController extends AbstractController {
                 $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
+        }
 
-            if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-                if ($cm === null) {
-                    $access_failure = 'Course material not found';
-                }
-                else {
-                    $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
-                }
-                if ($access_failure) {
-                    $this->core->getOutput()->showError($access_failure);
-                    return false;
-                }
+        if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
+            if ($cm === null) {
+                $access_failure = 'Course material not found';
             }
+            else {
+                $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+            }
+            if ($access_failure) {
+                $this->core->getOutput()->showError($access_failure);
+                return false;
+            }
+        }
 
-            if ($dir === "course_materials") {
-                CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
-            }
+        if ($dir === "course_materials") {
+            CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
         $file_name = basename($path);
@@ -301,7 +301,9 @@ class MiscController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/read_file")]
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
-        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+        // Only files in the course's site directory need to be served raw
+        $path = $dir === 'site' ? $this->core->getAccess()->resolveDirPath($dir, $path) : false;
+        if ($path === false || !$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path]) || !is_file($path)) {
             $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
             return false;
         }
@@ -351,6 +353,10 @@ class MiscController extends AbstractController {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
                 $title = $cm->getTitle();
+            }
+            else {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
             }
         }
 
