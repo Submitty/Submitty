@@ -1,9 +1,17 @@
 describe('test for discussion post panel', () => {
-    before(() => {
+    beforeEach(() => {
         cy.login();
         // Reset the gradeable to the expected state
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
         // toggle between options to trigger the save status
+        cy.get('[data-testid="yes-discussion"]').click();
+        cy.get('[data-testid="no-discussion"]').click();
+        cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'All Changes Saved');
+    });
+
+    afterEach(() => {
+        cy.login();
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
         cy.get('[data-testid="yes-discussion"]').click();
         cy.get('[data-testid="no-discussion"]').click();
         cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'All Changes Saved');
@@ -16,6 +24,9 @@ describe('test for discussion post panel', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
         cy.get('[data-testid="yes-discussion"]').click();
         cy.get('[data-testid="yes-discussion"]').should('be.checked');
+        cy.get('[data-testid="discussion-thread-id"]').clear();
+        cy.get('[data-testid="discussion-thread-id"]').type('1,2,3');
+        cy.get('[data-testid="discussion-thread-id"]').type('{enter}');
         cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'All Changes Saved');
 
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=L1LdxbPPN5GiLb4&sort=id&direction=ASC']);
@@ -23,11 +34,6 @@ describe('test for discussion post panel', () => {
         cy.get('[data-testid="posts-list"]').should('contain', 'Discussion Posts');
         cy.get('[data-testid="posts-list"]').should('contain', 'No thread id specified.');
         cy.get('[data-testid="posts-list"]').should('not.contain', 'Go to thread');
-
-        cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
-        cy.get('[data-testid="discussion-thread-id"]').type('1,2,3');
-        cy.get('[data-testid="discussion-thread-id"]').type('{enter}');
-        cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'All Changes Saved');
 
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=L1LdxbPPN5GiLb4&sort=id&direction=ASC']);
         cy.get('[data-testid="posts-list"]').should('contain', 'No posts for thread id: 1');
