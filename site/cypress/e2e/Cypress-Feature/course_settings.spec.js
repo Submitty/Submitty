@@ -200,7 +200,6 @@ describe('test editing each setting on course settings page', () => {
             arrOfFields.forEach((fieldArr) => {
                 const fieldId = fieldArr[0];
                 const input = fieldArr[1];
-                cy.log(`Setting ${fieldId} to ${input}`);
                 changeField(fieldId, Number(fieldType), input);
                 verifyIndicator(fieldId, IndicatorType.Saved);
             });
