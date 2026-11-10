@@ -960,7 +960,7 @@ class Gradeable extends AbstractModel {
      * @param mixed $max_team_size Must be greater than 0
      */
     public function setTeamSizeMax(mixed $max_team_size) {
-        if (is_numeric($max_team_size) && intval($max_team_size) > 0 && (float) $max_team_size == (int) $max_team_size) {
+        if (is_numeric($max_team_size) && intval($max_team_size) > 0 && (float) $max_team_size === (int) $max_team_size) {
             $this->team_size_max = intval($max_team_size);
         }
         else {
