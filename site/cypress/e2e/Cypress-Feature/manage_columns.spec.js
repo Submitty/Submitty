@@ -12,6 +12,17 @@ const saveStudentColumns = () => {
     cy.get('[data-testid="popup-save-button"]').click();
 };
 
+// Cypress >= 15.20.0 regression (cypress-io/cypress#35338): the popup writes the column cookie
+// with document.cookie and reloads, but Cypress's server-side cookie jar re-sends the OLD value
+// on that navigation, so the server renders the previous columns. Re-apply the browser's value
+// through Cypress (which keeps the jar in sync as of 16.2.0), then reload once.
+const reloadWithSavedColumns = (cookie) => {
+    cy.getCookie(cookie).then(({ value, path }) => {
+        cy.setCookie(cookie, value, { path });
+    });
+    cy.reload();
+};
+
 describe('Manage Students: column toggles', () => {
     // Cypress clears cookies before every test, so each test starts from the default columns.
     beforeEach(() => {
@@ -37,7 +48,7 @@ describe('Manage Students: column toggles', () => {
         cy.get('[data-testid="toggle-columns"]').click();
         cy.get('[data-testid="toggle-registration-subsection"]').check();
         saveStudentColumns();
-        // Cypress retries this until the page reloads with the new column (no cy.wait needed).
+        reloadWithSavedColumns('active_student_columns');
         cy.get('[data-testid="registration-subsection-td"]').should('exist');
     });
 
@@ -45,6 +56,7 @@ describe('Manage Students: column toggles', () => {
         cy.get('[data-testid="toggle-columns"]').click();
         cy.contains('All Off').click();
         saveStudentColumns();
+        reloadWithSavedColumns('active_student_columns');
         // Assert on the changed state first: this waits for the reload to finish...
         cy.get('[data-testid="student-given-name"]').should('not.exist');
         // ...so these two are checked against the reloaded page.
@@ -76,6 +88,7 @@ describe('Manage Graders: column toggles', () => {
         cy.get('[data-testid="toggle-columns"]').click();
         cy.get('[data-testid="toggle-registration-subsection"]').check();
         cy.get('[data-testid="toggle-columns-submit"]').click();
+        reloadWithSavedColumns('active_grader_columns');
         cy.get('[data-testid="registration-subsection-td"]').should('exist');
 
         // This is the check that would have caught the new Array(7) bug in manage-graders-columns.js.
@@ -87,6 +100,7 @@ describe('Manage Graders: column toggles', () => {
         cy.get('[data-testid="toggle-columns"]').click();
         cy.contains('All Off').click();
         cy.get('[data-testid="toggle-columns-submit"]').click();
+        reloadWithSavedColumns('active_grader_columns');
         cy.get('[data-testid="grader-given-name"]').should('not.exist');
         cy.get('[data-testid="grader-id-td"]').should('exist');
         cy.get('[data-testid="edit-grader-td"]').should('exist');
