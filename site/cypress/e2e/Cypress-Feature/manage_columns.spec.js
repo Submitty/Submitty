@@ -12,10 +12,7 @@ const saveStudentColumns = () => {
     cy.get('[data-testid="popup-save-button"]').click();
 };
 
-// Cypress >= 15.20.0 regression (cypress-io/cypress#35338): the popup writes the column cookie
-// with document.cookie and reloads, but Cypress's server-side cookie jar re-sends the OLD value
-// on that navigation, so the server renders the previous columns. Re-apply the browser's value
-// through Cypress (which keeps the jar in sync as of 16.2.0), then reload once.
+// Workaround for cypress-io/cypress#35338: re-apply the saved cookie so the reload uses it.
 const reloadWithSavedColumns = (cookie) => {
     cy.getCookie(cookie).then(({ value, path }) => {
         cy.setCookie(cookie, value, { path });
