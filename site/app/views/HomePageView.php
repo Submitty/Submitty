@@ -69,7 +69,10 @@ class HomePageView extends AbstractView {
                 "notifications" => $notifications,
                 "unseenCount" => $unseen_count,
                 "userId" => $user->getId(),
-            ]
+            ],
+            "events" => [
+                "badge-count-change" => "updateBadgeDOM",
+            ],
         ]);
     }
 

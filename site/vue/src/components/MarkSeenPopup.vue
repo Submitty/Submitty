@@ -98,6 +98,7 @@ function markSeen() {
     <template #trigger>
       <button
         class="btn btn-primary"
+        data-testid="mark-seen-trigger-button"
         @click="toggle"
       >
         Mark as seen
@@ -110,29 +111,39 @@ function markSeen() {
         :key="idx"
         class="course-count-container"
         :class="{ 'selected-row': selected[idx] }"
+        data-testid="course-count-row"
         @click="selected[idx] = !selected[idx]"
       >
-        <div class="course-count-grid">
+        <div
+          class="course-count-grid"
+          data-testid="course-count-grid"
+        >
           <input
             v-model="selected[idx]"
             type="checkbox"
+            data-testid="course-count-checkbox"
             @click.stop
           />
-          <span>{{ n.title }}</span>
-          <span>{{ n.name }}</span>
-          <span><b>{{ n.count }}</b></span>
+          <span data-testid="course-title">{{ n.title }}</span>
+          <span data-testid="course-name">{{ n.name }}</span>
+          <span data-testid="course-count"><b>{{ n.count }}</b></span>
         </div>
         <hr />
       </div>
-      <div class="select-buttons">
+      <div
+        class="select-buttons"
+        data-testid="select-buttons"
+      >
         <a
           class="btn btn-primary"
+          data-testid="select-all-button"
           @click="selectAll"
         >
           Select All
         </a>
         <a
           class="btn btn-primary"
+          data-testid="clear-all-button"
           @click="clearAll"
         >
           Clear Selection
