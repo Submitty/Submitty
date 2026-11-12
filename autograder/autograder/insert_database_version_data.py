@@ -9,6 +9,7 @@ import json
 import os
 
 from submitty_utils import dateutils
+from submitty_utils import db_utils
 from sqlalchemy import (
     create_engine,
     Table,
@@ -32,6 +33,7 @@ def insert_into_database(
 ):
     db_user = config.database["database_user"]
     db_host = config.database["database_host"]
+    db_port = config.database.get("database_port", 5432)
     db_pass = config.database["database_password"]
     data_dir = config.submitty["submitty_data_dir"]
 
@@ -66,11 +68,7 @@ def insert_into_database(
 
     db_name = f"submitty_{semester}_{course}"
 
-    # If using a UNIX socket, have to specify a slightly different connection string
-    if os.path.isdir(db_host):
-        conn_string = f"postgresql://{db_user}:{db_pass}@/{db_name}?host={db_host}"
-    else:
-        conn_string = f"postgresql://{db_user}:{db_pass}@{db_host}/{db_name}"
+    conn_string = db_utils.generate_connect_string(db_host, db_port, db_name, db_user, db_pass)
 
     engine = create_engine(conn_string)
     db = engine.connect()
