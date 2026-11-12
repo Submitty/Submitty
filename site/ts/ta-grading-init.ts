@@ -57,7 +57,6 @@ $(() => {
                         storageCode,
                     )
                 ) {
-                    settingsCallbacks[storageCode as keyof typeof settingsCallbacks]((this as HTMLSelectElement).value);
                     if ((this as HTMLSelectElement).value !== 'active-inquiry') {
                         // if user change setting to non-grade inquiry option, change the inquiry_status to off and set inquiry_status to off in grading index page
                         window.Cookies.set('inquiry_status', 'off');
@@ -65,6 +64,7 @@ $(() => {
                     else {
                         window.Cookies.set('inquiry_status', 'on');
                     }
+                    settingsCallbacks[storageCode as keyof typeof settingsCallbacks]((this as HTMLSelectElement).value);
                 }
             }
         },
