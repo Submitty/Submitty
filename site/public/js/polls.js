@@ -1,12 +1,73 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializeStudentSocketClient */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializeStudentIndexSocketClient initializeStudentSocketClient */
 /* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
+
+let pollIndexTimerId = null;
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function () {
         $(this).siblings('table').toggle();
         $(this).find('i').toggleClass('down');
     });
+    initializePollIndexTimers();
 });
+
+function initializePollIndexTimers() {
+    clearInterval(pollIndexTimerId);
+    pollIndexTimerId = null;
+
+    function tick() {
+        let active = false;
+        const now = Date.now();
+        document.querySelectorAll('.poll-index-timer[data-end-time]').forEach((timer) => {
+            const remaining = new Date(timer.dataset.endTime).getTime() - now;
+            if (!Number.isFinite(remaining) || remaining <= 0) {
+                timer.textContent = Number.isFinite(remaining) ? 'Poll Ended' : '—';
+                timer.removeAttribute('data-end-time');
+                return;
+            }
+
+            active = true;
+            const totalSeconds = Math.ceil(remaining / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor(totalSeconds / 60) % 60;
+            const seconds = totalSeconds % 60;
+            timer.textContent = [hours, minutes, seconds].map((value) => String(value).padStart(2, '0')).join(':');
+        });
+        return active;
+    }
+
+    if (tick()) {
+        pollIndexTimerId = setInterval(() => {
+            if (!tick()) {
+                clearInterval(pollIndexTimerId);
+                pollIndexTimerId = null;
+            }
+        }, 1000);
+    }
+}
+
+function updatePollIndexState(pollid, response) {
+    // Status endpoints redirect to the index with the server's updated deadline.
+    const page = new DOMParser().parseFromString(response, 'text/html');
+    const timer = document.getElementById(`poll_${pollid}_timer`);
+    const updatedTimer = page.getElementById(`poll_${pollid}_timer`);
+    if (timer && updatedTimer) {
+        timer.textContent = updatedTimer.textContent;
+        if (updatedTimer.hasAttribute('data-end-time')) {
+            timer.dataset.endTime = updatedTimer.dataset.endTime;
+        }
+        else {
+            timer.removeAttribute('data-end-time');
+        }
+    }
+    for (const suffix of ['visible', 'view_results']) {
+        const checkbox = page.getElementById(`poll_${pollid}_${suffix}`);
+        if (checkbox) {
+            $(`#poll_${pollid}_${suffix}`).prop('checked', checkbox.checked);
+        }
+    }
+    initializePollIndexTimers();
+}
 
 function newDeletePollForm(pollid, pollname, base_url) {
     if (confirm(`This will delete poll '${pollname}'. Are you sure?`)) {
@@ -66,6 +127,9 @@ function updatePollAcceptingAnswers(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
+        beforeSend: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', true),
+        success: (response) => updatePollIndexState(pollid, response),
+        complete: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', false),
         error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
@@ -94,6 +158,9 @@ function updatePollVisible(pollid, base_url) {
         processData: false,
         cache: false,
         contentType: false,
+        beforeSend: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', true),
+        success: (response) => updatePollIndexState(pollid, response),
+        complete: () => $(`${visible_checkbox}, ${accepting_answers_checkbox}`).prop('disabled', false),
         error: function (err) {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
@@ -322,6 +389,118 @@ function initializeIndexSocketClient() {
         }
     };
     window.socketClient.open('polls_index');
+}
+
+function initializeStudentIndexSocketClient(base_url) {
+    let pending = false;
+    let dirty = false;
+
+    // Use the same Markdown renderer as Vue.twig, with script-free props for dynamic rows.
+    function mountAnswer(row) {
+        const answer = row.querySelector('.student-poll-answer');
+        window.submitty.render(answer, 'component', 'Markdown', { content: answer.dataset.content })
+            .then(() => {
+                // The lazy component import may finish after a deletion or visibility change.
+                if (!answer.isConnected) {
+                    answer.unmount?.();
+                }
+            });
+    }
+
+    document.querySelectorAll('#student-polls .student-poll-row').forEach(mountAnswer);
+
+    function refresh() {
+        dirty = true;
+        if (pending) {
+            return;
+        }
+        pending = true;
+        dirty = false;
+        $.ajax({ url: `${base_url}/student_index`, dataType: 'json', headers: { Accept: 'application/json' }, cache: false })
+            .done((response) => {
+                // A newer notification invalidates this response. Fetch again before applying it.
+                if (dirty || response?.status !== 'success' || typeof response.data?.html !== 'string') {
+                    return;
+                }
+                const page = new DOMParser().parseFromString(response.data.html, 'text/html');
+                const tables = ['today-table', 'older-table'];
+                const currentPage = document.getElementById('student-polls');
+                const updatedPage = page.getElementById('student-polls');
+                if (!updatedPage || !tables.every((id) => updatedPage.querySelector(`#${id} tbody`))) {
+                    return;
+                }
+                const rows = new Map(Array.from(currentPage.querySelectorAll('.student-poll-row'), (row) => [row.dataset.pollId, row]));
+                const updatedIds = new Set(Array.from(updatedPage.querySelectorAll('.student-poll-row'), (row) => row.dataset.pollId));
+                for (const [id, row] of rows) {
+                    if (!updatedIds.has(id)) {
+                        row.querySelector('.student-poll-answer').unmount?.();
+                        row.remove();
+                    }
+                }
+                for (const id of tables) {
+                    const body = currentPage.querySelector(`#${id} tbody`);
+                    updatedPage.querySelectorAll(`#${id} .student-poll-row`).forEach((updatedRow, index) => {
+                        let row = rows.get(updatedRow.dataset.pollId);
+                        const isNew = !row;
+                        if (isNew) {
+                            // Never evaluate scripts from the fetched page.
+                            updatedRow.querySelectorAll('script').forEach((script) => script.remove());
+                            row = document.importNode(updatedRow, true);
+                        }
+                        else {
+                            row.cells[0].textContent = updatedRow.cells[0].textContent;
+                            const action = row.querySelector('.student-poll-action');
+                            const updatedAction = updatedRow.querySelector('.student-poll-action');
+                            if (!action.isEqualNode(updatedAction)) {
+                                action.replaceChildren(...updatedAction.childNodes);
+                            }
+                            const timer = row.querySelector('.poll-index-timer');
+                            const updatedTimer = updatedRow.querySelector('.poll-index-timer');
+                            if (timer && updatedTimer) {
+                                timer.textContent = updatedTimer.textContent;
+                                if (updatedTimer.hasAttribute('data-end-time')) {
+                                    timer.dataset.endTime = updatedTimer.dataset.endTime;
+                                }
+                                else {
+                                    timer.removeAttribute('data-end-time');
+                                }
+                            }
+                            else if (timer) {
+                                timer.remove();
+                            }
+                            else if (updatedTimer) {
+                                row.insertBefore(updatedTimer, action);
+                            }
+                        }
+                        // Match server ordering/grouping without replacing existing answer mounts.
+                        if (body.children[index] !== row) {
+                            body.insertBefore(row, body.children[index] ?? null);
+                        }
+                        if (isNew) {
+                            mountAnswer(row);
+                        }
+                    });
+                }
+                initializePollIndexTimers();
+            })
+            .fail((error) => console.error('Unable to refresh student poll state:', error))
+            .always(() => {
+                pending = false;
+                if (dirty) {
+                    refresh();
+                }
+            });
+    }
+
+    window.socketClient = new WebSocketClient();
+    // Also recover changes missed before connecting or while disconnected.
+    window.socketClient.onopen = refresh;
+    window.socketClient.onmessage = (msg) => {
+        if (msg.type === 'poll_state_changed') {
+            refresh();
+        }
+    };
+    window.socketClient.open('polls_student_index');
 }
 
 function initializeStudentSocketClient(poll_id) {
