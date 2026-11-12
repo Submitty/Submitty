@@ -1283,6 +1283,44 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
+    public static function invalidPreviousFileNameProvider(): array {
+        return [
+            ['../../../../config/database.json'],
+            ['/etc/passwd'],
+            ['dir/test.txt'],
+            ['..'],
+            ['.'],
+            [''],
+            ["in'valid.txt"]
+        ];
+    }
+
+    /**
+     * Previous file names come from the client and are joined onto the previous version's path,
+     * so anything other than a plain file name must be rejected before touching the filesystem.
+     *
+     * @dataProvider invalidPreviousFileNameProvider
+     */
+    public function testInvalidPreviousFileName(string $filename) {
+        $_POST['previous_files'] = json_encode([0 => [$filename]]);
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
+        $this->assertTrue($return['status'] == 'fail');
+        $this->assertEquals("Invalid previous file name '{$filename}'.", $return['message']);
+    }
+
+    public function testNonStringPreviousFileName() {
+        $_POST['previous_files'] = json_encode([0 => [1]]);
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
+        $this->assertTrue($return['status'] == 'fail');
+        $this->assertEquals("Invalid previous file name.", $return['message']);
+    }
+
     /**
      * We are not running through all possible invalid filenames (as the list might grow) as that is tested elsewhere,
      * just that we're using that function at all really.

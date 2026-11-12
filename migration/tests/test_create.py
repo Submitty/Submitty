@@ -32,7 +32,7 @@ class TestCreate(unittest.TestCase):
     def create_test_runner(self, module_text, parameters, parameter_text, environment):
         """Run create test for a given environment."""
         args = Namespace()
-        args.name = 'test'
+        args.name = "test"
         args.environments = [environment]
         migrator_dir = Path(self.dir, environment)
         migrator_dir.mkdir()
@@ -56,7 +56,7 @@ def down({1}):
     {2}
     \"\"\"
     pass
-""".format(module_text, ', '.join(parameters), parameter_text)
+""".format(module_text, ", ".join(parameters), parameter_text)
         found_files = 0
         for entry in migrator_dir.iterdir():
             with entry.open() as open_file:
@@ -66,31 +66,31 @@ def down({1}):
 
     def test_create_system(self):
         """Test the create command for system environment."""
-        parameters = ['config']
-        environment = 'system'
-        module_text = 'Migration for the Submitty system.'
+        parameters = ["config"]
+        environment = "system"
+        module_text = "Migration for the Submitty system."
         parameter_text = """:param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config"""
         self.create_test_runner(module_text, parameters, parameter_text, environment)
-        self.assertRegex(sys.stdout.getvalue(), r'Created migration: system\/[0-9]{14}_test.py')
+        self.assertRegex(sys.stdout.getvalue(), r"Created migration: system\/[0-9]{14}_test.py")
 
     def test_create_master(self):
         """Test the create command for the master environment."""
-        parameters = ['config', 'database']
-        environment = 'master'
-        module_text = 'Migration for the Submitty master database.'
+        parameters = ["config", "database"]
+        environment = "master"
+        module_text = "Migration for the Submitty master database."
         parameter_text = """:param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database"""
         self.create_test_runner(module_text, parameters, parameter_text, environment)
-        self.assertRegex(sys.stdout.getvalue(), r'Created migration: master\/[0-9]{14}_test.py')
+        self.assertRegex(sys.stdout.getvalue(), r"Created migration: master\/[0-9]{14}_test.py")
 
     def test_create_course(self):
         """Test the create command for the course environment."""
-        parameters = ['config', 'database', 'semester', 'course']
-        environment = 'course'
-        module_text = 'Migration for a given Submitty course database.'
+        parameters = ["config", "database", "semester", "course"]
+        environment = "course"
+        module_text = "Migration for a given Submitty course database."
         parameter_text = """:param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     :param database: Object for interacting with given database for environment
@@ -100,12 +100,12 @@ def down({1}):
     :param course: Code of course being migrated
     :type course: str"""
         self.create_test_runner(module_text, parameters, parameter_text, environment)
-        self.assertRegex(sys.stdout.getvalue(), r'Created migration: course\/[0-9]{14}_test.py')
+        self.assertRegex(sys.stdout.getvalue(), r"Created migration: course\/[0-9]{14}_test.py")
 
     def test_create_master_and_system(self):
         args = Namespace()
-        args.name = 'test'
-        args.environments = ['system', 'master']
+        args.name = "test"
+        args.environments = ["system", "master"]
         for environment in args.environments:
             Path(self.dir, environment).mkdir()
         migrator.main.create(args)
@@ -124,8 +124,8 @@ Created migration: system\/[0-9]{14}_test.py"""
 
     def test_create_all(self):
         args = Namespace()
-        args.name = 'test'
-        args.environments = ['course', 'master', 'system']
+        args.name = "test"
+        args.environments = ["course", "master", "system"]
         for environment in args.environments:
             Path(self.dir, environment).mkdir()
         migrator.main.create(args)
@@ -145,11 +145,11 @@ Created migration: course\/[0-9]{14}_test.py"""
 
     def test_create_bad_name(self):
         args = Namespace()
-        args.name = 'invalid#!!!'
-        args.environments = ['system']
+        args.name = "invalid#!!!"
+        args.environments = ["system"]
         with self.assertRaises(ValueError) as cm:
             migrator.main.create(args)
         self.assertEqual(
             "Invalid migration name (must only contain alphanumeric and _): invalid#!!!",
-            str(cm.exception)
+            str(cm.exception),
         )

@@ -71,20 +71,19 @@ class CourseJob(AbstractJob):
     and course and that they are valid directories within Submitty
     """
 
-    required_keys = [
-        'semester',
-        'course'
-    ]
+    required_keys = ["semester", "course"]
 
     def validate_job_details(self):
-        for key in ['semester', 'course']:
+        for key in ["semester", "course"]:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
-            if self.job_details[key] in ['', '.', '..']:
+            if self.job_details[key] in ["", ".", ".."]:
                 return False
             if self.job_details[key] != os.path.basename(self.job_details[key]):
                 return False
-        test_path = Path(DATA_DIR, 'courses', self.job_details['semester'], self.job_details['course'])
+        test_path = Path(
+            DATA_DIR, "courses", self.job_details["semester"], self.job_details["course"]
+        )
         return test_path.exists()
 
     def cleanup_job(self):
@@ -99,66 +98,71 @@ class CourseGradeableJob(CourseJob):
     dot or two dots.
     """
 
-    required_keys = CourseJob.required_keys + ['gradeable']
+    required_keys = CourseJob.required_keys + ["gradeable"]
 
     def validate_job_details(self):
         if not super().validate_job_details():
             return False
-        if 'gradeable' not in self.job_details or self.job_details['gradeable'] is None:
+        if "gradeable" not in self.job_details or self.job_details["gradeable"] is None:
             return False
-        if self.job_details['gradeable'] != os.path.basename(self.job_details['gradeable']):
+        if self.job_details["gradeable"] != os.path.basename(self.job_details["gradeable"]):
             return False
-        self.job_details['gradeable'] = os.path.basename(self.job_details['gradeable'])
-        return self.job_details['gradeable'] not in ['', '.', '..']
+        self.job_details["gradeable"] = os.path.basename(self.job_details["gradeable"])
+        return self.job_details["gradeable"] not in ["", ".", ".."]
 
 
 class RunAutoRainbowGrades(CourseJob):
     def run_job(self):
 
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        source = self.job_details['source']
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        source = self.job_details["source"]
 
-        path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
-        debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
+        path = os.path.join(INSTALL_DIR, "sbin", "auto_rainbow_grades.py")
+        debug_output = os.path.join(
+            DATA_DIR, "courses", semester, course, "rainbow_grades", "auto_debug_output.txt"
+        )
 
         try:
             with open(debug_output, "w") as file:
-                subprocess.call(['python3', path, semester, course, source], stdout=file, stderr=file)
+                subprocess.call(
+                    ["python3", path, semester, course, source], stdout=file, stderr=file
+                )
         except PermissionError:
-            print("error, could not open "+file+" for writing")
+            print("error, could not open " + file + " for writing")
 
 
 class BuildConfig(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        gradeable = self.job_details['gradeable']
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        gradeable = self.job_details["gradeable"]
 
-        build_script = os.path.join(DATA_DIR, 'courses', semester,
-                                    course, f'BUILD_{course}.sh')
-        build_output = os.path.join(DATA_DIR, 'courses', semester,
-                                    course, 'build', gradeable,
-                                    'build_script_output.txt')
+        build_script = os.path.join(DATA_DIR, "courses", semester, course, f"BUILD_{course}.sh")
+        build_output = os.path.join(
+            DATA_DIR, "courses", semester, course, "build", gradeable, "build_script_output.txt"
+        )
 
         try:
-            res = subprocess.run([build_script, gradeable, "--clean"],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
+            res = subprocess.run(
+                [build_script, gradeable, "--clean"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
             with open(build_output, "w") as output_file:
                 output_file.write(res.stdout.decode("ascii"))
         except PermissionError:
-            print("error, could not open "+output_file+" for writing")
+            print("error, could not open " + output_file + " for writing")
 
 
 class RunGenerateRepos(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        gradeable = self.job_details['gradeable']
-        subdirectory = self.job_details['subdirectory']
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        gradeable = self.job_details["gradeable"]
+        subdirectory = self.job_details["subdirectory"]
 
-        gen_script = os.path.join(INSTALL_DIR, 'bin', 'generate_repos.py')
+        gen_script = os.path.join(INSTALL_DIR, "bin", "generate_repos.py")
 
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "vcs_generation")
@@ -167,61 +171,65 @@ class RunGenerateRepos(CourseGradeableJob):
         current_time = today.strftime("%m/%d/%Y, %H:%M:%S")
         try:
             with open(log_file_path, "a") as output_file:
-                print("At time: "+current_time, file=output_file)
+                print("At time: " + current_time, file=output_file)
                 output_file.flush()
-                subprocess.run([
-                    "sudo",
-                    gen_script,
-                    "--non-interactive",
-                    semester,
-                    course,
-                    gradeable,
-                    "--subdirectory",
-                    subdirectory
-                ], stdout=output_file, stderr=output_file)
+                subprocess.run(
+                    [
+                        "sudo",
+                        gen_script,
+                        "--non-interactive",
+                        semester,
+                        course,
+                        gradeable,
+                        "--subdirectory",
+                        subdirectory,
+                    ],
+                    stdout=output_file,
+                    stderr=output_file,
+                )
         except PermissionError:
             print("error, could not open " + output_file + " for writing")
 
 
 class RunLichen(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        gradeable = self.job_details['gradeable']
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        gradeable = self.job_details["gradeable"]
         # We cast to an int to prevent malicious json files from containing invalid path components
-        config_id = int(self.job_details['config_id'])
-        config_data = self.job_details['config_data']
+        config_id = int(self.job_details["config_id"])
+        config_data = self.job_details["config_data"]
 
         # error checking
         # prevent backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable:
+        if ".." in semester or ".." in course or ".." in gradeable:
             print('Error: Invalid path component ".." in string')
             return
 
         # paths
-        lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
+        lichen_dir = os.path.join(DATA_DIR, "courses", semester, course, "lichen")
         config_path = os.path.join(lichen_dir, gradeable, str(config_id))
-        data_path = os.path.join(DATA_DIR, 'courses')
+        data_path = os.path.join(DATA_DIR, "courses")
 
-        with open(os.path.join(config_path, 'config.json'), 'w') as file:
+        with open(os.path.join(config_path, "config.json"), "w") as file:
             json.dump(config_data, file, indent=4)
 
         # run Lichen
-        subprocess.call(['/usr/local/submitty/Lichen/bin/run_lichen.sh', config_path, data_path])
+        subprocess.call(["/usr/local/submitty/Lichen/bin/run_lichen.sh", config_path, data_path])
 
 
 class DeleteLichenResult(CourseGradeableJob):
     def run_job(self):
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        gradeable = self.job_details['gradeable']
-        config_id = int(self.job_details['config_id'])
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        gradeable = self.job_details["gradeable"]
+        config_id = int(self.job_details["config_id"])
 
-        lichen_dir = os.path.join(DATA_DIR, 'courses', semester, course, 'lichen')
+        lichen_dir = os.path.join(DATA_DIR, "courses", semester, course, "lichen")
 
         # error checking
         # prevent against backwards crawling
-        if '..' in semester or '..' in course or '..' in gradeable:
+        if ".." in semester or ".." in course or ".." in gradeable:
             print('invalid path component ".." in string')
             return
 
@@ -237,7 +245,7 @@ class DeleteLichenResult(CourseGradeableJob):
 
 
 class BulkUpload(CourseJob):
-    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']
+    required_keys = CourseJob.required_keys + ["timestamp", "g_id", "filename", "is_qr"]
 
     def add_permissions(self, item, perms):
         if os.getuid() == os.stat(item).st_uid:
@@ -252,38 +260,44 @@ class BulkUpload(CourseJob):
                 self.add_permissions(os.path.join(root, f), file_perms)
 
     def run_job(self):
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        timestamp = self.job_details['timestamp']
-        gradeable_id = self.job_details['g_id']
-        filename = self.job_details['filename']
-        is_qr = self.job_details['is_qr']
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        timestamp = self.job_details["timestamp"]
+        gradeable_id = self.job_details["g_id"]
+        filename = self.job_details["filename"]
+        is_qr = self.job_details["is_qr"]
 
-        if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
+        if is_qr and ("qr_prefix" not in self.job_details or "qr_suffix" not in self.job_details):
             msg = "did not pass in qr prefix or suffix"
             print(msg)
             return
 
         use_ocr = False
         if is_qr:
-            qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
-            qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
-            use_ocr = self.job_details['use_ocr']
+            qr_prefix = unquote(unquote(self.job_details["qr_prefix"]))
+            qr_suffix = unquote(unquote(self.job_details["qr_suffix"]))
+            use_ocr = self.job_details["use_ocr"]
         else:
-            if 'num' not in self.job_details:
+            if "num" not in self.job_details:
                 msg = "Did not pass in the number to divide " + filename + " by"
                 print(msg)
                 return
-            num = self.job_details['num']
+            num = self.job_details["num"]
 
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
-        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
+        log_file_path = os.path.join(
+            log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day)
+        )
 
         pid = os.getpid()
-        log_msg = "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
+        log_msg = (
+            "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
+        )
         if is_qr:
-            log_msg += "QR bulk upload job, QR Prefx: \'" + qr_prefix + "\', QR Suffix: \'" + qr_suffix + "\'"
+            log_msg += (
+                "QR bulk upload job, QR Prefx: '" + qr_prefix + "', QR Suffix: '" + qr_suffix + "'"
+            )
         else:
             log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
 
@@ -291,8 +305,12 @@ class BulkUpload(CourseJob):
         # create paths
         try:
             current_path = os.path.dirname(os.path.realpath(__file__))
-            bulk_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/bulk_pdf", gradeable_id, timestamp)
-            split_path = os.path.join(DATA_DIR, "courses", semester, course, "uploads/split_pdf", gradeable_id, timestamp)
+            bulk_path = os.path.join(
+                DATA_DIR, "courses", semester, course, "uploads/bulk_pdf", gradeable_id, timestamp
+            )
+            split_path = os.path.join(
+                DATA_DIR, "courses", semester, course, "uploads/split_pdf", gradeable_id, timestamp
+            )
         except Exception:
             msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
             print(msg)
@@ -310,15 +328,31 @@ class BulkUpload(CourseJob):
 
             # copy over file to new directory
             if not os.path.isfile(os.path.join(split_path, filename)):
-                shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
+                shutil.copyfile(
+                    os.path.join(bulk_path, filename), os.path.join(split_path, filename)
+                )
 
             # reset permissions just in case, group needs read/write
             # access so submitty_php can view & delete pdfs when they are
             # assigned to a student and/or deleted
-            self.add_permissions_recursive(split_path,
-                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,  # noqa: E222
-                                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,  # noqa: E222
-                                           stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP)  # noqa: E222
+            self.add_permissions_recursive(
+                split_path,
+                stat.S_IRUSR
+                | stat.S_IWUSR
+                | stat.S_IXUSR
+                | stat.S_IRGRP
+                | stat.S_IWGRP
+                | stat.S_IXGRP
+                | stat.S_ISGID,  # noqa: E222
+                stat.S_IRUSR
+                | stat.S_IWUSR
+                | stat.S_IXUSR
+                | stat.S_IRGRP
+                | stat.S_IWGRP
+                | stat.S_IXGRP
+                | stat.S_ISGID,  # noqa: E222
+                stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP,
+            )  # noqa: E222
 
             # move to copy folder
             os.chdir(split_path)
@@ -331,7 +365,9 @@ class BulkUpload(CourseJob):
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr])
+                bulk_qr_split.main(
+                    [filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr]
+                )
             else:
                 bulk_upload_split.main([filename, split_path, num, log_file_path])
         except Exception:
@@ -370,30 +406,64 @@ class GeneratePdfImages(AbstractJob):
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):
-        for key in ['semester', 'course', 'head_instructor', 'group_name']:
+        for key in ["semester", "course", "head_instructor", "group_name"]:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
-            if self.job_details[key] in ['', '.', '..']:
+            if self.job_details[key] in ["", ".", ".."]:
                 return False
             if self.job_details[key] != os.path.basename(self.job_details[key]):
                 return False
         return True
 
     def run_job(self):
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        head_instructor = self.job_details['head_instructor']
-        base_group = self.job_details['group_name']
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        head_instructor = self.job_details["head_instructor"]
+        base_group = self.job_details["group_name"]
 
-        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
-            semester, course, head_instructor, base_group
-        ))
+        log_file_path = Path(
+            DATA_DIR,
+            "logs",
+            "course_creation",
+            "{}_{}_{}_{}.txt".format(semester, course, head_instructor, base_group),
+        )
 
         with log_file_path.open("w") as output_file:
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)
+            subprocess.run(
+                [
+                    "sudo",
+                    "/usr/local/submitty/sbin/create_course.sh",
+                    semester,
+                    course,
+                    head_instructor,
+                    base_group,
+                ],
+                stdout=output_file,
+                stderr=output_file,
+            )
+            subprocess.run(
+                [
+                    "sudo",
+                    "/usr/local/submitty/sbin/adduser_course.py",
+                    head_instructor,
+                    semester,
+                    course,
+                ],
+                stdout=output_file,
+                stderr=output_file,
+            )
             if VERIFIED_ADMIN_USER != "":
-                subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", VERIFIED_ADMIN_USER, semester, course], stdout=output_file, stderr=output_file)
+                subprocess.run(
+                    [
+                        "sudo",
+                        "/usr/local/submitty/sbin/adduser_course.py",
+                        VERIFIED_ADMIN_USER,
+                        semester,
+                        course,
+                    ],
+                    stdout=output_file,
+                    stderr=output_file,
+                )
 
     def cleanup_job(self):
         pass
@@ -403,16 +473,24 @@ class UpdateDockerImages(AbstractJob):
     def run_job(self):
         today = datetime.datetime.now()
         log_path = os.path.join(DATA_DIR, "logs", "docker")
-        log_file_path = os.path.join(log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
+        log_file_path = os.path.join(
+            log_path, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day)
+        )
         flag = os.O_EXCL | os.O_WRONLY
         if not os.path.exists(log_file_path):
             flag = flag | os.O_CREAT
         log_fd = os.open(log_file_path, flag)
-        script_path = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'update_and_install_workers.py')
-        with os.fdopen(log_fd, 'a') as output_file:
-            subprocess.run(["python3", script_path, "--docker_images"], stdout=output_file, stderr=output_file)
+        script_path = os.path.join(
+            INSTALL_DIR, "sbin", "shipper_utils", "update_and_install_workers.py"
+        )
+        with os.fdopen(log_fd, "a") as output_file:
+            subprocess.run(
+                ["python3", script_path, "--docker_images"], stdout=output_file, stderr=output_file
+            )
 
-        log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(today.year, today.month, today.day, today.hour, today.minute, today.second)
+        log_msg = "[Last ran on: {:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}]\n".format(
+            today.year, today.month, today.day, today.hour, today.minute, today.second
+        )
         logger.write_to_log(log_file_path, log_msg)
 
     def cleanup_job(self):
@@ -431,9 +509,12 @@ class UpdateSystemInfo(AbstractJob):
         log = os.open(log_file, flag)
 
         script = os.path.join(INSTALL_DIR, "sbin", "shipper_utils", "get_sysinfo.py")
-        with os.fdopen(log, 'a') as output_file:
-            subprocess.run(["python3", script, "--workers", "service", "disk", "sysload"],
-                           stdout=output_file, stderr=output_file)
+        with os.fdopen(log, "a") as output_file:
+            subprocess.run(
+                ["python3", script, "--workers", "service", "disk", "sysload"],
+                stdout=output_file,
+                stderr=output_file,
+            )
 
         log_msg = f"[Last ran on: {today.isoformat()}]\n"
         logger.write_to_log(log_file, log_msg)
@@ -447,8 +528,7 @@ class RegenerateBulkImages(AbstractJob):
     def run_job(self):
         folder = self.job_details["pdf_file_path"]
         redactions = [
-            generate_pdf_images.Redaction(**r)
-            for r in self.job_details.get("redactions", [])
+            generate_pdf_images.Redaction(**r) for r in self.job_details.get("redactions", [])
         ]
         # Support configurable parallel workers (default to None for auto-detection)
         max_workers = self.job_details.get("max_workers", None)
@@ -462,28 +542,34 @@ class DocxToPDF(AbstractJob):
     def run_job(self):
         log_dir = os.path.join(DATA_DIR, "logs", "docx_to_pdf")
         today = datetime.datetime.now()
-        log_file = os.path.join(log_dir, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
-        log = open(log_file, 'a')
-        log.write('\n')
+        log_file = os.path.join(
+            log_dir, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day)
+        )
+        log = open(log_file, "a")
+        log.write("\n")
 
         try:
-            term = self.job_details['term']
-            course = self.job_details['course']
-            gradeable = self.job_details['gradeable']
-            user = self.job_details['user']
-            version = self.job_details['version']
+            term = self.job_details["term"]
+            course = self.job_details["course"]
+            gradeable = self.job_details["gradeable"]
+            user = self.job_details["user"]
+            version = self.job_details["version"]
 
-            course_dir = os.path.join(DATA_DIR, 'courses', term, course)
-            submissions_dir = os.path.join(course_dir, 'submissions')
-            submissions_processed_dir = os.path.join(course_dir, 'submissions_processed')
+            course_dir = os.path.join(DATA_DIR, "courses", term, course)
+            submissions_dir = os.path.join(course_dir, "submissions")
+            submissions_processed_dir = os.path.join(course_dir, "submissions_processed")
 
             submissions_path = os.path.join(submissions_dir, gradeable, user, str(version))
-            submissions_processed_path = os.path.join(submissions_processed_dir, gradeable, user, str(version), 'convert_docx_to_pdf')
+            submissions_processed_path = os.path.join(
+                submissions_processed_dir, gradeable, user, str(version), "convert_docx_to_pdf"
+            )
 
             if not os.path.isdir(submissions_processed_path):
                 os.makedirs(submissions_processed_path)
 
-            docx_MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            docx_MIME_TYPES = [
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ]
 
             docx_files = []
 
@@ -495,23 +581,29 @@ class DocxToPDF(AbstractJob):
                         docx_files.append(file_path)
 
             with TemporaryDirectory() as tmpdir:
-                os.mkdir(os.path.join(tmpdir, 'docx_files'))
+                os.mkdir(os.path.join(tmpdir, "docx_files"))
 
                 for i in range(len(docx_files)):
-                    numfolder = os.path.join(tmpdir, 'docx_files', str(i))
+                    numfolder = os.path.join(tmpdir, "docx_files", str(i))
                     os.mkdir(numfolder)
-                    shutil.copyfile(docx_files[i], os.path.join(numfolder, os.path.basename(docx_files[i])))
+                    shutil.copyfile(
+                        docx_files[i], os.path.join(numfolder, os.path.basename(docx_files[i]))
+                    )
 
                 client = docker.from_env(timeout=60)
                 container = client.containers.run(
-                    image='submitty/libreoffice-writer:latest',
-                    command=['/bin/bash', '-c', f'for x in /app/docx_files/*/; \
+                    image="submitty/libreoffice-writer:latest",
+                    command=[
+                        "/bin/bash",
+                        "-c",
+                        f'for x in /app/docx_files/*/; \
                             do libreoffice --headless --convert-to pdf --outdir "$x"out "$x"*; done; \
-                            chown -R {os.getuid()}:{os.getgid()} /app/docx_files'],
-                    volumes={tmpdir: {'bind': '/app', 'mode': 'rw'}},
+                            chown -R {os.getuid()}:{os.getgid()} /app/docx_files',
+                    ],
+                    volumes={tmpdir: {"bind": "/app", "mode": "rw"}},
                     stdout=True,
                     stderr=True,
-                    detach=True
+                    detach=True,
                 )
 
                 try:
@@ -519,15 +611,21 @@ class DocxToPDF(AbstractJob):
                 except requests.exceptions.ConnectionError:
                     log.write("Container timed out...\n")
 
-                log.write("Output from libreoffice container:\n----------------------------------\n" + container.logs().decode('utf-8'))
+                log.write(
+                    "Output from libreoffice container:\n----------------------------------\n"
+                    + container.logs().decode("utf-8")
+                )
                 container.stop()
                 container.remove()
 
                 stat_parent = os.stat(submissions_processed_path)
                 for i in range(len(docx_files)):
-                    dest = os.path.join(submissions_processed_path, os.path.relpath(docx_files[i], submissions_path) + '.pdf')
+                    dest = os.path.join(
+                        submissions_processed_path,
+                        os.path.relpath(docx_files[i], submissions_path) + ".pdf",
+                    )
                     os.makedirs(os.path.dirname(dest), 0o2755, exist_ok=True)
-                    out_dir = os.path.join(tmpdir, 'docx_files', str(i), 'out')
+                    out_dir = os.path.join(tmpdir, "docx_files", str(i), "out")
                     if not os.path.isdir(out_dir):
                         log.write(f"Failed to generate output for '{docx_files[i]}'\n")
                         continue
@@ -548,13 +646,13 @@ class DocxToPDF(AbstractJob):
 
 
 class GradingClustering(CourseGradeableJob):
-    required_keys = CourseGradeableJob.required_keys + ['algorithm']
+    required_keys = CourseGradeableJob.required_keys + ["algorithm"]
 
     def run_job(self):
-        semester = self.job_details['semester']
-        course = self.job_details['course']
-        gradeable = self.job_details['gradeable']
-        algorithm = self.job_details['algorithm']
+        semester = self.job_details["semester"]
+        course = self.job_details["course"]
+        gradeable = self.job_details["gradeable"]
+        algorithm = self.job_details["algorithm"]
 
-        script = str(Path(INSTALL_DIR, 'sbin', 'grading_clustering', 'main.py'))
-        subprocess.run(['python3', script, semester, course, gradeable, algorithm], check=True)
+        script = str(Path(INSTALL_DIR, "sbin", "grading_clustering", "main.py"))
+        subprocess.run(["python3", script, semester, course, gradeable, algorithm], check=True)

@@ -21,11 +21,14 @@ HELP_MESSAGE="
     phpstan   : php static analysis [option: --memory-limit <#>G, --generate-baseline ...]
     phpcs     : php CodeSniffer [option: --fix]
     php-lint  : phpcs & phpstan (with default options only)
+    twig-lint : lint all Twig templates, or pass arguments for specific files
+                usage: twig-lint [--format FORMAT] [--show-deprecations] [--] [<filename>...]
     php-unit  : run php unit tests [option: --filter testFunctionName, --debug, testFile ...]
     js-lint   : eslint [option: --fix]
     js-unit   : run js unit tests with jest [option: --api] # if run on host with --api, the VM must be up
     css-lint  : css-stylelint [option: --fix]
     shell-lint: run ShellCheck
+    yaml-lint : run yamllint
     py-lint   : run ruff check [option: --fix, specific_file.py]
     py-format : run ruff format, check-only by default [option: --fix, specific_file.py]
     py-unit   : run all python unit tests except migration
@@ -113,6 +116,15 @@ run_php_cs() {
     fi
 }
 
+run_twig_lint() {
+    local ARGS=("${@:2}")
+    if [ ${#ARGS[@]} -gt 0 ]; then
+        run_in_container /home/submitty/site composer run-script lint:twig-specific-file -- "${ARGS[@]}"
+    else
+        run_in_container /home/submitty/site composer run-script lint:twig
+    fi
+}
+
 run_js_es() {
     parse_args "${@:2}"
     script="eslint"
@@ -151,6 +163,10 @@ run_css_style() {
 
 run_shell_lint() {
     run_in_container /home/submitty python3 run_shellcheck.py
+}
+
+run_yaml_lint() {
+    run_in_container /home/submitty yamllint .
 }
 
 run_php_unit() {
@@ -214,6 +230,9 @@ case "${1:-}" in
         run_php_cs
         run_php_stan
         ;;
+    twig-lint)
+        run_twig_lint "$@"
+        ;;
     php-unit)
         run_php_unit "$@"
         ;;
@@ -228,6 +247,9 @@ case "${1:-}" in
         ;;
     shell-lint)
         run_shell_lint
+        ;;
+    yaml-lint)
+        run_yaml_lint
         ;;
     py-lint)
         run_py_lint "$@"

@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Add parent directory to path to import the script
-script_path = Path(__file__).parent.parent.parent / '.github' / 'scripts'
+script_path = Path(__file__).parent.parent.parent / ".github" / "scripts"
 sys.path.insert(0, str(script_path))
 
 # pylint: disable=wrong-import-position
@@ -29,9 +29,7 @@ class TestParseMigrationFilename(unittest.TestCase):
         self.assertEqual(result.day, 25)
 
     def test_invalid_migration_filename(self):
-        result = verify_migration_datestamp.parse_migration_filename(
-            "__init__.py"
-        )
+        result = verify_migration_datestamp.parse_migration_filename("__init__.py")
         self.assertIsNone(result)
 
     def test_invalid_datestamp_format(self):
@@ -41,16 +39,14 @@ class TestParseMigrationFilename(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_wrong_pattern(self):
-        result = verify_migration_datestamp.parse_migration_filename(
-            "base_migration_course.py"
-        )
+        result = verify_migration_datestamp.parse_migration_filename("base_migration_course.py")
         self.assertIsNone(result)
 
 
 class TestGetChangedMigrationFiles(unittest.TestCase):
     """Unit tests for the get_changed_migration_files function."""
 
-    @patch('verify_migration_datestamp.subprocess.run')
+    @patch("verify_migration_datestamp.subprocess.run")
     def test_get_changed_files_in_pr(self, mock_run):
         mock_result = MagicMock()
         mock_result.stdout = (
@@ -60,20 +56,18 @@ class TestGetChangedMigrationFiles(unittest.TestCase):
         )
         mock_run.return_value = mock_result
 
-        with patch.dict(os.environ, {'GITHUB_BASE_REF': 'main'}):
+        with patch.dict(os.environ, {"GITHUB_BASE_REF": "main"}):
             files = verify_migration_datestamp.get_changed_migration_files()
 
         self.assertEqual(len(files), 2)
-        self.assertIn('20240225143000_new.py', files[0][1])
-        self.assertIn('20240101120000_old.py', files[1][1])
+        self.assertIn("20240225143000_new.py", files[0][1])
+        self.assertIn("20240101120000_old.py", files[1][1])
 
-    @patch('verify_migration_datestamp.subprocess.run')
+    @patch("verify_migration_datestamp.subprocess.run")
     def test_filters_non_migration_files(self, mock_run):
         mock_result = MagicMock()
         mock_result.stdout = (
-            "migration/migrator/migrations/course/__init__.py\n"
-            "site/app/models/User.php\n"
-            "README.md"
+            "migration/migrator/migrations/course/__init__.py\nsite/app/models/User.php\nREADME.md"
         )
         mock_run.return_value = mock_result
 
@@ -85,7 +79,7 @@ class TestGetChangedMigrationFiles(unittest.TestCase):
 class TestVerifyMigrationFreshness(unittest.TestCase):
     """Unit tests for the verify_migration_freshness function."""
 
-    @patch('verify_migration_datestamp.get_changed_migration_files')
+    @patch("verify_migration_datestamp.get_changed_migration_files")
     def test_no_migrations_returns_true(self, mock_get_files):
         mock_get_files.return_value = []
 
@@ -93,24 +87,23 @@ class TestVerifyMigrationFreshness(unittest.TestCase):
 
         self.assertTrue(result)
 
-    @patch('verify_migration_datestamp.get_changed_migration_files')
-    @patch('verify_migration_datestamp.get_current_time')
+    @patch("verify_migration_datestamp.get_changed_migration_files")
+    @patch("verify_migration_datestamp.get_current_time")
     def test_fresh_migration_passes(self, mock_time, mock_get_files):
         now = datetime(2024, 2, 25, 14, 30, 0, tzinfo=timezone.utc)
         mock_time.return_value = now
 
         # Migration is 5 days old (fresh)
         mock_get_files.return_value = [
-            ('migration/migrator/migrations/course/20240220143000_new.py',
-             '20240220143000_new.py')
+            ("migration/migrator/migrations/course/20240220143000_new.py", "20240220143000_new.py")
         ]
 
         result = verify_migration_datestamp.verify_migration_freshness()
 
         self.assertTrue(result)
 
-    @patch('verify_migration_datestamp.get_changed_migration_files')
-    @patch('verify_migration_datestamp.get_current_time')
+    @patch("verify_migration_datestamp.get_changed_migration_files")
+    @patch("verify_migration_datestamp.get_current_time")
     def test_stale_migration_fails(self, mock_time, mock_get_files):
         """Stale migration older than 7 days should fail."""
         now = datetime(2024, 2, 25, 14, 30, 0, tzinfo=timezone.utc)
@@ -118,28 +111,26 @@ class TestVerifyMigrationFreshness(unittest.TestCase):
 
         # Migration is 55 days old (stale)
         mock_get_files.return_value = [
-            ('migration/migrator/migrations/course/20240101120000_old.py',
-             '20240101120000_old.py')
+            ("migration/migrator/migrations/course/20240101120000_old.py", "20240101120000_old.py")
         ]
 
         result = verify_migration_datestamp.verify_migration_freshness()
 
         self.assertFalse(result)
 
-    @patch('verify_migration_datestamp.get_changed_migration_files')
+    @patch("verify_migration_datestamp.get_changed_migration_files")
     def test_invalid_format_fails(self, mock_get_files):
         mock_get_files.return_value = [
-            ('migration/migrator/migrations/course/invalid_migration.py',
-             'invalid_migration.py')
+            ("migration/migrator/migrations/course/invalid_migration.py", "invalid_migration.py")
         ]
 
         result = verify_migration_datestamp.verify_migration_freshness()
 
         self.assertFalse(result)
 
-    @patch('verify_migration_datestamp.MAX_AGE_DAYS', 14)
-    @patch('verify_migration_datestamp.get_changed_migration_files')
-    @patch('verify_migration_datestamp.get_current_time')
+    @patch("verify_migration_datestamp.MAX_AGE_DAYS", 14)
+    @patch("verify_migration_datestamp.get_changed_migration_files")
+    @patch("verify_migration_datestamp.get_current_time")
     def test_custom_max_age_14_days(self, mock_time, mock_get_files):
         """Test with custom MAX_AGE_DAYS of 14 days."""
         now = datetime(2024, 2, 25, 14, 30, 0, tzinfo=timezone.utc)
@@ -147,13 +138,15 @@ class TestVerifyMigrationFreshness(unittest.TestCase):
 
         # Migration is 10 days old (within 14 day limit, should pass)
         mock_get_files.return_value = [
-            ('migration/migrator/migrations/course/20240215143000_ten_days.py',
-             '20240215143000_ten_days.py')
+            (
+                "migration/migrator/migrations/course/20240215143000_ten_days.py",
+                "20240215143000_ten_days.py",
+            )
         ]
 
         result = verify_migration_datestamp.verify_migration_freshness()
         self.assertTrue(result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

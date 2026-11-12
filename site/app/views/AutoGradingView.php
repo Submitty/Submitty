@@ -514,6 +514,7 @@ class AutoGradingView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs3.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.js'));
         $this->core->getOutput()->addInternalModuleJs('ImageAnnotationEmbedded.js');
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('image', 'image_annotation.css'));
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -595,6 +596,7 @@ class AutoGradingView extends AbstractView {
                     'points' => $mark->getPoints(),
 
                     'show_mark' => $mark->isPublish() || $container->hasMark($mark),
+                    'published' => $mark->isPublish(),
                     'earned' => array_map(function (User $grader) use ($mark, $container) {
                                     return $container->hasMark($mark, $grader);
                     }, $container->getGraders()),
@@ -603,6 +605,27 @@ class AutoGradingView extends AbstractView {
                     })),
                 ];
             }, $component->getMarks());
+
+            // Prepare each peer's results for the shared TA component display.
+            $peer_results = [];
+            foreach ($container->getGradedComponents() as $graded_component) {
+                $peer_results[$graded_component->getGrader()->getId()] = [
+                    'total_score' => $graded_component->getTotalScore(),
+                    'custom_mark_score' => $graded_component->getScore(),
+                    'comment' => $graded_component->getComment(),
+                    'version_graded' => $graded_component->getGradedVersion(),
+                    'graders' => [],
+                    'marks' => array_map(function (Mark $mark) use ($graded_component) {
+                        $earned = $graded_component->hasMark($mark);
+                        return [
+                            'title' => $mark->getTitle(),
+                            'points' => $mark->getPoints(),
+                            'show_mark' => $mark->isPublish() || $earned,
+                            'earned' => $earned,
+                        ];
+                    }, $component->getMarks()),
+                ];
+            }
 
             $peer_grading_earned += $container->getTotalScore();
             // Maintain names (Peer 1, Peer 2, etc.) for each of the peer graders to help the student
@@ -627,6 +650,7 @@ class AutoGradingView extends AbstractView {
                     return $grader->getId();
                 }, $container->getGraders())),
                 'marks' => $component_marks,
+                'peer_results' => $peer_results,
             ];
         }, $peer_graded_components);
         /*$peer_anon_component_data = $peer_component_data;

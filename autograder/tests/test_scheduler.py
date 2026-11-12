@@ -12,70 +12,67 @@ from autograder.scheduler import FCFSScheduler, Worker
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # Path any auxiliary test files (e.g. autograding configs)
-TEST_DATA_SRC_DIR = os.path.join(SCRIPT_DIR, 'data')
+TEST_DATA_SRC_DIR = os.path.join(SCRIPT_DIR, "data")
 
 # Where to dump intermediate test files
 # The GIT_CHECKOUT folder is guaranteed to be within the Submitty install dir.
 WORKING_DIR = os.path.abspath(
-    os.path.join('..', '..', '..', 'test_suite', 'unitTests', 'autograder')
+    os.path.join("..", "..", "..", "test_suite", "unitTests", "autograder")
 )
 # Path to place our temporary data files
-TEST_DATA_DIR = os.path.join(WORKING_DIR, 'data')
+TEST_DATA_DIR = os.path.join(WORKING_DIR, "data")
 # Equivalent to install dir
-TEST_ENVIRONMENT = os.path.join(WORKING_DIR, 'test_environment')
+TEST_ENVIRONMENT = os.path.join(WORKING_DIR, "test_environment")
 
 # Holds all system config files (equivalent to /usr/local/submitty/config)
-CONFIG_DIR = os.path.join(TEST_ENVIRONMENT, 'config')
-SUBMITTY_DATA_DIR = os.path.join(TEST_ENVIRONMENT, 'autograding')
+CONFIG_DIR = os.path.join(TEST_ENVIRONMENT, "config")
+SUBMITTY_DATA_DIR = os.path.join(TEST_ENVIRONMENT, "autograding")
 
 # Autograding directories
-TODO_DIR = os.path.join(SUBMITTY_DATA_DIR, 'autograding_TODO')
-DONE_DIR = os.path.join(SUBMITTY_DATA_DIR, 'autograding_DONE')
-TO_BE_GRADED = os.path.join(SUBMITTY_DATA_DIR, 'to_be_graded_queue')
+TODO_DIR = os.path.join(SUBMITTY_DATA_DIR, "autograding_TODO")
+DONE_DIR = os.path.join(SUBMITTY_DATA_DIR, "autograding_DONE")
+TO_BE_GRADED = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
 GRADING = os.path.join(SUBMITTY_DATA_DIR, "in_progress_grading")
 
 WORKER_PROPERTIES = {
     "worker_0": {
         "capabilities": [
-            "default", "zero",
+            "default",
+            "zero",
         ],
         "enabled": True,
         "num_autograding_workers": 1,
     },
     "worker_1": {
         "capabilities": [
-            "default", "one",
+            "default",
+            "one",
         ],
         "enabled": True,
         "num_autograding_workers": 1,
     },
     "worker_2": {
         "capabilities": [
-            "default", "two",
+            "default",
+            "two",
         ],
         "enabled": True,
         "num_autograding_workers": 1,
     },
 }
-WORKER_DIRECTORIES = [
-    os.path.join(GRADING, name)
-    for name in WORKER_PROPERTIES.keys()
-]
+WORKER_DIRECTORIES = [os.path.join(GRADING, name) for name in WORKER_PROPERTIES.keys()]
 
 # Log directorories
-LOG_PATH = os.path.join(TEST_ENVIRONMENT, 'logs')
-STACK_TRACES = os.path.join(LOG_PATH, 'autograding_stack_traces')
-AUTOGRADING_LOGS = os.path.join(LOG_PATH, 'autograding')
+LOG_PATH = os.path.join(TEST_ENVIRONMENT, "logs")
+STACK_TRACES = os.path.join(LOG_PATH, "autograding_stack_traces")
+AUTOGRADING_LOGS = os.path.join(LOG_PATH, "autograding")
 # The autograder.Config object to pass to the shipper.
 CONFIG = None
 
 
 def generate_queue_file(name: str, *, required_capabilities: str, queue_time: str):
-    queue_obj = {
-        'required_capabilities': required_capabilities,
-        'queue_time': queue_time
-    }
-    with open(os.path.join(TO_BE_GRADED, name), 'w') as f:
+    queue_obj = {"required_capabilities": required_capabilities, "queue_time": queue_time}
+    with open(os.path.join(TO_BE_GRADED, name), "w") as f:
         json.dump(queue_obj, f)
 
 
@@ -123,36 +120,36 @@ class TestScheduler(unittest.TestCase):
 
         # Create the configuration json files
         submitty_json = {
-            'submitty_data_dir': SUBMITTY_DATA_DIR,
-            'submitty_install_dir': TEST_ENVIRONMENT,
-            'autograding_log_path': AUTOGRADING_LOGS,
-            'site_log_path': LOG_PATH,
-            'submission_url': '/fake/url/for/submission/',
-            'vcs_url': '/fake/url/for/vcs/submission/'
+            "submitty_data_dir": SUBMITTY_DATA_DIR,
+            "submitty_install_dir": TEST_ENVIRONMENT,
+            "autograding_log_path": AUTOGRADING_LOGS,
+            "site_log_path": LOG_PATH,
+            "submission_url": "/fake/url/for/submission/",
+            "vcs_url": "/fake/url/for/vcs/submission/",
         }
         users_json = {
             # Pretend that we are the daemon user.
-            'daemon_uid': os.getuid()
+            "daemon_uid": os.getuid()
         }
         # The database json is required by autograder/insert_database_version_data.py
         # When we test that script, a mock database may be needed, and these
         # values will have to be updated.
         database_json = {
-            'database_user': 'foo',
-            'database_host': 'bar',
-            'database_password': 'password'
+            "database_user": "foo",
+            "database_host": "bar",
+            "database_password": "password",
         }
 
         for filename, json_file in [
-            ('submitty', submitty_json),
-            ('submitty_users', users_json),
-            ('database', database_json)
+            ("submitty", submitty_json),
+            ("submitty_users", users_json),
+            ("database", database_json),
         ]:
-            with open(os.path.join(CONFIG_DIR, f'{filename}.json'), 'w') as outfile:
+            with open(os.path.join(CONFIG_DIR, f"{filename}.json"), "w") as outfile:
                 json.dump(json_file, outfile, indent=4)
 
         # Instantiate the shipper's config object
-        CONFIG = config.Config.path_constructor(CONFIG_DIR, 'TEST')
+        CONFIG = config.Config.path_constructor(CONFIG_DIR, "TEST")
 
     def tearDown(self):
         """Clear out all of the queues between test invocations."""
@@ -165,7 +162,7 @@ class TestScheduler(unittest.TestCase):
                     with contextlib.suppress(FileNotFoundError):
                         os.remove(os.path.join(worker_queue, entry))
 
-    @mock.patch('multiprocessing.Process')
+    @mock.patch("multiprocessing.Process")
     def test_fcfs_simple(self, MockProcess: mock.Mock):
         """Test the most barebones scheduling setup: one job, one worker."""
 
@@ -173,13 +170,13 @@ class TestScheduler(unittest.TestCase):
         worker_proc = MockProcess()
         worker_proc.is_alive = mock.MagicMock(return_value=True)
 
-        worker = Worker(CONFIG, 'worker_0', WORKER_PROPERTIES['worker_0'], worker_proc)
+        worker = Worker(CONFIG, "worker_0", WORKER_PROPERTIES["worker_0"], worker_proc)
 
         # Make our scheduler
         scheduler = FCFSScheduler(CONFIG, [worker])
 
         # Place a dummy queue file in the queue
-        generate_queue_file("test", required_capabilities='default', queue_time='')
+        generate_queue_file("test", required_capabilities="default", queue_time="")
 
         # Invoke the scheduler's update mechanism
         scheduler.update_and_schedule()
@@ -188,11 +185,11 @@ class TestScheduler(unittest.TestCase):
         worker_files = os.listdir(worker.folder)
         self.assertIn("test", worker_files)
 
-    @mock.patch('multiprocessing.Process')
+    @mock.patch("multiprocessing.Process")
     def test_fcfs_multiworker(self, MockProcess: mock.Mock):
         """Test a scheduling setup with two workers."""
 
-        worker_names = ['worker_0', 'worker_1']
+        worker_names = ["worker_0", "worker_1"]
 
         worker_procs = [MockProcess() for _ in worker_names]
         for proc in worker_procs:
@@ -205,7 +202,7 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("test", required_capabilities='default', queue_time='')
+        generate_queue_file("test", required_capabilities="default", queue_time="")
 
         scheduler.update_and_schedule()
 
@@ -215,7 +212,7 @@ class TestScheduler(unittest.TestCase):
         # Make sure we don't double-copy files
         self.assertEqual(all_worker_files.count("test"), 1)
 
-    @mock.patch('multiprocessing.Process')
+    @mock.patch("multiprocessing.Process")
     def test_fcfs_capacity(self, MockProcess: mock.Mock):
         """Test that the scheduling behavior respects the one-job-per-worker rule.
 
@@ -226,13 +223,13 @@ class TestScheduler(unittest.TestCase):
         worker_proc = MockProcess()
         worker_proc.is_alive = mock.MagicMock(return_value=True)
 
-        worker = Worker(CONFIG, 'worker_0', WORKER_PROPERTIES['worker_0'], worker_proc)
+        worker = Worker(CONFIG, "worker_0", WORKER_PROPERTIES["worker_0"], worker_proc)
 
         scheduler = FCFSScheduler(CONFIG, [worker])
 
-        generate_queue_file("first", required_capabilities='default', queue_time='')
+        generate_queue_file("first", required_capabilities="default", queue_time="")
         time.sleep(0.1)  # Kinda ugly, but helps avoid temporal aliasing by the OS
-        generate_queue_file("second", required_capabilities='default', queue_time='')
+        generate_queue_file("second", required_capabilities="default", queue_time="")
 
         scheduler.update_and_schedule()
 
@@ -256,11 +253,11 @@ class TestScheduler(unittest.TestCase):
         self.assertNotIn("first", worker_files)
         self.assertIn("second", worker_files)
 
-    @mock.patch('multiprocessing.Process')
+    @mock.patch("multiprocessing.Process")
     def test_fcfs_capacity_multi(self, MockProcess: mock.Mock):
         """Test that the one-job-per-worker rule is still applied with multiple workers."""
 
-        worker_names = ['worker_0', 'worker_1']
+        worker_names = ["worker_0", "worker_1"]
 
         worker_procs = [MockProcess() for _ in worker_names]
         for proc in worker_procs:
@@ -273,11 +270,11 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("first", required_capabilities='default', queue_time='')
+        generate_queue_file("first", required_capabilities="default", queue_time="")
         time.sleep(0.1)
-        generate_queue_file("second", required_capabilities='default', queue_time='')
+        generate_queue_file("second", required_capabilities="default", queue_time="")
         time.sleep(0.1)
-        generate_queue_file("third", required_capabilities='default', queue_time='')
+        generate_queue_file("third", required_capabilities="default", queue_time="")
 
         scheduler.update_and_schedule()
 
@@ -289,11 +286,11 @@ class TestScheduler(unittest.TestCase):
         self.assertEqual(all_worker_files.count("first"), 1)
         self.assertEqual(all_worker_files.count("second"), 1)
 
-    @mock.patch('multiprocessing.Process')
+    @mock.patch("multiprocessing.Process")
     def test_fcfs_constraints(self, MockProcess: mock.Mock):
         """Test that job constraints are respected."""
 
-        worker_names = ['worker_0', 'worker_1', 'worker_2']
+        worker_names = ["worker_0", "worker_1", "worker_2"]
 
         worker_procs = [MockProcess() for _ in worker_names]
         for proc in worker_procs:
@@ -306,11 +303,11 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("first", required_capabilities='zero', queue_time='')
-        generate_queue_file("second", required_capabilities='one', queue_time='')
-        generate_queue_file("third", required_capabilities='two', queue_time='')
+        generate_queue_file("first", required_capabilities="zero", queue_time="")
+        generate_queue_file("second", required_capabilities="one", queue_time="")
+        generate_queue_file("third", required_capabilities="two", queue_time="")
         time.sleep(0.1)
-        generate_queue_file("fourth", required_capabilities='zero', queue_time='')
+        generate_queue_file("fourth", required_capabilities="zero", queue_time="")
 
         scheduler.update_and_schedule()
 
@@ -320,4 +317,3 @@ class TestScheduler(unittest.TestCase):
 
         all_worker_files = sum([os.listdir(worker.folder) for worker in workers], [])
         self.assertNotIn("fourth", all_worker_files)
-

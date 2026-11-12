@@ -1,5 +1,6 @@
 import { createApp, h, defineComponent } from 'vue';
 import Unknown from './components/Unknown.vue';
+import '../../ts/sort-table-by-column';
 
 const mountedApps = new Map<string, ReturnType<typeof createApp>>();
 

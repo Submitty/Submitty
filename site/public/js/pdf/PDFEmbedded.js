@@ -78,6 +78,7 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                     console.log(err);
                     console.log(data);
                     alert('Something went wrong, please try again later.');
+                    return;
                 }
                 const pdfJsBaseUrl = `${window.location.origin}/vendor/pdfjs/`;
                 pdfjsLib.getDocument({
@@ -93,6 +94,10 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                         return;
                     }
                     const viewer = document.getElementById('viewer');
+                    // The grader moved to another file or student while the PDF loaded
+                    if (viewer === null) {
+                        return;
+                    }
                     $(viewer).on('touchstart touchmove', (e) => {
                         // Let touchscreen work
                         if (currentTool === 'pen' || currentTool === 'text') {
@@ -122,6 +127,10 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                     }
 
                     Promise.all(renderPagePromises).then(() => {
+                        // The viewer was removed while the pages rendered
+                        if (!viewer.isConnected) {
+                            return;
+                        }
                         $('.pdfViewer .page').each(function () {
                             $(this).css('width', `calc(${$(this).css('width')} * var(--pdf-scale))`);
                             $(this).css('height', `calc(${$(this).css('height')} * var(--pdf-scale))`);
@@ -262,6 +271,10 @@ function renderPage(pageNumber, renderOptions) {
     // Load the page
     return pdfDocument.getPage(pageNumber).then((pdfPage) => {
         const page = document.getElementById(`pageContainer${pageNumber}`);
+        // The viewer was removed while this page loaded
+        if (page === null) {
+            return pdfPage;
+        }
         const canvas = page.querySelector('.canvasWrapper canvas');
         const canvasContext = canvas.getContext('2d', { alpha: false });
         const totalRotation = (rotate + pdfPage.rotate) % 360;

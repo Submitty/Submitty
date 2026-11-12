@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, closePopup, displaySuccessMessage, showPopup */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, closePopup, displaySuccessMessage, showPopup */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function updateVisibility() {
@@ -233,32 +233,34 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         }
 
         if (set_new) {
-            new_scores[elem.data('id')] = elem.data('score');
+            const score = elems.data('score');
+            new_scores[elem.data('id')] = score;
 
-            // update css to reflect score
-            const currentScore = parseFloat(elem.data('score')) || 0;
+            switch (score) {
+                case 1.0:
+                    elem.removeClass('simple-half-credit');
+                    elem.addClass('simple-full-credit');
+                    elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
+                    break;
+                case 0.5:
+                    elem.removeClass('simple-full-credit');
+                    elem.addClass('simple-half-credit');
+                    elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
+                    break;
+                default:
+                    elem.removeClass('simple-half-credit');
+                    elem.removeClass('simple-full-credit');
+                    elem.css('background-color', 'var(--invisible) !important');
+                    break;
+            }
+            elem.data('unresolvedMessages', (elems.data('unresolvedMessages') ?? 0) + 1);
+            elem.find('.fa-hourglass').css('visibility', 'visible');
 
-            if (currentScore === 1.0) {
-                elem.addClass('simple-full-credit');
-                elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
-            }
-            else if (currentScore === 0.5) {
-                elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
-                elem.addClass('simple-half-credit');
-                elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
-            }
-            else {
-                elem.removeClass('simple-half-credit');
-                elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
-            }
+            elem.find('.simple-grade-grader').text('');
+            elem.find('.simple-grade-date').text('');
 
             // set new grader data
             elem.data('grader', $('#data-table').data('current-grader'));
-
-            // create border we can animate to reflect ajax status
-            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
         }
     });
 
@@ -272,6 +274,14 @@ function updateCheckpointCells(elems, scores, no_cookie) {
     }
 
     // Update the buttons to reflect that they were clicked
+    function errorCheckbox() {
+        elems.each((idx, elem) => {
+            elem = $(elem);
+            elem.css('background-color', 'var(--simple-save-error-red) !important');
+            elem.data('unresolvedMessages', 0);
+            elem.find('.fa-hourglass').css('visibility', 'hidden');
+        });
+    }
     submitAJAX(
         buildCourseUrl(['gradeable', g_id, 'grading']),
         {
@@ -285,19 +295,16 @@ function updateCheckpointCells(elems, scores, no_cookie) {
             const returned_date = returned_data?.data?.date;
             if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
-                elems.each((idx, elem) => {
-                    elem = $(elem);
-                    elem.stop(true, true);
-                    elem.css('border-right', '60px solid var(--simple-save-error-red)');
-                });
+                errorCheckbox();
             }
             updateVisibility();
         },
+        errorCheckbox,
     );
 }
 
 function getCheckpointHistory(g_id) {
-    const history = Cookies.get(`${g_id}_history`);
+    const history = sessionStorage.getItem(`${g_id}_history`);
     try {
         return JSON.parse(history) || [0];
     }
@@ -306,11 +313,9 @@ function getCheckpointHistory(g_id) {
     }
 }
 
+// The history holds student ids and scores, so it is kept for the tab's lifetime only.
 function setCheckpointHistory(g_id, history) {
-    const DateTime = luxon.DateTime;
-    const now = DateTime.now();
-    const expiration_date = now.plus({ days: 1 });
-    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date.toJSDate() });
+    sessionStorage.setItem(`${g_id}_history`, JSON.stringify(history));
 }
 
 function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
@@ -886,6 +891,17 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
         // otherwise it is a checkpoint
         else {
             const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
+
+            // If the user clicked multiple times, only show the result of their last click
+            // by discarding intermediate updates
+            const unresolvedMessages = elem.data('unresolvedMessages');
+            if (unresolvedMessages && unresolvedMessages > 0) {
+                elem.data('unresolvedMessages', unresolvedMessages - 1);
+                if (unresolvedMessages - 1 > 0) {
+                    return;
+                }
+            }
+
             const score = parseFloat(value);
             elem.data('score', score);
             elem.attr('data-score', score);
@@ -898,23 +914,22 @@ function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date)
 
             switch (score) {
                 case 1.0:
+                    elem.removeClass('simple-half-credit');
                     elem.addClass('simple-full-credit');
                     elem.css('background-color', 'var(--simple-full-credit-dark-blue) !important');
                     break;
                 case 0.5:
                     elem.removeClass('simple-full-credit');
-                    elem.css('background-color', '');
                     elem.addClass('simple-half-credit');
                     elem.css('background-color', 'var(--simple-half-credit-light-blue) !important');
                     break;
                 default:
                     elem.removeClass('simple-half-credit');
                     elem.removeClass('simple-full-credit');
-                    elem.css('background-color', '');
+                    elem.css('background-color', 'var(--invisible) !important');
                     break;
             }
-            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-            elem.animate({ 'border-right-width': '0px' }, 400);
+            elem.find('.fa-hourglass').css('visibility', 'hidden');
         }
     }
 }

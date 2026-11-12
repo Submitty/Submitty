@@ -16,6 +16,7 @@ RUN apt-get update \
     poppler-utils \
     libzbar0 \
     shellcheck \
+    yamllint \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

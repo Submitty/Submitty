@@ -13,14 +13,19 @@ import json
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Populates Office Hours Queue of the sample course in the current semester. "
-                    "It will read in configuration information from .setup/submitty_conf.json "
-                    "and populate any queue that is open in the sample course."
-                    "Run Python3 .setup/bin/populate_office_hours_queue.py  or"
-                    "Python3 .setup/bin/populate_office_hours_queue.py --random_seed"
+        "It will read in configuration information from .setup/submitty_conf.json "
+        "and populate any queue that is open in the sample course."
+        "Run Python3 .setup/bin/populate_office_hours_queue.py  or"
+        "Python3 .setup/bin/populate_office_hours_queue.py --random_seed"
     )
-    parser.add_argument("--random_seed", action="store_const", dest="seed",
-                        help="when this flag is present, the script will use a random seed instead",
-                        const=random.random(), default=334)
+    parser.add_argument(
+        "--random_seed",
+        action="store_const",
+        dest="seed",
+        help="when this flag is present, the script will use a random seed instead",
+        const=random.random(),
+        default=334,
+    )
     return parser.parse_args()
 
 
@@ -44,7 +49,8 @@ def main():
     DB_PASS = settings["database_password"]
 
     engine = create_engine(
-        db_utils.generate_connect_string(DB_HOST, DB_PORT, database, DB_USER, DB_PASS))
+        db_utils.generate_connect_string(DB_HOST, DB_PORT, database, DB_USER, DB_PASS)
+    )
     conn = engine.connect()
     metadata = MetaData()
     queues_table = Table("queue_settings", metadata, autoload_with=engine)
@@ -70,9 +76,11 @@ def main():
 
     # Find all ids of students and graders
     all_student_ids = [
-        x['user_id'] for x in all_users if x['user_group'] == 4 and
-        x['registration_section'] is not None]
-    all_grader_ids = [x['user_id'] for x in all_users if x['user_group'] < 4]
+        x["user_id"]
+        for x in all_users
+        if x["user_group"] == 4 and x["registration_section"] is not None
+    ]
+    all_grader_ids = [x["user_id"] for x in all_users if x["user_group"] < 4]
 
     # create a lookup table from user id to name
     name_lookup = dict()
@@ -97,7 +105,8 @@ def main():
     # For those who are being helped, they will finish getting helped
     # Otherwise, they will get either emptied or removed
     res = conn.execute(
-        select(queue_entries_table).where(queue_entries_table.c.current_state != "done"))
+        select(queue_entries_table).where(queue_entries_table.c.current_state != "done")
+    )
     tmp = res.mappings().all()
     res.close()
     for row in tmp:
@@ -114,8 +123,9 @@ def main():
         update_query = update(queue_entries_table)
         update_query = update_query.values(update_dict)
         update_query = update_query.where(
-            (queue_entries_table.c.user_id == row["user_id"]) &
-            (queue_entries_table.c.time_in == row["time_in"]))
+            (queue_entries_table.c.user_id == row["user_id"])
+            & (queue_entries_table.c.time_in == row["time_in"])
+        )
         conn.execute(update_query)
     conn.commit()
 
@@ -191,10 +201,14 @@ def main():
         else:
             queue_entry["contact_info"] = None
 
-        res = conn.execute(text(f"SELECT max(time_in) FROM queue WHERE user_id = \
+        res = conn.execute(
+            text(
+                f"SELECT max(time_in) FROM queue WHERE user_id = \
             '{queue_entry['user_id']}' AND UPPER(TRIM(queue_code)) = \
             UPPER(TRIM('{queue_entry['queue_code']}')) AND \
-            (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)"))
+            (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)"
+            )
+        )
         queue_entry["last_time_in_queue"] = res.all()[0][0]
         res.close()
 
@@ -216,7 +230,8 @@ def main():
             queue_entry["time_paused"] = random.choice([0, random.randint(0, time_in)])
             if queue_entry["paused"]:
                 queue_entry["time_paused_start"] = datetime.now() - timedelta(
-                    seconds=random.randint(0, queue_entry["time_paused"]))
+                    seconds=random.randint(0, queue_entry["time_paused"])
+                )
             else:
                 queue_entry["time_paused_start"] = None
 

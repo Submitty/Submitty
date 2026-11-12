@@ -8,14 +8,14 @@ import migrator.db
 class TestDb(unittest.TestCase):
     def test_no_driver(self):
         with self.assertRaises(RuntimeError):
-            migrator.db.Database({}, 'system')
+            migrator.db.Database({}, "system")
 
     def test_invalid_driver(self):
         with self.assertRaises(RuntimeError):
-            migrator.db.Database({'database_driver': 'mysql'}, 'system')
+            migrator.db.Database({"database_driver": "mysql"}, "system")
 
     def test_db(self):
-        db = migrator.db.Database({'database_driver': 'sqlite'}, 'master')
+        db = migrator.db.Database({"database_driver": "sqlite"}, "master")
         db.execute("""
             CREATE TABLE users (
                 id INTEGER NOT NULL, name VARCHAR,
@@ -24,105 +24,101 @@ class TestDb(unittest.TestCase):
                 PRIMARY KEY (id)
             )""")
         db.commit()
-        self.assertTrue(db.has_table('users'))
-        self.assertFalse(db.has_table('fake'))
-        self.assertTrue(db.table_has_column('users', 'id'))
-        self.assertFalse(db.table_has_column('users', 'fake'))
+        self.assertTrue(db.has_table("users"))
+        self.assertFalse(db.has_table("fake"))
+        self.assertTrue(db.table_has_column("users", "id"))
+        self.assertFalse(db.table_has_column("users", "fake"))
         db.close()
 
     def test_get_migration_table(self):
-        table = migrator.db.get_migration_table('system', object)
-        self.assertEqual('migrations_system', table.__tablename__)
+        table = migrator.db.get_migration_table("system", object)
+        self.assertEqual("migrations_system", table.__tablename__)
 
     def test_get_connection_string_sqlite(self):
-        params = {
-            'database_driver': 'sqlite'
-        }
+        params = {"database_driver": "sqlite"}
         string = migrator.db.Database.get_connection_string(params)
-        self.assertEqual('sqlite://', string)
+        self.assertEqual("sqlite://", string)
 
     def test_get_connection_string_postgresql(self):
         params = {
-            'database_driver': 'psql',
-            'database_host': 'localhost',
-            'database_port': 15432,
-            'database_user': 'user',
-            'database_password': 'password',
-            'dbname': 'test'
+            "database_driver": "psql",
+            "database_host": "localhost",
+            "database_port": 15432,
+            "database_user": "user",
+            "database_password": "password",
+            "dbname": "test",
         }
         string = migrator.db.Database.get_connection_string(params)
-        self.assertEqual('postgresql+psycopg2://user:password@localhost:15432/test', string)
+        self.assertEqual("postgresql+psycopg2://user:password@localhost:15432/test", string)
 
     def test_get_connection_string_postgresql_no_port(self):
         params = {
-            'database_driver': 'psql',
-            'database_host': 'localhost',
-            'database_user': 'user',
-            'database_password': 'password',
-            'dbname': 'test'
+            "database_driver": "psql",
+            "database_host": "localhost",
+            "database_user": "user",
+            "database_password": "password",
+            "dbname": "test",
         }
         string = migrator.db.Database.get_connection_string(params)
-        self.assertEqual('postgresql+psycopg2://user:password@localhost:5432/test', string)
+        self.assertEqual("postgresql+psycopg2://user:password@localhost:5432/test", string)
 
     def test_get_connection_string_postgresql_path_host(self):
         try:
             host = tempfile.mkdtemp()
             params = {
-                'database_driver': 'psql',
-                'database_host': host,
-                'database_user': 'user',
-                'database_password': 'password',
-                'dbname': 'test'
+                "database_driver": "psql",
+                "database_host": host,
+                "database_user": "user",
+                "database_password": "password",
+                "dbname": "test",
             }
             string = migrator.db.Database.get_connection_string(params)
             self.assertEqual(
-                'postgresql+psycopg2://user:password@/test?host={}'.format(host),
-                string
+                "postgresql+psycopg2://user:password@/test?host={}".format(host), string
             )
         finally:
             shutil.rmtree(host)
 
     def test_get_connection_string_postgresql_escapes_credentials(self):
         params = {
-            'database_driver': 'psql',
-            'database_host': 'localhost',
-            'database_user': 'us@er',
-            'database_password': 'p@ss:w/o%rd',
-            'dbname': 'test'
+            "database_driver": "psql",
+            "database_host": "localhost",
+            "database_user": "us@er",
+            "database_password": "p@ss:w/o%rd",
+            "dbname": "test",
         }
         string = migrator.db.Database.get_connection_string(params)
         self.assertEqual(
-            'postgresql+psycopg2://us%40er:p%40ss%3Aw%2Fo%25rd@localhost:5432/test',
-            string
+            "postgresql+psycopg2://us%40er:p%40ss%3Aw%2Fo%25rd@localhost:5432/test", string
         )
         url = make_url(string)
-        self.assertEqual('us@er', url.username)
-        self.assertEqual('p@ss:w/o%rd', url.password)
-        self.assertEqual('localhost', url.host)
+        self.assertEqual("us@er", url.username)
+        self.assertEqual("p@ss:w/o%rd", url.password)
+        self.assertEqual("localhost", url.host)
         self.assertEqual(5432, url.port)
-        self.assertEqual('test', url.database)
+        self.assertEqual("test", url.database)
 
     def test_get_connection_string_postgresql_path_host_escapes_credentials(self):
         try:
             host = tempfile.mkdtemp()
             params = {
-                'database_driver': 'psql',
-                'database_host': host,
-                'database_user': 'user',
-                'database_password': 'se@cret:/%40x',
-                'dbname': 'test'
+                "database_driver": "psql",
+                "database_host": host,
+                "database_user": "user",
+                "database_password": "se@cret:/%40x",
+                "dbname": "test",
             }
             string = migrator.db.Database.get_connection_string(params)
             url = make_url(string)
-            self.assertEqual('user', url.username)
-            self.assertEqual('se@cret:/%40x', url.password)
+            self.assertEqual("user", url.username)
+            self.assertEqual("se@cret:/%40x", url.password)
             self.assertIsNone(url.host)
-            self.assertEqual('test', url.database)
-            self.assertEqual(host, url.query['host'])
+            self.assertEqual("test", url.database)
+            self.assertEqual(host, url.query["host"])
         finally:
             shutil.rmtree(host)
 
     def test_invalid_connection_string(self):
         with self.assertRaises(RuntimeError) as cm:
-            migrator.db.Database.get_connection_string({'database_driver': 'invalid'})
-        self.assertEqual('Invalid driver: invalid', str(cm.exception))
+            migrator.db.Database.get_connection_string({"database_driver": "invalid"})
+        self.assertEqual("Invalid driver: invalid", str(cm.exception))

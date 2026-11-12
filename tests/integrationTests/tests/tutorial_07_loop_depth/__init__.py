@@ -13,6 +13,7 @@ import traceback
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/07_loop_depth/config"
 SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/07_loop_depth/submissions"
 
+
 @prebuild
 def initialize(test):
     try:
@@ -27,24 +28,29 @@ def initialize(test):
     except OSError:
         pass
 
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-        os.path.join(test.testcase_path, "assignment_config")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+            os.path.join(test.testcase_path, "assignment_config"),
+        ]
+    )
 
 
 def cleanup(test):
-    subprocess.call(["rm"] + ["-rf"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "*")))
+    subprocess.call(["rm"] + ["-rf"] + glob.glob(os.path.join(test.testcase_path, "data", "*")))
+
 
 @testcase
 def schema_validation(test):
     cleanup(test)
-    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    config_path = os.path.join(test.testcase_path, "assignment_config", "complete_config.json")
     try:
         test.validate_complete_config(config_path)
     except Exception:
         traceback.print_exc()
         raise
+
 
 ####################################################################################
 ##
@@ -64,12 +70,12 @@ def schema_validation(test):
 #                      os.path.join(test.testcase_path, "data")])
 #     test.run_run()
 #     test.run_validator()
-# 
+#
 #     test.diff("grade.txt", "grade.txt_solution", "-b")
 #     test.json_diff("results.json", "results.json_solution")
-# 
-# 
-# 
+#
+#
+#
 # @testcase
 # def buggy(test):
 #     cleanup(test)
@@ -78,9 +84,9 @@ def schema_validation(test):
 #                      os.path.join(test.testcase_path, "data")])
 #     test.run_run()
 #     test.run_validator()
-# 
+#
 #     test.diff("grade.txt", "grade.txt_buggy", "-b")
 #     test.json_diff("results.json", "results.json_buggy")
-# 
-# 
+#
+#
 ####################################################################################

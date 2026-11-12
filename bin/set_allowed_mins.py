@@ -14,15 +14,17 @@ import json
 from submitty_utils import db_utils
 
 try:
-    CONFIG_PATH = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), '..', 'config')
+    CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "config")
 
-    with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+    with open(os.path.join(CONFIG_PATH, "submitty.json")) as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
 
 except Exception as config_fail_error:
-    print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
-        str(datetime.datetime.now()), str(config_fail_error)))
+    print(
+        "[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
+            str(datetime.datetime.now()), str(config_fail_error)
+        )
+    )
     sys.exit(1)
 
 CONFIG_FILE_PATH = sys.argv[1]
@@ -33,15 +35,15 @@ GRADEABLE = sys.argv[4]
 
 def setup_db():
     """Set up a connection with the course database."""
-    with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
+    with open(os.path.join(CONFIG_PATH, "database.json")) as open_file:
         db_config = json.load(open_file)
     db_name = "submitty_{}_{}".format(SEMESTER, COURSE)
     conn_string = db_utils.generate_connect_string(
-        db_config['database_host'],
-        db_config.get('database_port', 5432),
+        db_config["database_host"],
+        db_config.get("database_port", 5432),
         db_name,
-        db_config['database_user'],
-        db_config['database_password'],
+        db_config["database_user"],
+        db_config["database_password"],
     )
 
     engine = create_engine(conn_string)
@@ -58,10 +60,18 @@ def send_data(db, allowed_minutes, override):
     db.execute(text(query), {"gradeable": GRADEABLE})
     if override is not None:
         for user in override:
-            query = "INSERT INTO gradeable_allowed_minutes_override (g_id, user_id, allowed_minutes) " +\
-                    "VALUES (:gradeable, :userid, :minutes)"  # noqa: E501
-            db.execute(text(query), {"gradeable": GRADEABLE, "userid": user['user'],
-                       "minutes": user['allowed_minutes']})
+            query = (
+                "INSERT INTO gradeable_allowed_minutes_override (g_id, user_id, allowed_minutes) "
+                + "VALUES (:gradeable, :userid, :minutes)"
+            )  # noqa: E501
+            db.execute(
+                text(query),
+                {
+                    "gradeable": GRADEABLE,
+                    "userid": user["user"],
+                    "minutes": user["allowed_minutes"],
+                },
+            )
     db.commit()
 
 
@@ -71,19 +81,19 @@ def main():
     CONFIG_FILE = json.loads(json_string)
     timelimit_case = None
     # Check if time limit exists
-    for testcase in CONFIG_FILE['testcases']:
-        if testcase['title'] == "Check Time Limit":
-            if 'validation' in testcase and len(testcase['validation']) > 0:
-                if 'allowed_minutes' in testcase['validation'][0]:
+    for testcase in CONFIG_FILE["testcases"]:
+        if testcase["title"] == "Check Time Limit":
+            if "validation" in testcase and len(testcase["validation"]) > 0:
+                if "allowed_minutes" in testcase["validation"][0]:
                     timelimit_case = testcase
                     break
 
     allowed_minutes = override = None
     # If time limit exists, set it to the correct time limit
     if timelimit_case is not None:
-        allowed_minutes = timelimit_case['validation'][0]['allowed_minutes']
-        if 'override' in timelimit_case['validation'][0]:
-            override = timelimit_case['validation'][0]['override']
+        allowed_minutes = timelimit_case["validation"][0]["allowed_minutes"]
+        if "override" in timelimit_case["validation"][0]:
+            override = timelimit_case["validation"][0]["override"]
 
     # sets allowed_minutes and override in the database
     try:
@@ -92,8 +102,10 @@ def main():
     except exc.IntegrityError:
         sys.exit(1)
     except IOError:
-        print("WARNING: You do not have access to set allowed minutes from CLI." +
-              " Please use website to set that.")
+        print(
+            "WARNING: You do not have access to set allowed minutes from CLI."
+            + " Please use website to set that."
+        )
         exit()
 
 

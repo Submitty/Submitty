@@ -11,7 +11,8 @@ import traceback
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
 SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_TUTORIAL_DIR + "/examples/03_multipart/config"
-SAMPLE_SUBMISSIONS       = SUBMITTY_TUTORIAL_DIR + "/examples/03_multipart/submissions"
+SAMPLE_SUBMISSIONS = SUBMITTY_TUTORIAL_DIR + "/examples/03_multipart/submissions"
+
 
 @prebuild
 def initialize(test):
@@ -26,9 +27,13 @@ def initialize(test):
         os.mkdir(data_path)
     except OSError:
         pass
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
-        os.path.join(test.testcase_path, "assignment_config")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
+            os.path.join(test.testcase_path, "assignment_config"),
+        ]
+    )
     try:
         os.mkdir(os.path.join(test.testcase_path, "data", "part1"))
     except OSError:
@@ -44,58 +49,85 @@ def initialize(test):
 
 
 def cleanup(test):
-    subprocess.call(["rm"] + ["-f"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
-    subprocess.call(["rm"] + ["-rf"] +
-            glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    subprocess.call(
+        ["rm"] + ["-f"] + glob.glob(os.path.join(test.testcase_path, "data", "part*", "*"))
+    )
+    subprocess.call(["rm"] + ["-rf"] + glob.glob(os.path.join(test.testcase_path, "data", "test*")))
 
-    os.mkdir(os.path.join(test.testcase_path ,"data" ,"test_output"))
-    subprocess.call(["cp"] +
-                     glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*")) +
-                     [os.path.join(test.testcase_path, "data", "test_output")])
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
+    subprocess.call(
+        ["cp"]
+        + glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*"))
+        + [os.path.join(test.testcase_path, "data", "test_output")]
+    )
+
 
 @testcase
 def schema_validation(test):
     cleanup(test)
-    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    config_path = os.path.join(test.testcase_path, "assignment_config", "complete_config.json")
     try:
         test.validate_complete_config(config_path)
     except Exception:
         traceback.print_exc()
         raise
 
+
 @testcase
 def solution(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part1.py"),
-                     os.path.join(test.testcase_path, "data", "part1")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part2.py"),
-                     os.path.join(test.testcase_path, "data", "part2")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part3.py"),
-                     os.path.join(test.testcase_path, "data", "part3")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part1.py"),
+            os.path.join(test.testcase_path, "data", "part1"),
+        ]
+    )
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part2.py"),
+            os.path.join(test.testcase_path, "data", "part2"),
+        ]
+    )
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part3.py"),
+            os.path.join(test.testcase_path, "data", "part3"),
+        ]
+    )
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_solution", "-b")
     test.json_diff("results.json", "results.json_solution")
 
 
-
 @testcase
 def buggy(test):
     return  # TODO: REMOVE THIS!
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error1.py"),
-                     os.path.join(test.testcase_path, "data", "part1")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part2_syntax_error1.py"),
-                     os.path.join(test.testcase_path, "data", "part2")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part3_syntax_error1.py"),
-                     os.path.join(test.testcase_path, "data", "part3")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error1.py"),
+            os.path.join(test.testcase_path, "data", "part1"),
+        ]
+    )
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part2_syntax_error1.py"),
+            os.path.join(test.testcase_path, "data", "part2"),
+        ]
+    )
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part3_syntax_error1.py"),
+            os.path.join(test.testcase_path, "data", "part3"),
+        ]
+    )
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_buggy", "-b")
@@ -106,9 +138,13 @@ def buggy(test):
 def buggy2(test):
     return  # TODO: REMOVE THIS!
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error2.py"),
-                     os.path.join(test.testcase_path, "data", "part1")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part1_syntax_error2.py"),
+            os.path.join(test.testcase_path, "data", "part1"),
+        ]
+    )
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_buggy2", "-b")
@@ -118,17 +154,28 @@ def buggy2(test):
 @testcase
 def wrong(test):
     cleanup(test)
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part1_wrong_output.py"),
-                     os.path.join(test.testcase_path, "data", "part1")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part2_wrong_output.py"),
-                     os.path.join(test.testcase_path, "data", "part2")])
-    subprocess.call(["cp",
-                     os.path.join(SAMPLE_SUBMISSIONS, "part3_wrong_output.py"),
-                     os.path.join(test.testcase_path, "data", "part3")])
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part1_wrong_output.py"),
+            os.path.join(test.testcase_path, "data", "part1"),
+        ]
+    )
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part2_wrong_output.py"),
+            os.path.join(test.testcase_path, "data", "part2"),
+        ]
+    )
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "part3_wrong_output.py"),
+            os.path.join(test.testcase_path, "data", "part3"),
+        ]
+    )
     test.run_run()
     test.run_validator()
     test.diff("grade.txt", "grade.txt_wrong", "-b")
     test.json_diff("results.json", "results.json_wrong")
-

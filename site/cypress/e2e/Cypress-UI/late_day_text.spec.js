@@ -1,6 +1,6 @@
 import { skipOn } from '@cypress/skip-test';
 
-skipOn(Cypress.env('run_area') === 'CI', () => {
+skipOn(Cypress.expose('run_area') === 'CI', () => {
     describe('Testing the functionality of the late days page text', () => {
         const setFlatpickrDate = (selector, year, month = 0, day = null, hour = 23, minute = 59, second = 59) => {
             const dayToUse = day === null ? new Date().getDate() : day;

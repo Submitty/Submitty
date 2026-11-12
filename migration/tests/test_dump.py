@@ -133,90 +133,75 @@ class TestDump(TestCase):
     def tearDown(self):
         sys.stdout = sys.__stdout__
 
-    @patch('migrator.dumper.check_output', side_effect=[
-        MASTER_DB_FRAGMENT,
-        COURSE_DB_FRAGMENT
-    ])
+    @patch("migrator.dumper.check_output", side_effect=[MASTER_DB_FRAGMENT, COURSE_DB_FRAGMENT])
     def test_dump_all(self, subprocess):
         with TemporaryDirectory() as tmp_dirname:
             config = SimpleNamespace()
-            config.database = {
-                'database_driver': 'psql'
-            }
+            config.database = {"database_driver": "psql"}
             args = Namespace()
             args.config = config
-            args.environments = ['master', 'course']
+            args.environments = ["master", "course"]
             args.path = tmp_dirname
-            data_dir = Path(tmp_dirname, 'data')
+            data_dir = Path(tmp_dirname, "data")
             data_dir.mkdir()
             dump(args)
-            submitty_db = data_dir / 'submitty_db.sql'
+            submitty_db = data_dir / "submitty_db.sql"
             self.assertTrue(submitty_db.exists())
             self.assertEqual(MASTER_DB_EXPECTED, submitty_db.read_text())
-            course_db = data_dir / 'course_tables.sql'
+            course_db = data_dir / "course_tables.sql"
             self.assertTrue(course_db.exists())
             self.assertEqual(COURSE_DB_EXPECTED, course_db.read_text())
             self.assertRegex(
                 sys.stdout.getvalue(),
-                r"Dumping master environment to .*/data/submitty_db.sql... DONE\n" +
-                r"Dumping course environment to .*/data/course_tables.sql... DONE\n"
+                r"Dumping master environment to .*/data/submitty_db.sql... DONE\n"
+                + r"Dumping course environment to .*/data/course_tables.sql... DONE\n",
             )
 
-    @patch('migrator.dumper.check_output', side_effect=[
-        MASTER_DB_FRAGMENT
-    ])
+    @patch("migrator.dumper.check_output", side_effect=[MASTER_DB_FRAGMENT])
     def test_dump_master(self, subprocess):
         with TemporaryDirectory() as tmp_dirname:
             config = SimpleNamespace()
-            config.database = {
-                'database_driver': 'psql'
-            }
+            config.database = {"database_driver": "psql"}
             args = Namespace()
             args.config = config
-            args.environments = ['master']
+            args.environments = ["master"]
             args.path = tmp_dirname
-            data_dir = Path(tmp_dirname, 'data')
+            data_dir = Path(tmp_dirname, "data")
             data_dir.mkdir()
             dump(args)
-            submitty_db = data_dir / 'submitty_db.sql'
+            submitty_db = data_dir / "submitty_db.sql"
             self.assertTrue(submitty_db.exists())
             self.assertEqual(MASTER_DB_EXPECTED, submitty_db.read_text())
             self.assertRegex(
                 sys.stdout.getvalue(),
-                r"Dumping master environment to .*/data/submitty_db.sql... DONE"
+                r"Dumping master environment to .*/data/submitty_db.sql... DONE",
             )
 
-    @patch('migrator.dumper.check_output', side_effect=[
-        COURSE_DB_EXPECTED
-    ])
+    @patch("migrator.dumper.check_output", side_effect=[COURSE_DB_EXPECTED])
     def test_dump_course(self, subprocess):
         with TemporaryDirectory() as tmp_dirname:
             config = SimpleNamespace()
-            config.database = {
-                'database_driver': 'psql'
-            }
+            config.database = {"database_driver": "psql"}
             args = Namespace()
             args.config = config
-            args.environments = ['course']
+            args.environments = ["course"]
             args.path = tmp_dirname
-            data_dir = Path(tmp_dirname, 'data')
+            data_dir = Path(tmp_dirname, "data")
             data_dir.mkdir()
             dump(args)
-            course_db = data_dir / 'course_tables.sql'
+            course_db = data_dir / "course_tables.sql"
             self.assertTrue(course_db.exists())
             self.assertEqual(COURSE_DB_EXPECTED, course_db.read_text())
             self.assertRegex(
                 sys.stdout.getvalue(),
-                r"Dumping course environment to .*/data/course_tables.sql... DONE"
+                r"Dumping course environment to .*/data/course_tables.sql... DONE",
             )
 
     def test_dump_non_psql_driver(self):
         with self.assertRaises(SystemExit) as cm:
             config = SimpleNamespace()
-            config.database = {
-                'database_driver': 'sqlite'
-            }
+            config.database = {"database_driver": "sqlite"}
             args = Namespace()
             args.config = config
             dump(args)
-        self.assertEqual(str(cm.exception), 'Cannot dump schema for non-postgresql database')
+        self.assertEqual(str(cm.exception), "Cannot dump schema for non-postgresql database")

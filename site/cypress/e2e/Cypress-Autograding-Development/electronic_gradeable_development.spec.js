@@ -1,6 +1,6 @@
 import { runTests } from '../../support/electronic_gradeable_utils';
 
-describe('Test the development course gradeables', { env: { course: 'development' } }, () => {
+describe('Test the development course gradeables', { expose: { course: 'development' } }, () => {
     it('Should test the development gradeables with full and buggy submissions', () => {
         cy.login('instructor');
 

@@ -130,11 +130,6 @@ class ImageController extends AbstractController {
         $file_path = urldecode($_POST['file_path']);
 
         $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
-        $real_path = $this->getSubmittedFilePath($file_path, $id, true);
-        if (!file_exists($real_path)) {
-            $this->core->getOutput()->renderJsonFail('The image file could not be found');
-            return;
-        }
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -150,6 +145,12 @@ class ImageController extends AbstractController {
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('You do not have permission to grade this student');
+            return;
+        }
+
+        $real_path = $this->getSubmittedFilePath($file_path, $id, true);
+        if (!FileUtils::isInSubmitterDirectory($real_path, $this->core->getConfig()->getCoursePath(), $gradeable_id, $id)) {
+            $this->core->getOutput()->renderJsonFail('The image file could not be found');
             return;
         }
 

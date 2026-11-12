@@ -1,6 +1,9 @@
 // This test will not pass locally unless your authentication is set to database authentication
 
 describe('notification sync and defaults test', () => {
+    // Course created by the first test and used by the tests after it
+    let testCourse;
+
     const visitNotificationSettings = (course = 'sample') => {
         cy.visit([course, 'notifications', 'settings']);
         cy.get('[data-testid="notification-settings-header"]').should('be.visible');
@@ -96,8 +99,7 @@ describe('notification sync and defaults test', () => {
 
     describe('Sync settings to other courses', () => {
         it('functionality of sync popup', () => {
-            const course = createCourse();
-            Cypress.env('test-course', course);
+            testCourse = createCourse();
             cy.login('instructor');
             visitNotificationSettings('sample');
             openSyncPopup();
@@ -120,7 +122,7 @@ describe('notification sync and defaults test', () => {
         });
 
         it('syncs settings to a new course', () => {
-            const course = Cypress.env('test-course');
+            const course = testCourse;
             cy.login('instructor');
             visitNotificationSettings('sample');
             setCheckbox('merge_threads', true);
@@ -143,7 +145,6 @@ describe('notification sync and defaults test', () => {
 
     describe('Future Course Default', () => {
         it('default checkbox is unchecked when this course is not the default', () => {
-            const course = Cypress.env('test-course');
             cy.login('instructor');
             visitNotificationSettings('sample');
             clearDefaultIfSet();
@@ -196,7 +197,7 @@ describe('notification sync and defaults test', () => {
                     cy.wait('@saveDefaults');
                 }
             });
-            const course = Cypress.env('test-course');
+            const course = testCourse;
             visitNotificationSettings(course);
             cy.get('[data-testid="other-default-course-banner"]')
                 .should('be.visible')
@@ -219,7 +220,7 @@ describe('notification sync and defaults test', () => {
             cy.get('[data-testid="default-course-banner"]').should('be.visible');
             cy.logout();
 
-            const course = Cypress.env('test-course');
+            const course = testCourse;
             AddStudentToCourse(course);
 
             cy.login('student');
