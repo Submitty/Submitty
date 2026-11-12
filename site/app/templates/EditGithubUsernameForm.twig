@@ -1,34 +1,35 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}edit-github-username-form{% endblock %}
-{% block title %}Edit GitHub username{% endblock %}
+{% block title %}Edit GitHub Username{% endblock %}
 {% block body %}
-    <p class="std-margin">Go to your GitHub profile page;  your username is visible in your profile URL (https://github.com/YOUR-USERNAME)</p>
-    <p class="std-margin">Your instructor and the system administrators reserve the right to remove aGitHub username if they contain inappropriate or offensive language.</p>
     <div class="flex-col" id="user_settings_modal">
+        <p class="std-margin">Share your personal projects and contributions with your instructors by sharing your GitHub username!</p>
+        <p>Go to your GitHub profile page. Your username is visible in your profile URL.</p>
+        <p>(https://github.com/YOUR-USERNAME)</p>
+        <br>
         <input id="user-github-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <h2>My GitHub Username</h2>
         <div class="edit_user_row ui-front">
             <label for="user-github-username-change">GitHub Username:&emsp;</label>
-            <input type="text"
-                   name="github_username"
-                   data-testid="github-input"
-                   value="{{ github_username }}"
-                   id="user-github-username-change"
-                   placeholder="Type"
-                   size="30"
-                   maxlength = "50"
-                   >
-            </input>
+                <input type="text"
+                    name="github_username"
+                    data-testid="github-input"
+                    value="{{ github_username }}"
+                    id="user-github-username-change"
+                    placeholder="Type"
+                    size="30"
+                    maxlength = "50"/>
+                </input>
+            </div>
+            <br>
         </div>
-        <br>
-    </div>
-{% endblock %}
-{% block form %}
-    <form method="post" onsubmit="return updateUserGithub(event)">
-        {{ parent() }}
-    </form>
-{% endblock %}
-{% block buttons %}
-    {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" id="edit-github-submit" data-testid="edit-github-submit" />
+    {% endblock %}
+    {% block form %}
+        <form method="post" onsubmit="return updateUserGithub(event)">
+            {{ parent() }}
+        </form>
+    {% endblock %}
+    {% block buttons %}
+        {{ block('close_button') }}
+        <input class="btn btn-primary" type="submit" value="Submit" id="edit-github-submit" data-testid="edit-github-submit" />
 {% endblock %}
