@@ -3,8 +3,10 @@
 namespace tests\app\models\gradeable;
 
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
+use app\models\Config;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Gradeable;
@@ -12,6 +14,7 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Submitter;
+use app\models\SimpleGradeOverriddenUser;
 use app\models\User;
 use tests\BaseUnitTest;
 
@@ -285,5 +288,74 @@ class LateDaysTester extends BaseUnitTest {
         $this->assertEquals(['on_time', 'on_time_exception', 'on_time1'], $late_days->getGradeableIdsByStatus(\app\models\gradeable\LateDayInfo::STATUS_GOOD));
         $this->assertEquals(['late_exception', 'late', 'late1'], $late_days->getGradeableIdsByStatus(\app\models\gradeable\LateDayInfo::STATUS_LATE));
         $this->assertEquals(['bad_for_gradeable', 'bad_for_term'], $late_days->getGradeableIdsByStatus(\app\models\gradeable\LateDayInfo::STATUS_BAD));
+    }
+
+    public function testGradeOverrideDoesNotConsumeLateDays() {
+        $due_date = '10-10-2010 11:59:59';
+        $one_day_later = '11-10-2010 11:59:59';
+        $overridden = $this->mockGradedGradeable('overridden', $due_date, 3, $one_day_later, 0);
+        $later = $this->mockGradedGradeable('later', $one_day_later, 3, $one_day_later, 0);
+        $overridden->method('getReasonForException')->willReturn('');
+        $later->method('getReasonForException')->willReturn('');
+
+        $late_days = $this->makeLateDaysWithOverrides([$overridden, $later], ['overridden']);
+        $overridden_info = $late_days->getLateDayInfoByGradeable($this->mockGradeable('overridden'));
+        $later_info = $late_days->getLateDayInfoByGradeable($this->mockGradeable('later'));
+
+        $this->assertEquals(0, $overridden_info->getLateDaysCharged());
+        $this->assertEquals(LateDayInfo::STATUS_OVERRIDDEN, $overridden_info->getStatus());
+        $this->assertEquals('Overridden', $overridden_info->getStatusMessage());
+        $this->assertEquals(5, $overridden_info->getLateDaysRemaining());
+        $this->assertEquals(LateDayInfo::STATUS_GOOD, $later_info->getStatus());
+        $this->assertEquals(0, $later_info->getLateDaysCharged());
+        $this->assertEquals(5, $later_info->getLateDaysRemaining());
+        $this->assertEquals(0, $late_days->getLateDaysUsed());
+    }
+
+    public function testRemovingGradeOverrideRestoresLateDayCharge() {
+        $due_date = '10-10-2010 11:59:59';
+        $one_day_later = '11-10-2010 11:59:59';
+        $late = $this->mockGradedGradeable('late_again', $due_date, 3, $one_day_later, 0);
+        $later = $this->mockGradedGradeable('later_again', $one_day_later, 3, $one_day_later, 0);
+        $late->method('getReasonForException')->willReturn('');
+        $later->method('getReasonForException')->willReturn('');
+
+        $late_days = $this->makeLateDaysWithOverrides([$late, $later], []);
+        $late_info = $late_days->getLateDayInfoByGradeable($this->mockGradeable('late_again'));
+        $later_info = $late_days->getLateDayInfoByGradeable($this->mockGradeable('later_again'));
+
+        $this->assertEquals(1, $late_info->getLateDaysCharged());
+        $this->assertEquals(LateDayInfo::STATUS_LATE, $late_info->getStatus());
+        $this->assertEquals(4, $late_info->getLateDaysRemaining());
+        $this->assertEquals(LateDayInfo::STATUS_GOOD, $later_info->getStatus());
+        $this->assertEquals(4, $later_info->getLateDaysRemaining());
+        $this->assertEquals(1, $late_days->getLateDaysUsed());
+    }
+
+    /**
+     * @param GradedGradeable[] $graded_gradeables
+     * @param string[] $overridden_ids
+     */
+    private function makeLateDaysWithOverrides(array $graded_gradeables, array $overridden_ids): LateDays {
+        $config = $this->createMockModel(Config::class);
+        $config->method('getDefaultStudentLateDays')->willReturn(5);
+        $config->method('getTimezone')->willReturn(new \DateTimeZone('America/New_York'));
+
+        $overridden_row = $this->createMock(SimpleGradeOverriddenUser::class);
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries->method('getLateDayUpdates')->willReturn([]);
+        $queries->method('getLateDayCacheForUser')->willReturn([]);
+        $queries->method('getAUserWithOverriddenGrades')->willReturnCallback(
+            function ($gradeable_id) use ($overridden_row, $overridden_ids) {
+                return in_array($gradeable_id, $overridden_ids, true) ? $overridden_row : null;
+            }
+        );
+
+        $core = $this->createMock(Core::class);
+        $core->method('getConfig')->willReturn($config);
+        $core->method('getQueries')->willReturn($queries);
+        $core->method('getDateTimeNow')->willReturn(new \DateTime('2026-10-08'));
+
+        return new LateDays($core, $this->mockUser('testuser'), $graded_gradeables);
     }
 }
