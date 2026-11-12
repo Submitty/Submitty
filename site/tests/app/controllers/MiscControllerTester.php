@@ -11,15 +11,19 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\SessionManager;
 use app\libraries\Utils;
+use app\libraries\response\MultiResponse;
 use app\models\Config;
+use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Submitter;
 use app\models\User;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use tests\BaseUnitTest;
 use tests\utils\NullOutput;
 
-class MiscControllerTester extends \PHPUnit\Framework\TestCase {
+class MiscControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
 
     private $tmp_dir = '';
@@ -28,6 +32,7 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
         if (file_exists($this->tmp_dir)) {
             FileUtils::recursiveRmdir($this->tmp_dir);
         }
+        $_POST = [];
     }
 
     public static function userDataProvider() {
@@ -361,5 +366,49 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
         $course_material->expects($this->once())->method('addAccess');
 
         $this->assertNotFalse($this->displayCourseMaterial($core, $course_material, $lookup));
+    }
+
+    /**
+     * Request a file from encode_pdf as part of doej's hw1 submission. Access allows every path,
+     * so only the controller's own path check can refuse it.
+     */
+    private function encodeSubmissionPdf(string $file_path): MultiResponse {
+        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($this->createMockModel(AutoGradedGradeable::class));
+        $core = $this->createMockCore(
+            ['course_path' => $this->tmp_dir],
+            [],
+            [
+                'getGradeableConfig' => $this->createMockModel(Gradeable::class),
+                'getSubmitterById' => $this->createMockModel(Submitter::class),
+                'getGradedGradeableForSubmitter' => $graded_gradeable,
+                'getSubmitterIdFromAnonId' => null,
+            ],
+            ['path.read']
+        );
+
+        $_POST['user_id'] = 'doej';
+        $_POST['filename'] = basename($file_path);
+        $_POST['file_path'] = $file_path;
+        return (new MiscController($core))->encodePDF('hw1');
+    }
+
+    public function testEncodePdfServesSubmittersFile(): void {
+        $this->tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        $path = $this->writeCourseFile('submissions/hw1/doej/1/hw1.pdf', 'own');
+
+        $response = $this->encodeSubmissionPdf($path);
+
+        $this->assertSame(['status' => 'success', 'data' => base64_encode('own')], $response->json_response->json);
+    }
+
+    public function testEncodePdfDeniesSubmitterWhoseIdStartsTheSame(): void {
+        $this->tmp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        $this->writeCourseFile('submissions/hw1/doej/1/hw1.pdf', 'own');
+        $path = $this->writeCourseFile('submissions/hw1/doej2/1/hw1.pdf', 'other');
+
+        $response = $this->encodeSubmissionPdf($path);
+
+        $this->assertSame(['status' => 'fail', 'message' => 'Invalid file path'], $response->json_response->json);
     }
 }
