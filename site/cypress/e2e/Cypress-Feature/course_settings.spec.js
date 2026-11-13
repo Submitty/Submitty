@@ -12,23 +12,21 @@ const FieldType = {
 
 function verifyIndicator(fieldId, indicatorType) {
     cy.get(`[data-testid="${fieldId}"]`).invoke('attr', 'data-usesaveindicator').then((indicatorId) => {
-        cy.get(`[data-testid="${indicatorId}-save-indicator"]`).then(($indicator) => {
-            cy.get(`[data-testid="${indicatorId}-save-text"]`).then(($savetext) => {
-                switch (indicatorType) {
-                    case IndicatorType.NotVisible:
-                        cy.wrap($indicator).should('not.be.visible');
-                        break;
-                    case IndicatorType.Saved:
-                        cy.wrap($indicator).should('be.visible');
-                        cy.wrap($savetext).should('have.text', 'Saved!');
-                        break;
-                    case IndicatorType.Failed:
-                        cy.wrap($indicator).should('be.visible');
-                        cy.wrap($savetext).should('have.text', 'Failed to save.');
-                        break;
-                }
-            });
-        });
+        const indicatorSelector = `[data-testid="${indicatorId}-save-indicator"]`;
+        const indicatorTextSelector = `[data-testid="${indicatorId}-save-text"]`;
+        switch (indicatorType) {
+            case IndicatorType.NotVisible:
+                cy.get(indicatorSelector).should('not.be.visible');
+                break;
+            case IndicatorType.Saved:
+                cy.get(indicatorSelector).should('be.visible');
+                cy.get(indicatorTextSelector).should('have.text', 'Saved!');
+                break;
+            case IndicatorType.Failed:
+                cy.get(indicatorSelector).should('be.visible');
+                cy.get(indicatorTextSelector).should('have.text', 'Failed to save.');
+                break;
+        }
     });
 }
 
@@ -49,13 +47,11 @@ function changeField(fieldTestId, fieldType, input) {
     else if (fieldType === FieldType.Checkbox) {
         if (input === true) {
             cy.get(selector).uncheck({ force: true });
-            cy.get(selector).blur({ force: true });
             cy.get(selector).check({ force: true });
             cy.get(selector).blur({ force: true });
         }
         else if (!input) {
             cy.get(selector).check({ force: true });
-            cy.get(selector).blur({ force: true });
             cy.get(selector).uncheck({ force: true });
             cy.get(selector).blur({ force: true });
         }
