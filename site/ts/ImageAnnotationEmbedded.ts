@@ -538,8 +538,19 @@ function triggerDownload(dataUrl: string, filename: string): void {
     document.body.removeChild(link);
 }
 
-function fetchImageData(gradeable_id: string, filename: string, path: string, anon_path: string): { image_url: string; annotations: Record<string, string> } | null {
-    let result: { image_url: string; annotations: Record<string, string> } | null = null;
+// One grader's annotations, labeled with the name the student may see
+interface GraderAnnotations {
+    label: string;
+    annotations: string;
+}
+
+interface ImageData {
+    image_url: string;
+    annotations: GraderAnnotations[];
+}
+
+function fetchImageData(gradeable_id: string, filename: string, path: string, anon_path: string): ImageData | null {
+    let result: ImageData | null = null;
     $.ajax({
         url: buildCourseUrl(['gradeable', gradeable_id, 'img']),
         type: 'GET',
@@ -551,7 +562,7 @@ function fetchImageData(gradeable_id: string, filename: string, path: string, an
         },
         dataType: 'json',
         async: false,
-        success: function (response: { status: string; message?: string; data?: { image_url: string; annotations: Record<string, string> } }) {
+        success: function (response: { status: string; message?: string; data?: ImageData }) {
             if (response.status === 'success') {
                 result = response.data || null;
             }
@@ -603,21 +614,20 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
         return new Promise((resolve, reject) => {
             img.onload = async () => {
                 try {
-                    // Collect each grader's non-empty annotations, sorted by grader ID
-                    const graderStates: AnnotationState[] = [];
-                    const sortedEntries = Object.entries(annotations).sort(([a], [b]) => a.localeCompare(b));
-                    for (const [graderId, annotationsJson] of sortedEntries) {
+                    // Collect each grader's non-empty annotations, already sorted by grader ID in ImageController::showStudentImg
+                    const graderStates: { label: string; state: AnnotationState }[] = [];
+                    for (const { label, annotations: annotationsJson } of annotations) {
                         if (!annotationsJson || typeof annotationsJson !== 'string' || annotationsJson.trim() === '') {
                             continue;
                         }
                         try {
                             const annotationState = JSON.parse(annotationsJson) as AnnotationState;
                             if (Array.isArray(annotationState.markers) && annotationState.markers.length > 0) {
-                                graderStates.push(annotationState);
+                                graderStates.push({ label, state: annotationState });
                             }
                         }
                         catch (parseError) {
-                            console.warn(`Skipping annotations for grader ${graderId} that failed to parse:`, parseError);
+                            console.warn(`Skipping annotations from ${label} that failed to parse:`, parseError);
                         }
                     }
 
@@ -626,14 +636,14 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
                         return;
                     }
 
-                    // Labeled by number since the client only has grader IDs, not names
+                    // File suffixes stay numbered since grader names can repeat or be unsafe in filenames
                     const views: AnnotatedView[] = [];
                     for (let index = 0; index < graderStates.length; index++) {
                         views.push({
-                            label: `Grader ${index + 1}`,
+                            label: graderStates[index].label,
                             suffix: graderStates.length > 1 ? `_grader${index + 1}` : '',
                             combined: false,
-                            dataUrl: await rasterizeAnnotations(img, graderStates[index]),
+                            dataUrl: await rasterizeAnnotations(img, graderStates[index].state),
                         });
                     }
 
@@ -642,7 +652,7 @@ async function generateDataURL(gradeable_id: string, filename: string, path: str
                         // Rendered separately since markers are positioned relative to their own state's width/height
                         let targetImage = img;
                         let dataUrl = '';
-                        for (const annotationState of graderStates) {
+                        for (const { state: annotationState } of graderStates) {
                             dataUrl = await rasterizeAnnotations(targetImage, annotationState);
 
                             targetImage = new Image();
@@ -777,6 +787,12 @@ function openAnnotatedPopup(views: AnnotatedView[], filename: string): void {
         body.appendChild(toolbar);
         body.appendChild(warning);
         buttons[0].click();
+    }
+    else {
+        const caption = popup.document.createElement('p');
+        caption.className = 'annotated-image-grader';
+        caption.textContent = `Annotated by ${views[0].label}`;
+        body.appendChild(caption);
     }
 
     body.appendChild(img);
