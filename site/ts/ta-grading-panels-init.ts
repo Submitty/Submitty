@@ -372,6 +372,8 @@ $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
     updatePanelOptions();
 
+    freeVueTemplatedPanelsFromVueDivs();
+
     // Check initially if its the mobile screen view or not
     changeMobileView();
     initializeTaLayout();
@@ -454,8 +456,6 @@ $(() => {
     if (gradingPanelHeader) {
         resizeObserver.observe(gradingPanelHeader);
     }
-
-    freeVueTemplatedPanelsFromVueDivs();
 
     notebookScrollLoad();
     checkNotebookScroll();
