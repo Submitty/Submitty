@@ -1111,7 +1111,7 @@ HTML;
         // if this is a withdrawn student, we should display it first
         if (!$gradeable->isTeamAssignment() && $graded_gradeable->getSubmitter()->getUser()->getRegistrationType() === "withdrawn") {
             $error_message = [
-                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "color" => "var(--standard-red-orange)",
                 "message" => "Withdrawn Student"
             ];
         }
@@ -1123,27 +1123,27 @@ HTML;
                 $overridden_message .= " (Reason: " . $overridden_comment . ")";
             }
             $error_message = [
-                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "color" => "var(--standard-creamsicle-orange)",
                 "message" => $overridden_message
             ];
         }
         elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === LateDayInfo::STATUS_NO_ACTIVE_VERSION) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $error_message = [
-                    "color" => "var(--standard-creamsicle-orange)", // mango orange
+                    "color" => "var(--standard-red-orange)",
                     "message" => "Cancelled Submission"
                 ];
             }
             else {
                 $error_message = [
-                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
+                    "color" => "var(--standard-red-orange)",
                     "message" => "No Submission"
                 ];
             }
         }
         elseif ($late_status !== LateDayInfo::STATUS_GOOD && $late_status !== LateDayInfo::STATUS_LATE && $rollback_submission > 0) {
             $error_message = [
-                "color" => "var(--standard-creamsicle-orange)",
+                "color" => "var(--standard-red-orange)",
                 "message" => "Bad Submission (Rollback to valid submission - Version #" . $rollback_submission . ")"
             ];
         }
@@ -1156,14 +1156,14 @@ HTML;
             }
             else {
                 $error_message = [
-                    "color" => "var(--standard-red-orange)", // fire engine red
+                    "color" => "var(--standard-red-orange)",
                     "message" => "Bad Submission (No valid submission available)"
                 ];
             }
         }
         elseif ($late_status === LateDayInfo::STATUS_LATE) {
             $error_message = [
-                "color" => "var(--standard-medium-orange)", // fire engine red
+                "color" => "var(--standard-vibrant-yellow)",
                 "message" => "Late Submission (Using one or more late days)"
             ];
         }
@@ -1178,7 +1178,7 @@ HTML;
             // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
             if ($pattern_match_flag === true) {
                 $error_message = [
-                    "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                    "color" => "var(--standard-vibrant-yellow)",
                     "message" => "Multiple files within submissions"
                 ];
             }

@@ -355,6 +355,19 @@ function openAutoGrading(num: string) {
     }
 }
 
+/*
+Panels created using Vue templates (namely solutions/notes and student info)
+are placed inside an empty div, which results in improper scrolling
+*/
+function freeVueTemplatedPanelsFromVueDivs(){
+    const parent = $(`.panels-container`);
+    const panelIdsMadeWithVueTemplates = ['solution_ta_notes', 'student_info'];
+    panelIdsMadeWithVueTemplates.forEach((panelId) => {
+        parent.append($(`#${panelId}`));
+    })
+}
+
+
 $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
     updatePanelOptions();
@@ -441,6 +454,8 @@ $(() => {
     if (gradingPanelHeader) {
         resizeObserver.observe(gradingPanelHeader);
     }
+
+    freeVueTemplatedPanelsFromVueDivs();
 
     notebookScrollLoad();
     checkNotebookScroll();
