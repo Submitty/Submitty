@@ -417,6 +417,8 @@ class AutoGradingView extends AbstractView {
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
+                // False if no grader has graded this component yet (partially released grading)
+                'graded' => $container->anyGradedComponents(),
                 'version_graded' => $container->getGradedVersion(),
                 'total_score' => $container->getTotalScore(),
                 'custom_mark_score' => $container->getScore(),
@@ -618,6 +620,8 @@ class AutoGradingView extends AbstractView {
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
+                // False if no grader has graded this component yet (partially released grading)
+                'graded' => $container->anyGradedComponents(),
                 'version_graded' => $container->getGradedVersion(),
                 'total_score' => $container->getTotalScore(),
                 'custom_mark_score' => $container->getScore(),
