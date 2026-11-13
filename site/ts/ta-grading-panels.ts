@@ -149,10 +149,6 @@ function activateTopBarButtons() {
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities() {
     panelElements.forEach((panel) => {
-        const id_str = document.getElementById(`#${panel.str}_btn`)
-            ? `#${panel.str}_btn`
-            : `#${panel.str}-btn`;
-
         if (
             taLayoutDet.currentTwoPanels.leftTop === panel.str
             || taLayoutDet.currentTwoPanels.leftBottom === panel.str
