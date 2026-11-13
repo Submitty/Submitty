@@ -1143,7 +1143,7 @@ HTML;
         }
         elseif ($late_status !== LateDayInfo::STATUS_GOOD && $late_status !== LateDayInfo::STATUS_LATE && $rollback_submission > 0) {
             $error_message = [
-                "color" => "var(--standard-red-orange)",
+                "color" => "var(--standard-creamsicle-orange)",
                 "message" => "Bad Submission (Rollback to valid submission - Version #" . $rollback_submission . ")"
             ];
         }
