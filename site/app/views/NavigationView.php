@@ -761,7 +761,7 @@ class NavigationView extends AbstractView {
                 $date_text = 'grades will be released ';
                 $date_time = $grades_released;
             }
-            elseif ( (!$this->core->getUser()->accessGrading()) && $gradeable->hasPeerComponent()) {
+            elseif ((!$this->core->getUser()->accessGrading()) && $gradeable->hasPeerComponent()) {
                 $title = 'PEER GRADE';
             }
             else {
