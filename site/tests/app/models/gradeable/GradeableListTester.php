@@ -585,6 +585,7 @@ class GradeableListTester extends BaseUnitTest {
             '1004-01-01',
             true,
             true,
+            false,
             false
         );
         $gradeables['05_submitted_grades_released'] = $this->mockGradeable(
@@ -598,6 +599,7 @@ class GradeableListTester extends BaseUnitTest {
             '1004-01-01',
             true,
             true,
+            false,
             false
         );
 
@@ -634,6 +636,91 @@ class GradeableListTester extends BaseUnitTest {
 
         $actual = $list->getGradedGradeables();
         $this->assertCount(0, $actual);
+    }
+
+    public function testNoDueWithReleaseDate() {
+        $core = $this->getCore(false, false);
+
+        $gradeables = [];
+        // Students submit, no due date, grades released date has not passed
+        $gradeables['01_no_due_release_future'] = $this->mockGradeable(
+            $core,
+            "01_no_due_release_future",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1001-01-01',
+            '1003-01-01',
+            '9999-01-01',
+            true,
+            true,
+            false,
+            true
+        );
+        // Students submit, no due date, grades released date has passed
+        $gradeables['02_no_due_release_past'] = $this->mockGradeable(
+            $core,
+            "02_no_due_release_past",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1001-01-01',
+            '1003-01-01',
+            '1004-01-01',
+            true,
+            true,
+            false,
+            true
+        );
+        // Scanned exam uploaded by TAs (no student submission), no due date, grades released date has not passed
+        $gradeables['03_bulk_no_due_release_future'] = $this->mockGradeable(
+            $core,
+            "03_bulk_no_due_release_future",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1001-01-01',
+            '1003-01-01',
+            '9999-01-01',
+            true,
+            false,
+            false,
+            true
+        );
+        // Scanned exam uploaded by TAs (no student submission), no due date, grades released date has passed
+        $gradeables['04_bulk_no_due_release_past'] = $this->mockGradeable(
+            $core,
+            "04_bulk_no_due_release_past",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1001-01-01',
+            '1003-01-01',
+            '1004-01-01',
+            true,
+            false,
+            false,
+            true
+        );
+
+        $this->mockGetGradeables($core, $gradeables);
+        $core->getQueries()->method('getHasSubmission')->willReturn(false);
+
+        $list = new GradeableList($core);
+
+        $this->assertCount(0, $list->getFutureGradeables());
+        $this->assertCount(0, $list->getBetaGradeables());
+        $this->assertCount(0, $list->getClosedGradeables());
+
+        // Grades have not been released yet, so these stay where a gradeable without a due date normally goes
+        $this->assertEquals(['01_no_due_release_future'], array_keys($list->getOpenGradeables()));
+        $this->assertEquals(['03_bulk_no_due_release_future'], array_keys($list->getGradingGradeables()));
+
+        // Once the grades released date passes, they move to the graded section
+        $this->assertEqualsCanonicalizing(
+            ['02_no_due_release_past', '04_bulk_no_due_release_past'],
+            array_keys($list->getGradedGradeables())
+        );
     }
 
     public function testNoSubmittableGradeables() {
