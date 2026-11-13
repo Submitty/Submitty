@@ -43,6 +43,20 @@ describe('ToggleColumns', () => {
         cy.get('[data-testid="toggle-user-id"]').should('be.checked').and('be.disabled');
     });
 
+    it('starts hidden columns unchecked when no saved preferences exist', () => {
+        cy.mount(ToggleColumns, {
+            props: {
+                columns: ['ta_time'],
+                labels: ['TA Time'],
+                hiddenColumns: ['ta_time'],
+                cookie: 'test_hidden_column_defaults',
+                format: 'json',
+            },
+        });
+        cy.get('[data-testid="toggle-columns"]').click();
+        cy.get('[data-testid="toggle-ta_time"]').should('not.be.checked');
+    });
+
     ['bits', 'json'].forEach((format) => {
         it(`saves mandatory and optional selections in ${format} preferences`, () => {
             const cookie = `test_saved_columns_${format}`;
