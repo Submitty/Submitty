@@ -529,9 +529,10 @@ HTML;
      * @param array<string, string> $algorithms
      * @param ?string $current_algorithm
      * @param array<string, string> $cluster_map
+     * @param array<string, int> $ta_grading_times
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = []) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $override_data, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders, bool $is_group_by_clusters = false, array $algorithms = [], ?string $current_algorithm = null, array $cluster_map = [], array $ta_grading_times = []) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         if (!$this->core->getConfig()->isSubmissionClusteringEnabled()) {
@@ -673,7 +674,8 @@ HTML;
 
             $info = [
                 "graded_gradeable" => $row,
-                "on_time_submission" => $on_time_submission
+                "on_time_submission" => $on_time_submission,
+                "ta_time" => $this->formatTaGradingTime($ta_grading_times[$row->getSubmitter()->getId()] ?? 0)
             ];
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
@@ -949,7 +951,7 @@ HTML;
             }
         }
 
-        $grading_details_columns += ['ta_time' => false];
+        $grading_details_columns += ['ta_time' => true];
         $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns) {
             return !array_key_exists($column['header_key'], $grading_details_columns) || $grading_details_columns[$column['header_key']];
         });
@@ -1024,6 +1026,16 @@ HTML;
         ]);
     }
 
+    private function formatTaGradingTime(int $seconds): string {
+        $seconds = max(0, $seconds);
+        return sprintf(
+            '%d:%02d:%02d',
+            intdiv($seconds, 3600),
+            intdiv($seconds % 3600, 60),
+            $seconds % 60
+        );
+    }
+
     public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections, $students) {
         $student_full = Utils::getAutoFillData($students);
 
@@ -1055,7 +1067,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0, ?string $cluster_name = null) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, int $late_status, int $rollback_submission, $sort, $direction, $from, array $solution_ta_notes, array $submitter_itempool_map, $anon_mode, $blind_grading, bool $clustering_enabled = false, bool $clusters_exist = false, bool $ta_grading_cluster_mode = false, bool $is_clustered = false, int $cluster_student_count = 0, ?string $cluster_name = null, ?string $ta_grading_time_session_id = null) {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $isPeerPanel = false;
@@ -1826,7 +1838,10 @@ HTML;
                 "display_version" => $display_version,
                 "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
                 "is_peer_grader" => $is_peer_grader,
-                "is_withdrawn_student" => $is_withdrawn_student
+                "is_withdrawn_student" => $is_withdrawn_student,
+                "ta_grading_time_session_id" => $ta_grading_time_session_id,
+                "ta_grading_time_close_url" => $ta_grading_time_session_id === null ? null : $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'time', 'close']),
+                "csrf_token" => $this->core->getCsrfToken()
             ]);
     }
 

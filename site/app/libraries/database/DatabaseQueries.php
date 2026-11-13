@@ -10262,6 +10262,40 @@ ORDER BY
             $graded_id,
             ]);
     }
+
+    public function startTaGradingTime(string $session_id, string $gradeable_id, string $submitter_id, string $grader_id): void {
+        $this->course_db->query(
+            'INSERT INTO ta_grading_time (session_id, g_id, submitter_id, grader_id, opened_at) VALUES (?, ?, ?, ?, ?)',
+            [$session_id, $gradeable_id, $submitter_id, $grader_id, $this->core->getDateTimeNow()]
+        );
+    }
+
+    public function closeTaGradingTime(string $session_id, string $gradeable_id, string $grader_id): void {
+        $this->course_db->query(
+            'UPDATE ta_grading_time SET closed_at = ? WHERE session_id = ? AND g_id = ? AND grader_id = ? AND closed_at IS NULL',
+            [$this->core->getDateTimeNow(), $session_id, $gradeable_id, $grader_id]
+        );
+    }
+
+    /**
+     * Gets total completed grading time, in seconds, grouped by submitter.
+     * @return array<string, int>
+     */
+    public function getTaGradingTimesForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            'SELECT submitter_id, SUM(EXTRACT(EPOCH FROM (closed_at - opened_at))) AS time_seconds
+             FROM ta_grading_time
+             WHERE g_id = ? AND closed_at IS NOT NULL
+             GROUP BY submitter_id',
+            [$gradeable_id]
+        );
+        $times = [];
+        foreach ($this->course_db->rows() as $row) {
+            $times[$row['submitter_id']] = (int) $row['time_seconds'];
+        }
+        return $times;
+    }
+
     /**
      * @param string $image the full name of the image to get
      * @return string|false the user id of the image's owner or false if the image is not in the db

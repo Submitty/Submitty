@@ -106,3 +106,29 @@
         {% endif %}
     </div>
 </div>
+{% if ta_grading_time_session_id is not null and ta_grading_time_close_url is not null %}
+    <script>
+        (() => {
+            let closed = false;
+            window.addEventListener('pagehide', () => {
+                if (closed) {
+                    return;
+                }
+                closed = true;
+                const url = {{ ta_grading_time_close_url|json_encode|raw }};
+                const data = new URLSearchParams({
+                    csrf_token: {{ csrf_token|json_encode|raw }},
+                    session_id: {{ ta_grading_time_session_id|json_encode|raw }}
+                });
+                if (typeof navigator.sendBeacon !== 'function' || !navigator.sendBeacon(url, data)) {
+                    fetch(url, {
+                        method: 'POST',
+                        body: data,
+                        credentials: 'same-origin',
+                        keepalive: true
+                    }).catch((error) => console.error('Unable to close TA grading time session', error));
+                }
+            }, { once: true });
+        })();
+    </script>
+{% endif %}
