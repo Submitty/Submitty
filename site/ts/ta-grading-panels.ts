@@ -281,9 +281,6 @@ export function setPanelsVisibilities(
     position: string | null = null,
 ) {
     panelElements.forEach((panel) => {
-        const id_str = document.getElementById(`${panel.str}_btn`)
-            ? `#${panel.str}_btn`
-            : `#${panel.str}-btn`;
         if (panel.str === ele) {
             const eleVisibility
                 = forceVisible !== null
