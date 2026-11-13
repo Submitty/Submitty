@@ -139,7 +139,7 @@ export function toggleFullScreenMode() {
     saveTaLayoutDetails();
 }
 
-function activateTopBarButtons(){
+function activateTopBarButtons() {
     panelElements.forEach((panel) => {
         const panelIsVisible = $(`#${panel.str}`).is(':visible');
         $(`#${panel.str}_btn`).toggleClass('active', panelIsVisible);
