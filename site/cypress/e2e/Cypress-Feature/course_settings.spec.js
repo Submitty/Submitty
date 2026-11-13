@@ -62,10 +62,6 @@ function changeField(fieldTestId, fieldType, input) {
     }
 }
 
-function verifyPageIsReady() {
-    cy.get('[data-testid="course-name"]').should('have.attr', 'data-usesaveindicator');
-}
-
 describe('test editing each setting on course settings page', () => {
     const allFields = {
         [FieldType.Text]: [
@@ -86,6 +82,14 @@ describe('test editing each setting on course settings page', () => {
     };
     const defaultFieldValues = {};
 
+    function verifyPageIsReady() {
+        for (const [fieldType, arrOfFieldIds] of Object.entries(allFields)) {
+            arrOfFieldIds.forEach((fieldId) => {
+                cy.get(`[data-testid="${fieldId}"]`).should('have.attr', 'data-usesaveindicator');
+            });
+        }
+    }
+
     before(() => {
         cy.login('instructor');
         cy.visit(['sample', 'config']);
@@ -98,10 +102,7 @@ describe('test editing each setting on course settings page', () => {
                 cy.get(`[data-testid="${fieldId}"]`).then(($field) => {
                     const fieldTypeN = Number(fieldType);
                     let originalVal = $field.val();
-                    if (fieldTypeN === FieldType.Select) {
-                        originalVal = $field[0].selectedIndex;
-                    }
-                    else if (fieldTypeN === FieldType.Checkbox) {
+                    if (fieldTypeN === FieldType.Checkbox) {
                         originalVal = $field[0].checked;
                     }
                     defaultFieldValues[fieldId] = {
@@ -123,14 +124,18 @@ describe('test editing each setting on course settings page', () => {
             cy.get(`[data-testid="${fieldId}"]`).then(($field) => {
                 const fieldTypeN = field.FieldType;
                 let currentVal = $field.val();
+                let originalVal = field.OriginalValue;
                 if (fieldTypeN === FieldType.Select) {
-                    currentVal = $field[0].selectedIndex;
+                    const optionExists = $field.find(`option[value="${field.OriginalValue}"`).length > 0;
+                    if (!optionExists) {
+                        originalVal = 0;
+                    }
                 }
                 else if (fieldTypeN === FieldType.Checkbox) {
                     currentVal = $field[0].checked;
                 }
                 if (currentVal !== field.OriginalValue) {
-                    changeField(fieldId, field.FieldType, field.OriginalValue);
+                    changeField(fieldId, field.FieldType, originalVal);
                     verifyIndicator(fieldId, IndicatorType.Saved);
                 }
             });
@@ -174,7 +179,7 @@ describe('test editing each setting on course settings page', () => {
                 ['grade-inquiry-message', 'Testing'],
             ],
             [FieldType.Select]: [
-                ['default-section-id', 2],
+                ['default-section-id', '2'],
             ],
             [FieldType.Checkbox]: [
                 ['forum-enabled', true],
@@ -218,7 +223,7 @@ describe('test editing each setting on course settings page', () => {
                     cy.get(selector).should(input ? 'be.checked' : 'not.be.checked');
                 }
                 else if (fieldTypeN === FieldType.Select) {
-                    cy.get(selector).should('have.prop', 'selectedIndex', input);
+                    cy.get(selector).should('have.value', input);
                 }
             });
         }
