@@ -104,8 +104,14 @@ class AbstractBuilder {
                 }
 
                 if (widget) {
-                    widget.load(cell);
-                    this.widgetAdd(widget);
+                    try {
+                        widget.load(cell);
+                        this.widgetAdd(widget);
+                    }
+                    catch (error) {
+                        console.error(`Failed to load notebook cell of type "${cell.type}":`, error);
+                        displayErrorMessage(`An error occurred loading a "${cell.type}" cell.  Check browser developer console for details.`);
+                    }
                 }
             });
         }
@@ -167,8 +173,10 @@ class AbstractBuilder {
             widgets_div = this.reorderable_widgets_div;
         }
 
+        const rendered_widget = widget.render();
+
         widgets_array.push(widget);
-        widgets_div.appendChild(widget.render());
+        widgets_div.appendChild(rendered_widget);
 
         // Codeboxes won't render correctly unless refreshed AFTER appended to the dom
         const codebox = widget.dom_pointer.querySelector('.CodeMirror');
