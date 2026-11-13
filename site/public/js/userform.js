@@ -279,6 +279,12 @@ function completeUserFormInformation(user) {
     $('[name="user_email"]', form).val(user['user_email']);
     $('[name="user_email_secondary"]', form).val(user['user_email_secondary']);
     $('[name="user_email"]').change();
+    $('[name="user_linkedin_username"]', form).val(user['linkedin_username']);
+    $('[name="user_linkedin_username"]').change();
+    $('[name="user_github_username"]', form).val(user['github_username']);
+    $('[name="user_github_username"]').change();
+    $('[name="user_personal_webpage"]', form).val(user['personal_webpage']);    
+    $('[name="user_personal_webpage"]').change();
     $('[name="registration_subsection"]', form).val(user['registration_subsection']);
     $('[name="registration_subsection"]').change();
 

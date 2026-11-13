@@ -1,0 +1,33 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-personal-webpage-form{% endblock %}
+{% block title %}Edit Personal Webpage{% endblock %}
+{% block body %}
+    <div class="flex-col" id="user_settings_modal">
+        <p class="std-margin">Do you have a personal website, resume, or portfolio? Add a valid URL here to share it with your instructors.</p>
+        <input id="user-webpage-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <h2>My Personal Webpage</h2>
+        <div class="edit_user_row ui-front">
+            <label for="user-personal-webpage-change">Personal Webpage:&emsp;</label>
+            <input type="text"
+                name="personal_webpage"
+                data-testid="personal-webpage-input"
+                value="{{ personal_webpage }}"
+                id="user-personal-webpage-change"
+                placeholder="Type"
+                size="30"
+                maxlength = "255"/>
+                </input>
+            </div>
+        <br>
+       
+</div>
+{% endblock %}
+{% block form %}
+    <form method="post" onsubmit="return updateUserWebpage(event)">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" id="edit-webpage-submit" data-testid="edit-webpage-submit" />
+{% endblock %}

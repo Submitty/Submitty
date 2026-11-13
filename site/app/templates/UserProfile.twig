@@ -111,6 +111,31 @@
                             <i class="fas fa-pencil-alt"></i> {% if user.getEmailBoth() %}True{% else %}False{% endif %}
                         </button>
                     </div>
+                    <div class="flex-row" id="linkedin-username-row">
+                        <span class="label">
+                            {{ localize('My_Profile.Linkedin_Username', "LinkedIn Username" )}}:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateLinkedinUsernameForm()" aria-label="Edit user LinkedIn username" title="Edit user LinkedIn username">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getLinkedinUsername() }}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="github-username-row">
+                        <span class="label">
+                            {{ localize('My_Profile.Github_Username', "GitHub Username" )}}:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdateGithubUsernameForm()" aria-label="Edit user GitHub username" title="Edit user GitHub username">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getGithubUsername() }}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="personal-webpage-row">
+                        <span class="label">
+                            {{ localize('My_Profile.Personal_Webpage', "Personal Webpage" )}}:
+                        </span>
+                        <button class="icon" tabindex="0" onclick="showUpdatePersonalWebpageForm()" aria-label="Edit user personal webpage" title="Edit user personal webpage">
+                            <i class="fas fa-pencil-alt"></i> {{ user.getPersonalWebpage() }}
+                        </button>
+                    </div>
+                    
                     {% if display_access_level %}
                         <div class="flex-row" id="access-row">
                             <span class="label">
@@ -247,6 +272,9 @@
 {% include 'EditLastInitialFormatForm.twig' %}
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
+{% include 'EditGithubUsernameForm.twig' %}
+{% include 'EditLinkedinUsernameForm.twig' %}
+{% include 'EditPersonalWebpageForm.twig' %}
 {% include 'EditPronounsForm.twig' %}
 {% include 'EditDisplayNameOrderForm.twig' %}
 {% if show_change_password %}

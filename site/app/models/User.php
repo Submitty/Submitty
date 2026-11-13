@@ -34,6 +34,12 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
  * @method void setSecondaryEmail(string $email)
+ * @method string getGithubUsername()
+ * @method void setGithubUsername(string $github)
+ * @method string getLinkedinUsername()
+ * @method void setLinkedinUsername(string $linkedin)
+ * @method string getPersonalWebpage()
+ * @method void setPersonalWebpage(string $webpage)
  * @method bool getEmailBoth()
  * @method void setEmailBoth(bool $flag)
  * @method int getGroup()
@@ -144,7 +150,15 @@ class User extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var string The secondary email of the user */
     protected $secondary_email;
-
+    /** @prop
+     * @var string The linkedin username of the user */
+    protected $linkedin_username;
+    /** @prop
+     * @var string The Github username of the user */
+    protected $github_username;
+    /** @prop
+     * @var string The personal webpage of the user */
+    protected $personal_webpage;
     /** @prop
      * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
@@ -284,6 +298,9 @@ class User extends AbstractModel implements \JsonSerializable {
         $this->email = $details['user_email'];
         $this->secondary_email = $details['user_email_secondary'] ?? '';
         $this->email_both = $details['user_email_secondary_notify'] ?? '';
+        $this->linkedin_username = $details['user_linkedin_username'] ?? '';
+        $this->github_username = $details['user_github_username'] ?? '';
+        $this->personal_webpage = $details['user_personal_webpage'] ?? '';
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
@@ -740,6 +757,12 @@ class User extends AbstractModel implements \JsonSerializable {
                 // validate email address against email RFCs
                 $validator = new EmailValidator();
                 return $validator->isValid($data, new RFCValidation());
+            case 'user_linkedin_username':
+                return is_string($data) && preg_match('/^[a-zA-Z0-9-]{0,50}$/', $data) === 1;
+            case 'user_github_username':
+                return is_string($data) && preg_match('/^[a-zA-Z0-9-]{0,50}$/', $data) === 1;
+            case 'user_personal_webpage':
+                return is_string($data) && (strlen($data) == 0 || filter_var($data, FILTER_VALIDATE_URL) !== false);
             case 'user_group':
                 //user_group check is either a digit between 1 - 4 or one of the strings:
                 // "Instructor"
