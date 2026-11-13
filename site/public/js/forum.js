@@ -1278,6 +1278,10 @@ function updateLikesDisplay(post_id, data) {
     const staffLiked = data['likesFromStaff'];
 
     const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
+    // Like updates are broadcast to the whole course, so this post may not be on the page
+    if (likeCounterElement === null) {
+        return;
+    }
     // eslint-disable-next-line no-useless-assignment
     let likeCounter = parseInt(likeCounterElement.innerText);
 

@@ -71,8 +71,8 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.wait('@verifyUser').then(({ response }) => {
                 const body = typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
                 if (body.data.previous_submission !== false) {
-                    cy.get('#instructor-submit-option-new').check({ force: true });
-                    cy.get('#previous-submission-form .submit-button').click();
+                    cy.get('[data-testid="previous-submission-new-files"]').check({ force: true });
+                    cy.get('[data-testid="previous-submission-submit"]').click();
                 }
             });
             cy.wait('@assignUpload');

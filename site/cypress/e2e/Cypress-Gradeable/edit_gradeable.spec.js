@@ -25,19 +25,24 @@ const logoutLogin = (user, url) => {
     cy.logout();
     cy.login(user);
     cy.visit(url);
-    // The edit page fetches its redactions in the background; leaving before that finishes
-    // cancels the request and the page reports an unhandled error, so wait for it first
+    // Let the edit page finish its background loading before the test interacts with it or leaves
     if (url.includes('open_peer_homework') && url.some((part) => part.startsWith('update'))) {
         cy.wait('@redactions');
     }
 };
 
 const updateDates = (inputSelector, date, saveText) => {
-    cy.get(inputSelector).clear();
-    cy.get(inputSelector).type(date);
-    // clicks out of the calendar
-    cy.get('body').click(0, 0);
-    cy.get('#save_status').should('have.text', saveText);
+    cy.get(inputSelector).then(($input) => {
+        // A retried test can find this date already saved, and retyping it triggers no save
+        if ($input.val() === date) {
+            return;
+        }
+        cy.get(inputSelector).clear();
+        cy.get(inputSelector).type(date);
+        // clicks out of the calendar
+        cy.get('body').click(0, 0);
+        cy.get('#save_status').should('have.text', saveText);
+    });
 };
 
 describe('Tests cases revolving around modifying gradeables', () => {
