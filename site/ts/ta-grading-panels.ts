@@ -139,13 +139,16 @@ export function toggleFullScreenMode() {
     saveTaLayoutDetails();
 }
 
+function activateTopBarButtons() {
+    panelElements.forEach((panel) => {
+        const panelIsVisible = $(`#${panel.str}`).is(':visible');
+        $(`#${panel.str}_btn`).toggleClass('active', panelIsVisible);
+    });
+}
+
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities() {
     panelElements.forEach((panel) => {
-        const id_str = document.getElementById(`#${panel.str}_btn`)
-            ? `#${panel.str}_btn`
-            : `#${panel.str}-btn`;
-
         if (
             taLayoutDet.currentTwoPanels.leftTop === panel.str
             || taLayoutDet.currentTwoPanels.leftBottom === panel.str
@@ -153,8 +156,6 @@ function setMultiPanelModeVisiblities() {
             || taLayoutDet.currentTwoPanels.rightBottom === panel.str
         ) {
             $(`#${panel.str}`).toggle(true);
-            $(panel.icon).toggleClass('icon-selected', true);
-            $(id_str).toggleClass('active', true);
 
             // display notebook elements if we have it
             $(`#${panel.str}`)
@@ -166,10 +167,9 @@ function setMultiPanelModeVisiblities() {
         }
         else {
             $(`#${panel.str}`).toggle(false);
-            $(panel.icon).toggleClass('icon-selected', false);
-            $(id_str).toggleClass('active', false);
         }
     });
+    activateTopBarButtons();
 }
 
 // Handles the DOM manipulation to update the two panel layout
@@ -281,17 +281,12 @@ export function setPanelsVisibilities(
     position: string | null = null,
 ) {
     panelElements.forEach((panel) => {
-        const id_str = document.getElementById(`${panel.str}_btn`)
-            ? `#${panel.str}_btn`
-            : `#${panel.str}-btn`;
         if (panel.str === ele) {
             const eleVisibility
                 = forceVisible !== null
                     ? forceVisible
                     : !$(`#${panel.str}`).is(':visible');
             $(`#${panel.str}`).toggle(eleVisibility);
-            $(panel.icon).toggleClass('icon-selected', eleVisibility);
-            $(id_str).toggleClass('active', eleVisibility);
 
             // display notebook elements if we have it
             $(`#${panel.str}`)
@@ -327,8 +322,6 @@ export function setPanelsVisibilities(
         ) {
             // only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
             $(`#${panel.str}`).hide();
-            $(panel.icon).removeClass('icon-selected');
-            $(id_str).removeClass('active');
         }
     });
     // update the two-panels-layout if it's enabled
@@ -344,6 +337,8 @@ export function setPanelsVisibilities(
     if (position !== null) {
         $(`select#${ele}_select`).hide();
     }
+
+    activateTopBarButtons();
 }
 
 // Exchanges positions of left and right panels
