@@ -173,7 +173,7 @@ class Core {
     }
 
     private function createEntityManager(AbstractDatabase $database): EntityManager {
-        $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
+        $cache_path = FileUtils::joinPaths($this->config->getSubmittyPath(), 'cache', 'doctrine');
         $cache = new PhpFilesAdapter("", 0, $cache_path);
         $config = ORMSetup::createAttributeMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
