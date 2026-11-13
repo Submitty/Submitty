@@ -51,6 +51,7 @@ with open(config_file, "r") as file:
     data = json.load(file)
     install_dir = data["submitty_install_dir"]
     data_dir = data["submitty_data_dir"]
+    venv_python = os.path.join(install_dir, "venv", "bin", "python3")
 
 # Collect user information from configuration file
 users_config_file = os.path.join(install_dir, "config", "submitty_users.json")
@@ -197,7 +198,7 @@ if "token" not in creds or not creds["token"]:
 # Take this path if we DID get an auth token
 else:
     # Construct cmd string
-    cmd = [f"{install_dir}/sbin/generate_grade_summaries.py", semester, course, source]
+    cmd = [venv_python, f"{install_dir}/sbin/generate_grade_summaries.py", semester, course, source]
 
     # Call generate_grade_summaries.py script to generate grade summaries for the
     # course
