@@ -32,6 +32,7 @@ DATA_CONFIG_PATH = path.join(SUBMITTY_DATA_DIR,'config')
 AUTOGRADING_WORKERS_PATH = path.join(INSTALL_CONFIG_PATH, 'autograding_workers.json')
 AUTOGRADING_CONTAINERS_PATH = path.join(DATA_CONFIG_PATH, 'autograding_containers.json')
 
+VENV_PYTHON = os.path.join(SUBMITTY_INSTALL_DIR, "venv", "bin", "python3")
 SYSTEMCTL_WRAPPER_SCRIPT = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils','systemctl_wrapper.py')
 
 # Functions to highlight important part of the output
@@ -185,14 +186,14 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         system_images_str = " ".join(system_docker_containers)
 
         # Pass in arguments for docker_command_wrapper.py (Remove unnecessary images)
-        image_removal_command = (f"python3 {script_directory} --remove "
+        image_removal_command = (f"{VENV_PYTHON} {script_directory} --remove "
                            f"--required-images {required_images_str} "
                            f"--system-images {system_images_str}")
         commands.append(image_removal_command)
         # Add the commands to pull the images
         for image in images_to_update:
-            commands.append(f'python3 {script_directory} --pull {image}')
-        commands.append(f"python3 {os.path.join(shipperutil_path, 'get_sysinfo.py')} docker osinfo")
+            commands.append(f'{VENV_PYTHON} {script_directory} --pull {image}')
+        commands.append(f"{VENV_PYTHON} {os.path.join(shipperutil_path, 'get_sysinfo.py')} docker osinfo")
         success = run_commands_on_worker(user, host, machine, commands, operation='docker image update', thread_object=thread_object)
 
     return success
@@ -275,7 +276,7 @@ def copy_code_to_worker(worker, user, host, submitty_repository, thread_object: 
         thread_object.add_message(print_red(res.stdout))
 
 def run_systemctl_command(machine, command, is_primary):
-    command = [SYSTEMCTL_WRAPPER_SCRIPT, command, '--target', machine]
+    command = [VENV_PYTHON, SYSTEMCTL_WRAPPER_SCRIPT, command, '--target', machine]
     process = subprocess.Popen(command)
     process.communicate()
     exit_code = process.wait()

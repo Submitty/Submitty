@@ -11,22 +11,26 @@ inputs:
     required: false
     default: '--test_only_grading'
 
-env:
-  PGPASSWORD: submitty_dbuser
-  PHP_USER: submitty_php
-  PHP_GROUP: submitty_php
-  CGI_USER: submitty_cgi
-  SUBMITTY_DATA_DIR: /var/local/submitty
-  SUBMITTY_INSTALL_DIR: /usr/local/submitty
-  SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
-  POSTGRES_HOST: localhost
-  PHP_VER: 8.2
-  NODE_VERSION: 16
-  PYTHON_VERSION: "3.10"
-
 runs:
   using: "composite"
   steps:
+    - name: Set environment variables
+      run: |
+        {
+          echo "PGPASSWORD=submitty_dbuser"
+          echo "PHP_USER=submitty_php"
+          echo "PHP_GROUP=submitty_php"
+          echo "CGI_USER=submitty_cgi"
+          echo "SUBMITTY_DATA_DIR=/var/local/submitty"
+          echo "SUBMITTY_INSTALL_DIR=/usr/local/submitty"
+          echo "SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty"
+          echo "VENV_PATH=/usr/local/submitty/venv"
+          echo "POSTGRES_HOST=localhost"
+          echo "PHP_VER=8.2"
+          echo "NODE_VERSION=16"
+          echo "PYTHON_VERSION=3.10"
+        } >> "$GITHUB_ENV"
+      shell: bash
     - name: Delete huge unnecessary folders, and clean apt cache
       run: |
         rm -rf /opt/hostedtoolcache
@@ -50,6 +54,14 @@ runs:
     - uses: actions/setup-python@v7
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Create and activate global Submitty venv
+      run: |
+        python3 -m venv "${VENV_PATH}"
+        # "Activate" for all later steps
+        echo "${VENV_PATH}/bin" >> "$GITHUB_PATH"
+        echo "VIRTUAL_ENV=${VENV_PATH}" >> "$GITHUB_ENV"
+      shell: bash
 
     - name: Disable php8.1-fpm before setup
       run: |
@@ -79,8 +91,6 @@ runs:
       run: |
         # Install for local
         pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
-        # Install globally
-        sudo pip3 install -r ${SUBMITTY_REPOSITORY}/.setup/pip/system_requirements.txt
       shell: bash
     - name: Get composer cache dir
       id: composer-cache
@@ -107,9 +117,6 @@ runs:
         cd ${SUBMITTY_REPOSITORY}/python_submitty_utils
         pip3 install .
         pip3 show submitty_utils
-        umask 022
-        sudo -H pip3 install .
-        sudo pip3 show submitty_utils
       shell: bash
 
     - name: Create Database and default users
@@ -217,6 +224,6 @@ runs:
       run: |
         cd $SUBMITTY_REPOSITORY
         SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-        sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+        sudo -E env "PATH=$PATH" python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
         bash tests/git_test.sh
       shell: bash
