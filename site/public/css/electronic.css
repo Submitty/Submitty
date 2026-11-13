@@ -178,7 +178,6 @@ button > i.fas:hover {
     border: 2px solid var(--default-border-color);
     border-radius: 5px;
     box-shadow: var(--default-box-shadow);
-    background-color: var(--default-white);
 }
 
 .gradeable .peer-version-conflict .indicator,
