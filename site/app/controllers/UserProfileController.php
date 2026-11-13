@@ -344,16 +344,16 @@ class UserProfileController extends AbstractController {
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
-                    'message' => "Github username updated successfully",
+                    'message' => "GitHub username updated successfully",
                     'github_username' => $newGithubUsername,
                 ]);
             }
             else {
-                return JsonResponse::getErrorResponse("Github username is not valid");
+                return JsonResponse::getErrorResponse("GitHub username is not valid");
             }
         }
         else {
-            return JsonResponse::getErrorResponse("Github username does not exist");
+            return JsonResponse::getErrorResponse("GitHub username does not exist");
         }
     }
     #[Route("/user_profile/change_linkedin_username", methods: ["POST"])]
@@ -388,16 +388,16 @@ class UserProfileController extends AbstractController {
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
-                    'message' => "Personal Webpage updated successfully",
+                    'message' => "Personal webpage updated successfully",
                     'personal_webpage' => $newPersonalWebpage,
                 ]);
             }
             else {
-                return JsonResponse::getErrorResponse("Personal Webpage is not valid");
+                return JsonResponse::getErrorResponse("Personal webpage is not valid");
             }
         }
         else {
-            return JsonResponse::getErrorResponse("Personal Webpage does not exist");
+            return JsonResponse::getErrorResponse("Personal webpage does not exist");
         }
     }
 }
