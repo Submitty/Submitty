@@ -10,6 +10,7 @@ use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\models\Email;
+use app\models\Notification;
 use app\views\admin\EmailRoomSeatingView;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -52,7 +53,10 @@ Please email your instructor with any questions or concerns.';
 
         $class_list = $this->core->getQueries()->getEmailListWithIds();
 
+        $metadata = json_encode(['url' => $this->core->buildCourseUrl()]);
+
         $seating_assignment_emails = [];
+        $seating_assignment_notifications = [];
         foreach ($class_list as $user) {
             $user_id = $user['user_id'];
 
@@ -70,7 +74,18 @@ Please email your instructor with any questions or concerns.';
             ];
 
             $seating_assignment_emails[] = new Email($this->core, $email_data);
+
+            $notification_data = [
+                'component' => 'grading',
+                'metadata' => $metadata,
+                'subject' => $email_data['subject'],
+                'sender_id' => $this->core->getUser()->getId(),
+                'to_user_id' => $user_id,
+                'gradeable_id' => $gradeable_id
+            ];
+            $seating_assignment_notifications[] = Notification::createNotification($this->core, $notification_data);
         }
+        $this->core->getNotificationFactory()->sendNotifications($seating_assignment_notifications);
         $this->core->getNotificationFactory()->sendEmails($seating_assignment_emails);
         $this->core->addSuccessMessage("Seating assignments have been successfully emailed!");
         return new RedirectResponse($this->core->buildCourseUrl());
