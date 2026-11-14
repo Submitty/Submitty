@@ -40,13 +40,13 @@
                          <span class="block">Please follow course code conventions established by your school and department.<br>
                                {{ course_code_requirements }}
                                Contact the system administrator if you are unsure what course code you should use.</span>
-                         <span class="block">Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</span>
+                         <span class="block">Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character (max 255 characters).</span>
                          <span class="required_type">(Required)</span>
                     </span>
                 </label>
             </div>
             <div class="option-input col-md-6">
-                <textarea name='course_title' id='course_title' data-testid="course-title-input" class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea><br>
+                <textarea name='course_title' id='course_title' data-testid="course-title-input" class="required auto_save" style="overflow:hidden" placeholder="(Required)" maxlength="255" required></textarea><br>
                 <span class="information-type" style="overflow-wrap: anywhere">My Prior Course Codes:<br>
                                   {% for course in courses %}{{ course }}{% if not loop.last %}, {% endif %}{% endfor %}.</span>
             </div>
