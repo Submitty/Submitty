@@ -2,6 +2,8 @@
 
 namespace app\views;
 
+use app\libraries\ImageAnnotationUtils;
+
 class ImageView extends AbstractView {
     /**
      * adds to our buffer a twig output of image annotation interface.
@@ -23,6 +25,7 @@ class ImageView extends AbstractView {
         $this->core->getOutput()->useHeader(false);
 
         $display_file_url = $this->core->buildCourseUrl(['display_file']);
+        $directory = $this->getDirectoryFromPath($file_path);
 
         $this->core->getOutput()->renderTwigOutput('grading/electronic/ImageAnnotationEmbedded.twig', [
             'gradeable_id' => $gradeable_id,
@@ -33,9 +36,10 @@ class ImageView extends AbstractView {
             'annotation_jsons' => $annotation_jsons,
             'student_popup' => $is_student,
             'can_download' => !$is_peer_grader,
-            'is_peer_grader' => $is_peer_grader, // temporary, see ImageAnnotationEmbedded.twig
+            // Peer graders can't annotate yet, see ImageAnnotationEmbedded.twig
+            'can_annotate' => in_array($directory, ImageAnnotationUtils::ANNOTATABLE_DIRS, true) && !$is_peer_grader,
             'display_file_url' => $display_file_url,
-            'directory' => $this->getDirectoryFromPath($file_path),
+            'directory' => $directory,
             'csrfToken' => $this->core->getCsrfToken(),
             'anon_path' => $anon_path,
             'download_path' => $download_path

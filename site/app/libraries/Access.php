@@ -560,8 +560,8 @@ class Access {
             if (!$grading_checks && self::checkBits($checks, self::ALLOW_ANNOTATED_FILE_OWNER)) {
                 $view_annotated_file = filter_var($args['view_annotated_file'] ?? false, FILTER_VALIDATE_BOOL);
                 $dir = $args['dir'] ?? '';
-                $path = $args['path'] ?? '';
-                if ($view_annotated_file && $dir === 'submissions_processed' && strpos($path, $user->getId()) !== false) {
+                // $graded_gradeable comes from the submitter directory in the requested path
+                if ($view_annotated_file && in_array($dir, ImageAnnotationUtils::ANNOTATABLE_DIRS, true) && $this->isGradedGradeableByUser($graded_gradeable, $user)) {
                     $grading_checks = true;
                 }
             }
