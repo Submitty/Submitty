@@ -1709,9 +1709,6 @@ class AdminGradeableController extends AbstractController {
         catch (ValidationException $e) {
             $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
         }
-        catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        }
         catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
