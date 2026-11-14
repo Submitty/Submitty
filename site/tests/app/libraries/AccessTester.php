@@ -115,6 +115,33 @@ class AccessTester extends BaseUnitTest {
         self::assertSame("{$expected}/", $this->access->resolveDirPath("submissions", "{$expected}/"));
     }
 
+    public function testResolveDirPathDoesNotTreatSiblingDirectoriesAsBase() {
+        $submissions = FileUtils::joinPaths($this->course_path, "submissions");
+        $processed = FileUtils::joinPaths($this->course_path, "submissions_processed", "hw1", "user", "1", "file.c");
+        self::assertSame($submissions . $processed, $this->access->resolveDirPath("submissions", $processed));
+
+        $results = FileUtils::joinPaths($this->course_path, "results");
+        $results_public = FileUtils::joinPaths($this->course_path, "results_public", "hw1", "user", "1", "out.txt");
+        self::assertSame($results . $results_public, $this->access->resolveDirPath("results", $results_public));
+
+        self::assertSame($submissions, $this->access->resolveDirPath("submissions", $submissions));
+        $material = FileUtils::joinPaths($this->course_path, "uploads", "course_materials", "file.txt");
+        self::assertSame($material, $this->access->resolveDirPath("uploads", $material));
+    }
+
+    public function testResolveDirPathTreatsEmptyPathAsBaseWithoutWarning() {
+        set_error_handler(static function (int $severity, string $message): never {
+            throw new \ErrorException($message, 0, $severity);
+        });
+        try {
+            $site = FileUtils::joinPaths($this->course_path, "site");
+            self::assertSame("{$site}/", $this->access->resolveDirPath("site", ""));
+        }
+        finally {
+            restore_error_handler();
+        }
+    }
+
     public function testStudentCanOnlyReadOwnSubmittedFiles() {
         $student = $this->createStudent("student");
         $graded_gradeables = $this->mockSubmitters(["student" => $student, "other" => $this->createStudent("other")]);
