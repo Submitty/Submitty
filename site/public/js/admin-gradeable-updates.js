@@ -360,7 +360,13 @@ $(document).ready(() => {
         }
     };
     if (is_electronic) {
-        loadTemplates().then(() => updateRedactionsDisplay());
+        // These requests fail if the page is left before they finish, so handle that instead of
+        // leaving an unhandled promise rejection
+        loadTemplates()
+            .then(() => updateRedactionsDisplay())
+            .catch((err) => {
+                console.error('Failed to load redactions:', err);
+            });
     }
 
     ajaxCheckBuildStatus();

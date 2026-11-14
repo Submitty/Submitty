@@ -567,7 +567,7 @@ class Gradeable extends AbstractModel {
         }
     }
     public function setPeerGradersList($input) {
-        if (!is_array($input) || count($input) === 0) {
+        if (!is_array($input) || !array_is_list($input) || $input === []) {
             throw new \InvalidArgumentException('Peer grading assignment CSV must contain at least one grader/student pair.');
         }
 

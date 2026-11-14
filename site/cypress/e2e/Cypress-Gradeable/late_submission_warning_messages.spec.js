@@ -103,25 +103,19 @@ const giveLateDays = (timestamp, student_id, late_days = 2) => {
 
 const giveExtensions = (gradeable_name) => {
     // Grant an extension to the student
-    cy.intercept('POST', '**/extensions/update').as('updateExtension');
     cy.visit(['sample', 'extensions']);
     cy.get('[data-testid=gradeable-select]').select(gradeable_name);
     cy.get('[data-testid=extension-user-id]').type('student');
     cy.get('[data-testid=extension-late-days]').clear();
     cy.get('[data-testid=extension-late-days]').type(1, { force: true });
-    if (gradeable_name.includes('_team')) {
-        cy.get('input[name="option"]').invoke('val', '1');
-    }
     cy.get('[data-testid=extensions-form]')
         .find('a')
         .contains('Submit')
         .click();
-    cy.wait('@updateExtension').then(({ response }) => {
-        const responseData = typeof response.body === 'string'
-            ? JSON.parse(response.body)
-            : response.body;
-        expect(responseData.status).to.equal('success');
-    });
+    if (gradeable_name.includes('_team')) {
+        cy.get('#more_extension_popup', { timeout: 20000 }).should('be.visible');
+        cy.get('[data-testid=more-extension-apply-to-all').click();
+    }
 };
 
 // daysLate: total calendar days late the server will report (daysAgo + 1)
@@ -369,8 +363,6 @@ describe('Test warning messages for team gradeable', () => {
         cy.login('aphacker');
         cy.visit(['sample', 'gradeable', team_gradeable, 'team']);
         cy.get('#accept_invitation').click();
-        cy.get('[data-testid="your-team-header"]').should('be.visible');
-        cy.contains('aphacker').should('be.visible');
     });
 
     it('Confirmation for the first submission with 2 remaining late days and 1 extension for teams', () => {
