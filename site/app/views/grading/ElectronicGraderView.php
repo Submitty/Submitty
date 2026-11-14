@@ -2020,25 +2020,32 @@ HTML;
      */
     public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable, bool $anonymize = false): string {
         $submitter = $graded_gradeable->getSubmitter();
-        $participation = [];
+        $entries = [];
         if (!$submitter->isTeam()) {
             $gradeable_id = $graded_gradeable->getGradeable()->getId();
             $participation = $this->core->getQueries()->getPeerParticipationForGrader(
                 $submitter->getId(),
                 $gradeable_id
             );
-            if ($anonymize && $participation !== []) {
+            if ($participation !== []) {
+                // One batched query for both modes
                 $anon_ids = $this->core->getQueries()->getAnonId(array_keys($participation), $gradeable_id);
-                $anonymized = [];
+                $grade_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade']);
                 foreach ($participation as $user_id => $data) {
-                    $anonymized[$anon_ids[$user_id] ?? 'Unknown'] = $data;
+                    $anon_id = $anon_ids[$user_id] ?? null;
+                    $data['display_id'] = $anonymize ? ($anon_id ?? 'Unknown') : $user_id;
+                    $data['grade_url'] = $anon_id !== null
+                        ? $grade_url . '?' . http_build_query(['who_id' => $anon_id])
+                        : null;
+                    $entries[] = $data;
                 }
-                ksort($anonymized);
-                $participation = $anonymized;
+                if ($anonymize) {
+                    usort($entries, static fn (array $a, array $b): int => strcmp($a['display_id'], $b['display_id']));
+                }
             }
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
-            'participation' => $participation
+            'participation' => $entries
         ]);
     }
 
