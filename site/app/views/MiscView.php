@@ -12,6 +12,13 @@ class MiscView extends AbstractView {
         ]);
     }
 
+    public function displayMarkdown(string $file_contents): string {
+        $this->core->getOutput()->setContentOnly(true);
+        return $this->core->getOutput()->renderTwigTemplate("misc/Markdown.twig", [
+            "file_contents" => $file_contents
+        ]);
+    }
+
     public function displayCode($file_type, $filename, $file_contents, $search_enabled = true) {
         $this->core->getOutput()->setContentOnly(true);
 

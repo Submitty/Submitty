@@ -33,6 +33,149 @@ class AccessTester extends BaseUnitTest {
         $this->access = new Access($this->core);
     }
 
+    protected function tearDown(): void {
+        parent::tearDown();
+        if (is_dir($this->course_path)) {
+            FileUtils::recursiveRmdir($this->course_path);
+        }
+    }
+
+    private function createStudent(string $id): User {
+        $student = $this->createMockModel(User::class);
+        $student->method("getId")->willReturn($id);
+        $student->method("getGroup")->willReturn(User::GROUP_STUDENT);
+        return $student;
+    }
+
+    private function createCourseFile(string $relative_path): string {
+        $path = FileUtils::joinPaths($this->course_path, $relative_path);
+        FileUtils::createDir(dirname($path), true);
+        FileUtils::writeFile($path, "data");
+        return $path;
+    }
+
+    /**
+     * Registers submitters with the mocked queries so that file paths resolve back to them.
+     *
+     * @param array<string, User|Team> $owners Submitter objects keyed by submitter id
+     * @return array<string, GradedGradeable> Graded gradeables for "hw1" keyed by submitter id
+     */
+    private function mockSubmitters(array $owners): array {
+        $gradeable = $this->createMockModel(\app\models\gradeable\Gradeable::class);
+        $gradeable->method("getId")->willReturn("hw1");
+        $gradeable->method("getHiddenFiles")->willReturn([]);
+        $gradeable->method("getMinGradingGroup")->willReturn(User::GROUP_INSTRUCTOR);
+        $gradeable->method("isTaGrading")->willReturn(true);
+        $gradeable->method("isStudentView")->willReturn(true);
+        $gradeable->method("isStudentSubmit")->willReturn(true);
+        $gradeable->method("canStudentDownload")->willReturn(true);
+
+        $submitters = [];
+        $graded_gradeables = [];
+        foreach ($owners as $id => $owner) {
+            $submitters[$id] = new Submitter($this->core, $owner);
+            $auto_graded_gradeable = $this->createMockModel(\app\models\gradeable\AutoGradedGradeable::class);
+            $auto_graded_gradeable->method("getHighestVersion")->willReturn(1);
+            $auto_graded_gradeable->method("getActiveVersion")->willReturn(1);
+            $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+            $graded_gradeable->method("getGradeable")->willReturn($gradeable);
+            $graded_gradeable->method("getSubmitter")->willReturn($submitters[$id]);
+            $graded_gradeable->method("getAutoGradedGradeable")->willReturn($auto_graded_gradeable);
+            $graded_gradeables[$id] = $graded_gradeable;
+        }
+
+        $queries = $this->core->getQueries();
+        $queries->method("getGradeableConfig")->willReturn($gradeable);
+        $queries->method("getSubmitterById")->willReturnCallback(fn (string $id) => $submitters[$id] ?? null);
+        $queries->method("getGradedGradeableForSubmitter")->willReturnCallback(
+            fn ($unused, Submitter $submitter) => $graded_gradeables[$submitter->getId()]
+        );
+
+        return $graded_gradeables;
+    }
+
+    private function canRead(User $user, string $dir, string $path, ?GradedGradeable $graded_gradeable = null): bool {
+        $args = ["dir" => $dir, "path" => $path];
+        if ($graded_gradeable !== null) {
+            $args["gradeable"] = $graded_gradeable->getGradeable();
+            $args["graded_gradeable"] = $graded_gradeable;
+        }
+        return $this->access->canUser($user, "path.read", $args);
+    }
+
+    public function testResolveDirPathRejectsEmptySegments() {
+        $base = FileUtils::joinPaths($this->course_path, "submissions");
+        self::assertFalse($this->access->resolveDirPath("submissions", "hw1//user/1/file.c"));
+        self::assertFalse($this->access->resolveDirPath("submissions", "{$base}/hw1//user/1/file.c"));
+
+        $expected = "{$base}/hw1/user/1/file.c";
+        self::assertSame($expected, $this->access->resolveDirPath("submissions", "hw1/user/1/file.c"));
+        self::assertSame($expected, $this->access->resolveDirPath("submissions", "/hw1/user/1/file.c"));
+        self::assertSame($expected, $this->access->resolveDirPath("submissions", $expected));
+        self::assertSame("{$expected}/", $this->access->resolveDirPath("submissions", "{$expected}/"));
+    }
+
+    public function testStudentCanOnlyReadOwnSubmittedFiles() {
+        $student = $this->createStudent("student");
+        $graded_gradeables = $this->mockSubmitters(["student" => $student, "other" => $this->createStudent("other")]);
+        $own_file = $this->createCourseFile("submissions/hw1/student/1/file.c");
+        $other_file = $this->createCourseFile("submissions/hw1/other/1/file.c");
+
+        self::assertTrue($this->canRead($student, "submissions", $own_file, $graded_gradeables["student"]));
+        self::assertFalse($this->canRead($student, "submissions", $other_file, $graded_gradeables["student"]));
+        self::assertFalse($this->canRead($student, "submissions", $other_file));
+    }
+
+    public function testEmptyPathSegmentCannotReachAnotherSubmitter() {
+        $student = $this->createStudent("student");
+        $graded_gradeables = $this->mockSubmitters(["student" => $student, "other" => $this->createStudent("other")]);
+
+        $files = [
+            "submissions" => "other/1/file.c",
+            "results_public" => "other/1/file.c",
+            "attachments" => "other/grader/file.c",
+        ];
+        foreach ($files as $dir => $relative_path) {
+            $this->createCourseFile("{$dir}/hw1/{$relative_path}");
+            $path = FileUtils::joinPaths($this->course_path, $dir, "hw1") . "//" . $relative_path;
+            self::assertFalse($this->canRead($student, $dir, $path, $graded_gradeables["student"]), $dir);
+        }
+    }
+
+    public function testFileWithUnknownSubmitterIsDenied() {
+        $student = $this->createStudent("student");
+        $graded_gradeables = $this->mockSubmitters(["student" => $student]);
+        $file = $this->createCourseFile("submissions/hw1/removed_user/1/file.c");
+
+        self::assertFalse($this->canRead($student, "submissions", $file, $graded_gradeables["student"]));
+    }
+
+    public function testGradedGradeableMustOwnTheFile() {
+        $instructor = $this->createMockModel(User::class);
+        $instructor->method("getGroup")->willReturn(User::GROUP_INSTRUCTOR);
+        $graded_gradeables = $this->mockSubmitters([
+            "student" => $this->createStudent("student"),
+            "other" => $this->createStudent("other"),
+        ]);
+        $file = $this->createCourseFile("submissions/hw1/other/1/file.c");
+
+        self::assertTrue($this->canRead($instructor, "submissions", $file, $graded_gradeables["other"]));
+        self::assertFalse($this->canRead($instructor, "submissions", $file, $graded_gradeables["student"]));
+    }
+
+    public function testOnlyTeamMembersCanReadTeamFiles() {
+        $member = $this->createStudent("member");
+        $outsider = $this->createStudent("outsider");
+        $team = $this->createMockModel(Team::class);
+        $team->method("getId")->willReturn("team1");
+        $team->method("hasMember")->willReturnCallback(fn (string $id) => $id === "member");
+        $this->mockSubmitters(["team1" => $team, "member" => $member, "outsider" => $outsider]);
+        $file = $this->createCourseFile("submissions/hw1/team1/1/file.c");
+
+        self::assertTrue($this->canRead($member, "submissions", $file));
+        self::assertFalse($this->canRead($outsider, "submissions", $file));
+    }
+
     public function testIsGradedGradeableInPeerAssignment() {
         $user1 = $this->createMockModel(User::class);
         $user2 = $this->createMockModel(User::class);

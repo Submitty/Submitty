@@ -936,7 +936,7 @@ class Access {
                     $submitter = $this->core->getQueries()->getSubmitterById($value);
                     if ($submitter !== null) {
                         $args["submitter"] = $submitter;
-                        if (array_key_exists("graded_gradeable", $subparts)) {
+                        if (array_key_exists("graded_gradeable", $args)) {
                             //If we already have a graded gradeable in the args, make sure this file
                             // actually belongs to it
                             $graded_gradeable = $args["graded_gradeable"];
@@ -958,6 +958,10 @@ class Access {
                         if (!$this->isGradedGradeableBySubmitter($graded_gradeable, $submitter)) {
                             return false;
                         }
+                    }
+                    else {
+                        //Without a known owner, nothing can tie this file to a graded gradeable
+                        return false;
                     }
                     break;
                 case "version":
@@ -1000,9 +1004,15 @@ class Access {
 
         //No directory traversal
         $orig_parts = explode(DIRECTORY_SEPARATOR, $path);
+        $last_index = count($orig_parts) - 1;
         $parts = [];
-        foreach ($orig_parts as $part) {
+        foreach ($orig_parts as $index => $part) {
             if ($part === "..") {
+                return false;
+            }
+            //An empty segment that isn't from a leading or trailing slash would shift the
+            // subparts parsed in canUserAccessPath away from the file's real owner
+            if ($part === "" && $index !== 0 && $index !== $last_index) {
                 return false;
             }
             if ($part !== ".") {

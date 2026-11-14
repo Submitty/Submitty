@@ -1,0 +1,8 @@
+{% include "Vue.twig" with {
+    type: "component",
+    name: "Markdown",
+    args: {
+        "content": file_contents,
+        "testId": "markdown-file"
+    }
+} only %}
