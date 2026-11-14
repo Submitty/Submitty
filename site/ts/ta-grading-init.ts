@@ -1,18 +1,13 @@
 import { changeStudentArrowTooltips } from './ta-grading';
 import { loadTAGradingSettingData, settingsData } from './ta-grading-keymap';
+import { setViewAllSections } from './utils/view-sections';
 
 const settingsCallbacks = {
     'general-setting-arrow-function': changeStudentArrowTooltips,
     'general-setting-navigate-assigned-students-only': function (
         value: string,
     ) {
-        // eslint-disable-next-line eqeqeq
-        if (value == 'true') {
-            window.Cookies.set('view', 'assigned', { path: '/' });
-        }
-        else {
-            window.Cookies.set('view', 'all', { path: '/' });
-        }
+        setViewAllSections(value !== 'true');
     },
 };
 
