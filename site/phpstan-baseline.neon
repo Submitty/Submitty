@@ -13050,7 +13050,7 @@ parameters:
 		-
 			rawMessage: 'Construct empty() is not allowed. Use more strict comparison.'
 			identifier: empty.notAllowed
-			count: 9
+			count: 5
 			path: app/models/gradeable/Gradeable.php
 
 		-
@@ -13061,18 +13061,6 @@ parameters:
 
 		-
 			rawMessage: Foreach key variable $i is never read.
-			identifier: foreach.unusedKey
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: Foreach key variable $row_num is never read before being overwritten.
-			identifier: foreach.keyOverwritten
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			rawMessage: Foreach key variable $row_num is never read.
 			identifier: foreach.unusedKey
 			count: 1
 			path: app/models/gradeable/Gradeable.php

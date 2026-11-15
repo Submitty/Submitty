@@ -4979,6 +4979,45 @@ SQL;
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES " . $values);
     }
 
+    /**
+     * Replace all peer grading assignments for a gradeable in one transaction.
+     *
+     * @param string $gradeable_id
+     * @param list<array{string, string}> $assignments Pairs of grader and student IDs
+     */
+    public function replacePeerGradingAssignments(string $gradeable_id, array $assignments): void {
+        $owns_transaction = !$this->course_db->inTransaction();
+        if ($owns_transaction) {
+            $this->course_db->beginTransaction();
+        }
+
+        try {
+            $this->clearPeerGradingAssignment($gradeable_id);
+            foreach (array_chunk($assignments, 1000) as $assignment_chunk) {
+                $value_placeholders = implode(',', array_fill(0, count($assignment_chunk), '(?, ?, ?)'));
+                $parameters = [];
+                foreach ($assignment_chunk as [$grader_id, $student_id]) {
+                    $parameters[] = $grader_id;
+                    $parameters[] = $student_id;
+                    $parameters[] = $gradeable_id;
+                }
+                $this->course_db->query(
+                    "INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES {$value_placeholders}",
+                    $parameters
+                );
+            }
+            if ($owns_transaction) {
+                $this->course_db->commit();
+            }
+        }
+        catch (\Throwable $exception) {
+            if ($owns_transaction && $this->course_db->inTransaction()) {
+                $this->course_db->rollback();
+            }
+            throw $exception;
+        }
+    }
+
 
     /**
      * Removes all peer grading pairs from a given assignment

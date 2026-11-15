@@ -1692,6 +1692,15 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         unset($_POST['csrf_token']);
+        if (array_key_exists('peer_graders_list', $_POST) && is_string($_POST['peer_graders_list'])) {
+            try {
+                $_POST['peer_graders_list'] = json_decode($_POST['peer_graders_list'], true, 512, JSON_THROW_ON_ERROR);
+            }
+            catch (\JsonException $e) {
+                $this->core->getOutput()->renderJsonFail('Peer grading assignment data is invalid JSON.');
+                return;
+            }
+        }
         try {
             $response_props = $this->updateGradeable($gradeable, $_POST);
             // Finally, send the requester back the information
