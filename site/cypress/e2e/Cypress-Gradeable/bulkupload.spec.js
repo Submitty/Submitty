@@ -16,6 +16,16 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.login(user);
             cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
 
+            // Remove PDFs left over from an earlier failed run so the file counts below start from zero
+            cy.get('body').then(($body) => {
+                if ($body.find('[data-testid="bulk-delete-all"]').length > 0) {
+                    cy.get('[data-testid="radio-bulk-upload"]').click();
+                    cy.get('[data-testid="bulk-delete-all"]').click();
+                    cy.get('[data-testid="assign-box"]').contains('0 files ready to assign', { timeout: 30000 });
+                    cy.reload();
+                }
+            });
+
             // Grader submission options
             cy.get('[data-testid="radio-student-upload"]').click();
             cy.get('[data-testid="submit-student-userid"]').should('be.visible');
@@ -54,7 +64,18 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.reload();
             cy.get('[data-testid="bulk-user-id-1"]').should('have.value', 'adamsg');
             // assign adamsg their test
+            cy.intercept('**/gradeable/bulk_upload_test/verify*').as('verifyUser');
+            cy.intercept('**/gradeable/bulk_upload_test/split_pdf/upload*').as('assignUpload');
             cy.get('[data-testid="bulk-submit-1"]').click();
+            // If adamsg already has a submission (e.g. from an earlier run), a popup asks which files to keep
+            cy.wait('@verifyUser').then(({ response }) => {
+                const body = typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
+                if (body.data.previous_submission !== false) {
+                    cy.get('[data-testid="previous-submission-new-files"]').check({ force: true });
+                    cy.get('[data-testid="previous-submission-submit"]').click();
+                }
+            });
+            cy.wait('@assignUpload');
             cy.get('[data-testid="bulk-delete-all"]').click();
             cy.get('[data-testid="assign-box"]').contains('0 files ready to assign', { timeout: 10000 });
 
