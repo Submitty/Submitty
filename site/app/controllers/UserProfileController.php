@@ -339,7 +339,7 @@ class UserProfileController extends AbstractController {
         $user = $this->core->getUser();
         if (isset($_POST['github_username'])) {
             $newGithubUsername = trim($_POST['github_username']);
-            if ($user->validateUserData('user_github_username', $newGithubUsername) === true) {
+            if (User::validateUserData('user_github_username', $newGithubUsername) === true) {
                 $user->setGithubUsername($newGithubUsername);
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
@@ -361,7 +361,7 @@ class UserProfileController extends AbstractController {
         $user = $this->core->getUser();
         if (isset($_POST['linkedin_username'])) {
             $newLinkedinUsername = trim($_POST['linkedin_username']);
-            if ($user->validateUserData('user_linkedin_username', $newLinkedinUsername) === true) {
+            if (User::validateUserData('user_linkedin_username', $newLinkedinUsername) === true) {
                 $user->setLinkedinUsername($newLinkedinUsername);
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);
@@ -383,7 +383,7 @@ class UserProfileController extends AbstractController {
         $user = $this->core->getUser();
         if (isset($_POST['personal_webpage'])) {
             $newPersonalWebpage = trim($_POST['personal_webpage']);
-            if ($user->validateUserData('user_personal_webpage', $newPersonalWebpage) === true) {
+            if (User::validateUserData('user_personal_webpage', $newPersonalWebpage) === true) {
                 $user->setPersonalWebpage($newPersonalWebpage);
                 $user->setUserUpdated(true);
                 $this->core->getQueries()->updateUser($user);

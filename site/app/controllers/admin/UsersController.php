@@ -64,9 +64,9 @@ class UsersController extends AbstractController {
                 'user_id' => $student->getId(),
                 'email' => $student->getEmail(),
                 'secondary_email' => $student->getSecondaryEmail(),
-                'linkedin_username' => $student-> getLinkedinUsername(),
-                'github_username' => $student-> getGithubUsername(),
-                'personal_webpage' => $student-> getPersonalWebpage(),
+                'linkedin_username' => $student->getLinkedinUsername(),
+                'github_username' => $student->getGithubUsername(),
+                'personal_webpage' => $student->getPersonalWebpage(),
                 'utc_offset' => $student->getUTCOffset(),
                 'time_zone' => $student->getNiceFormatTimeZone(),
                 'reg_section' => $reg_sec,
@@ -1441,19 +1441,13 @@ class UsersController extends AbstractController {
                             }
                             break;
                         case "LinkedIn Username":
-                            if (!empty($row[$col_num])) {
-                                $user->setLinkedinUsername($value);
-                            }
+                            // Ignore LinkedIn Username column from exported lists.
                             break;
                         case "GitHub Username":
-                            if (!empty($row[$col_num])) {
-                                $user->setGithubUsername($value);
-                            }
+                            // Ignore GitHub Username column from exported lists.
                             break;
                         case "Personal Webpage":
-                            if (!empty($row[$col_num])) {
-                                $user->setPersonalWebpage($value);
-                            }
+                            // Ignore Personal Webpage column from exported lists.
                             break;
                         case "UTC Offset":
                             // Ignore UTC Offset column from exported lists.

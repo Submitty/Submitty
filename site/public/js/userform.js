@@ -283,7 +283,7 @@ function completeUserFormInformation(user) {
     $('[name="user_linkedin_username"]').change();
     $('[name="user_github_username"]', form).val(user['github_username']);
     $('[name="user_github_username"]').change();
-    $('[name="user_personal_webpage"]', form).val(user['personal_webpage']);    
+    $('[name="user_personal_webpage"]', form).val(user['personal_webpage']);
     $('[name="user_personal_webpage"]').change();
     $('[name="registration_subsection"]', form).val(user['registration_subsection']);
     $('[name="registration_subsection"]').change();

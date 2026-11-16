@@ -762,7 +762,7 @@ class User extends AbstractModel implements \JsonSerializable {
             case 'user_github_username':
                 return is_string($data) && preg_match('/^[a-zA-Z0-9-]{0,50}$/', $data) === 1;
             case 'user_personal_webpage':
-                return is_string($data) && (strlen($data) == 0 || filter_var($data, FILTER_VALIDATE_URL) !== false);
+                return is_string($data) && (strlen($data) === 0 || filter_var($data, FILTER_VALIDATE_URL) !== false);
             case 'user_group':
                 //user_group check is either a digit between 1 - 4 or one of the strings:
                 // "Instructor"
