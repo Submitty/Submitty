@@ -48,6 +48,35 @@ class TermsController extends AbstractController {
         $term_name = $_POST['term_name'];
         $start_date = $_POST['start_date'];
         $end_date = $_POST['end_date'];
+
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $term_id)) {
+            $error = "Term ID must contain only letters, numbers, underscores, and hyphens.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        elseif (strlen($term_id) > 255) {
+            $error = "Term ID must not exceed 255 characters.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+        elseif (strlen($term_name) > 255) {
+            $error = "Term name must not exceed 255 characters.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
+
         $em = $this->core->getSubmittyEntityManager();
         $term = $em->find(Term::class, $term_id);
 
