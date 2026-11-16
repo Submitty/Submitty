@@ -11,9 +11,9 @@ def up(config, database):
     :type database: migrator.db.Database
     """
     database.execute("""
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username character varying(50) DEFAULT '';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_github_username character varying(50) DEFAULT '';
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_personal_webpage character varying(255) DEFAULT '';
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_linkedin_username character varying(50) NOT NULL DEFAULT '';
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_github_username character varying(50) NOT NULL DEFAULT '';
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS user_personal_webpage character varying(255) NOT NULL DEFAULT '';
     """)
     pass
 
