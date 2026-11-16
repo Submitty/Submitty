@@ -222,3 +222,26 @@ describe('Mentor visibility of upload.pdf for bulk uploaded exams', () => {
         cy.get('[data-testid="grade_start_date"]').type('{enter}');
     });
 });
+
+describe('Test cases revolving around creating a bulk upload gradeable', () => {
+    it('should default to no due date but a grades released date', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable']);
+        cy.get('[data-testid=create-gradeable-title]').type('BulkUploadDefaults');
+        cy.get('[data-testid=create-gradeable-id]').type('BulkUploadDefaults');
+        // force needed to click radio button
+        cy.get('#radio_ef_bulk_upload').check({ force: true });
+        cy.get('[data-testid=create-gradeable-btn]').click();
+
+        cy.visit(['sample', 'gradeable', 'BulkUploadDefaults', 'update?nav_tab=5']);
+        cy.get('#has_due_date_no').should('be.checked');
+        cy.get('#date_due').should('not.be.visible');
+        cy.get('#has_release_date_yes').should('be.checked');
+        cy.get('#date_released').should('be.visible');
+
+        cy.visit(['sample']);
+        cy.get('[data-testid="BulkUploadDefaults"] [title="Delete Gradeable"]').click();
+        cy.get('[data-testid="confirm-delete-gradeable"]').click();
+        cy.get('[data-testid="BulkUploadDefaults"] [title="Delete Gradeable"]').should('not.exist');
+    });
+});
