@@ -1,0 +1,19 @@
+{% extends "generic/Popup.twig" %}
+
+{% block popup_id %}popup-blocked-users{% endblock %}
+
+{% block title %}
+    <span data-testid="modal-title">Blocked Forum Users</span>
+{% endblock %}
+
+{% block body %}
+    <div class="form-body" data-testid="blocked-users-body">
+        <!-- Populated by showBlockedUsersModal() via AJAX -->
+    </div>
+{% endblock %}
+
+{% block buttons %}
+    <div class="form-buttons">
+        <a class="btn btn-default close-button" data-testid="close-blocked-users" onclick="closePopup('popup-blocked-users'); $('body').removeClass('popup-active');">Close</a>
+    </div>
+{% endblock %}
