@@ -2,6 +2,24 @@
     <div class="draggable_content" style="width:100%">
         <div style="padding:20px; margin-top:10px;">
             <span class="col grading_label" style="padding-left:0;">Peer Participation</span>
+            {% if assigned_count > 0 %}
+                <p data-testid="peer-participation-summary" style="margin-top:10px;">
+                    Graded {{ graded_count }} of {{ assigned_count }} assigned {{ assigned_count == 1 ? 'student' : 'students' }} ({{ ungraded|length }} ungraded)
+                </p>
+                {% if ungraded is not empty %}
+                    <div data-testid="peer-participation-ungraded">
+                        <strong>Not graded:</strong>
+                        {% for student in ungraded %}
+                            {% if student.grade_url %}
+                                <a data-testid="peer-participation-ungraded-link" href="{{ student.grade_url }}">{{ student.display_id }}</a>
+                            {%- else -%}
+                                {{ student.display_id }}
+                            {%- endif -%}
+                            {{- not loop.last ? ',' : '' }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endif %}
             {% if participation is empty %}
                 <p data-testid="peer-participation-empty">No peer grading participation found.</p>
             {% else %}
