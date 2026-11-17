@@ -330,6 +330,14 @@ function getZoomableImage(): { img: HTMLImageElement | null; markerView: MarkerV
     return { img, markerView };
 }
 
+// The stylesheet fits the image into its box with object-fit: contain, so the box can be
+// wider or taller than the image. The MarkerView would stretch the image to fill its box,
+// so it gets the size of the image inside the box instead.
+function getImageSizeInBox(img: HTMLImageElement, boxWidth: number, boxHeight: number): { width: number; height: number } {
+    const scale = Math.min(boxWidth / img.naturalWidth, boxHeight / img.naturalHeight);
+    return { width: img.naturalWidth * scale, height: img.naturalHeight * scale };
+}
+
 function getSavedImageZoom(): number {
     try {
         const zoom = Number(localStorage.getItem('image-scale'));
@@ -343,11 +351,19 @@ function getSavedImageZoom(): number {
     return MIN_IMAGE_ZOOM;
 }
 
+// The stylesheet only fits the plain image to the panel, so the MarkerView and a zoomed
+// image are refitted when the panel is resized
+let panelResizeObserver: ResizeObserver | null = null;
+
 function initImageZoom(): void {
     const { img } = getZoomableImage();
     if (!img) {
         return;
     }
+
+    panelResizeObserver?.disconnect();
+    panelResizeObserver = new ResizeObserver(refitImage);
+    panelResizeObserver.observe(document.getElementById('file-content')!);
 
     $('#file-zoom-display').text('100%');
     const restoreZoom = () => {
@@ -412,10 +428,11 @@ function applyImageZoom(): void {
     img.style.height = zoomed ? `${height}px` : '';
 
     if (markerView) {
-        markerView.style.width = `${width}px`;
-        markerView.style.height = `${height}px`;
-        markerView.targetWidth = width;
-        markerView.targetHeight = height;
+        const size = getImageSizeInBox(img, width, height);
+        markerView.style.width = `${size.width}px`;
+        markerView.style.height = `${size.height}px`;
+        markerView.targetWidth = size.width;
+        markerView.targetHeight = size.height;
         // Markers keep their old positions until the view is shown again
         if (annotationManager.currentAnnotations) {
             markerView.show(annotationManager.currentAnnotations);
@@ -423,6 +440,36 @@ function applyImageZoom(): void {
     }
 
     $('#file-zoom-display').text(`${Math.round(zoom * 100)}%`);
+}
+
+function refitImage(): void {
+    const { img, markerView } = getZoomableImage();
+    if (!img?.dataset.fitWidth) {
+        return;
+    }
+
+    // Measure the size the stylesheet fits the plain image to, putting it in
+    // place of the MarkerView for a moment
+    img.removeAttribute('style');
+    let width, height;
+    if (markerView) {
+        const display = markerView.style.display;
+        markerView.style.display = 'none';
+        markerView.before(img);
+        ({ width, height } = getComputedStyle(img));
+        img.remove();
+        markerView.style.display = display;
+    }
+    else {
+        ({ width, height } = getComputedStyle(img));
+    }
+
+    // A hidden panel has nothing to measure
+    if (parseFloat(width) > 0) {
+        img.dataset.fitWidth = width;
+        img.dataset.fitHeight = height;
+    }
+    applyImageZoom();
 }
 
 function renderAnnotationsOnImage(): void {
@@ -460,8 +507,9 @@ function renderAnnotationsOnImage(): void {
 
         // Get computed style dimensions to ensure proper scaling
         const computedStyle: CSSStyleDeclaration = getComputedStyle(annotationManager.originalImg);
-        const displayWidth: number = parseInt(computedStyle.width) || annotationManager.originalImg.width || annotationManager.originalImg.naturalWidth;
-        const displayHeight: number = parseInt(computedStyle.height) || annotationManager.originalImg.height || annotationManager.originalImg.naturalHeight;
+        const size = getImageSizeInBox(annotationManager.originalImg, parseFloat(computedStyle.width), parseFloat(computedStyle.height));
+        const displayWidth: number = size.width || annotationManager.originalImg.width || annotationManager.originalImg.naturalWidth;
+        const displayHeight: number = size.height || annotationManager.originalImg.height || annotationManager.originalImg.naturalHeight;
 
         // Set target dimensions to match the displayed image size
         markerView.targetWidth = displayWidth;
