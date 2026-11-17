@@ -57,6 +57,7 @@
       <tr>
         <th scope="col" style="text-align: left;"> Queue Name/Access Code </th>
         <th scope="col">Open?</th>
+        <th scope="col">Change Color</th>
         <th scope="col">Empty</th>
         <th scope="col">Delete</th>
       </tr>
@@ -75,6 +76,12 @@
 
           <td>
               <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']|e('js')}}')" {% if queue['open'] %} checked {% endif %} data-testid="toggle-queue-checkbox" />
+          </td>
+          <td>
+              <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
+                  {% for color_name, color_code in viewer.colors %}
+                    <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == queue['color'] %}selected="selected"{% endif %}>{{ color_name }}</option>
+                  {% endfor %}
           </td>
           <td>
             <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
