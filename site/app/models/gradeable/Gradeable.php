@@ -799,13 +799,11 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets if this gradeable has a due date or not for electronic gradeables
+     * Gets if this gradeable has a grades released date or not for electronic gradeables.
+     * This is independent of whether the gradeable has a due date.
      * @return bool
      */
     public function hasReleaseDate() {
-        if (!$this->hasDueDate()) {
-            return false;
-        }
         return $this->has_release_date;
     }
 

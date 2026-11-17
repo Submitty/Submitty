@@ -148,13 +148,17 @@ function activateTopBarButtons() {
 
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities() {
+    // Panels in positions the current layout doesn't use (e.g. the bottom ones
+    // after switching from 4 panels to 2) are remembered but stay hidden
+    const shownPanels = Object.keys(taLayoutDet.currentTwoPanels)
+        .filter((position) => taLayoutDet.currentActivePanels[position])
+        .map((position) => taLayoutDet.currentTwoPanels[position]);
     panelElements.forEach((panel) => {
-        if (
-            taLayoutDet.currentTwoPanels.leftTop === panel.str
-            || taLayoutDet.currentTwoPanels.leftBottom === panel.str
-            || taLayoutDet.currentTwoPanels.rightTop === panel.str
-            || taLayoutDet.currentTwoPanels.rightBottom === panel.str
-        ) {
+        const id_str = document.getElementById(`#${panel.str}_btn`)
+            ? `#${panel.str}_btn`
+            : `#${panel.str}-btn`;
+
+        if (shownPanels.includes(panel.str)) {
             $(`#${panel.str}`).toggle(true);
 
             // display notebook elements if we have it
@@ -247,6 +251,13 @@ function checkForTwoPanelLayoutChange(
 ) {
     // update the global variable
     if (isPanelAdded) {
+        // A panel can only be in one position, so forget any other position it was
+        // remembered in (e.g. a bottom one that a smaller layout doesn't use)
+        for (const position in taLayoutDet.currentTwoPanels) {
+            if (taLayoutDet.currentTwoPanels[position] === panelId) {
+                taLayoutDet.currentTwoPanels[position] = null;
+            }
+        }
         taLayoutDet.currentTwoPanels[panelPosition!] = panelId;
     }
     else {

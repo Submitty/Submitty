@@ -18,7 +18,7 @@ describe('Cluster Grading', () => {
         cy.get('.popup-window').should('be.visible');
         cy.get('.form-title').contains('Create Clusters');
         cy.get('[data-testid="clustering-algorithm-select"]').should('be.visible');
-        cy.get('[data-testid="clustering-algorithm-select"] option').contains('DummySplit').should('be.visible');
+        cy.get('[data-testid="clustering-algorithm-select"]').should('contain.text', 'DummySplit');
 
         // Close modal
         cy.get('.form-title .close-button:visible').click();
