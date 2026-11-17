@@ -30,6 +30,7 @@ if __name__ == "__main__":
     print("Commit {0} is currently installed on this system.".format(current_commit_hash))
   except:
     print("ERROR: could not determine commit hash.")
+    current_short_commit_hash = 'unknown'
     current_commit_hash = 'unknown'
 
   try:
