@@ -695,7 +695,7 @@ if [ ${WORKER} == 0 ]; then
         echo "#grant limited sudo access to members of the ${COURSE_BUILDERS_GROUP} group (instructors)" >> /etc/sudoers
         echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/generate_repos.py *" >> /etc/sudoers
         echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py *" >> /etc/sudoers
-        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py \"\"" >> /etc/sudoers
+        echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/grading_done.py" >> /etc/sudoers
         echo "%${COURSE_BUILDERS_GROUP} ALL=(ALL:ALL) /usr/local/submitty/venv/bin/python3 ${SUBMITTY_INSTALL_DIR}/bin/regrade.py *" >> /etc/sudoers
     fi
 
