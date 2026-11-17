@@ -299,7 +299,7 @@ class ForumController extends AbstractController {
         }
         if (!empty($_POST["category_color"])) {
             $category_color = $_POST["category_color"];
-            if (!in_array($category_color, $this->getAllowedCategoryColor())) {
+            if (!array_key_exists($category_color, $this->getAllowedCategoryColor())) {
                 return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }

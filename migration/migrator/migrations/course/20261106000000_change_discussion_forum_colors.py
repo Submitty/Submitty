@@ -14,47 +14,47 @@ def up(config, database, semester, course):
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-red)' 
+    SET color = 'RED' 
     WHERE(color = '#800000')""")
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-red)' 
+    SET color = 'RED' 
     WHERE(color = '#808000')""")
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-green)' 
+    SET color = 'GREEN' 
     WHERE(color = '#008000')""")
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-green)' 
+    SET color = 'GREEN' 
     WHERE(color = '#008080')""")
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-blue)' 
+    SET color = 'BLUE' 
     WHERE(color = '#000080')""")
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-purple)' 
+    SET color = 'PURPLE' 
     WHERE(color = '#800080')""")
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-purple)' 
+    SET color = 'PURPLE' 
     WHERE(color = '#808080')""")
 
     database.execute("""
     UPDATE categories_list 
-    SET color = 'var(--colorblind-friendly-blue)' 
+    SET color = 'BLUE' 
     WHERE(color = '#000000')""")
 
     database.execute("""
     ALTER TABLE categories_list
-    ALTER COLUMN color SET DEFAULT 'var(--colorblind-friendly-red)'""")
+    ALTER COLUMN color SET DEFAULT 'RED'""")
 
 
 def down(config, database, semester, course):
@@ -75,22 +75,22 @@ def down(config, database, semester, course):
     database.execute("""
     UPDATE categories_list 
     SET color = '#800000' 
-    WHERE(color = 'var(--colorblind-friendly-red)')""")
+    WHERE(color = 'RED')""")
 
     database.execute("""
     UPDATE categories_list 
     SET color = '#008080' 
-    WHERE(color = 'var(--colorblind-friendly-green)')""")
+    WHERE(color = 'GREEN')""")
 
     database.execute("""
     UPDATE categories_list 
     SET color = '#800080' 
-    WHERE(color = 'var(--colorblind-friendly-purple)')""")
+    WHERE(color = 'PURPLE')""")
 
     database.execute("""
     UPDATE categories_list 
     SET color = '#000080' 
-    WHERE(color = 'var(--colorblind-friendly-blue)')""")
+    WHERE(color = 'BLUE')""")
 
     database.execute("""
     ALTER TABLE categories_list
