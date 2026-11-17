@@ -764,7 +764,7 @@ CREATE TABLE public.categories_list (
     category_id integer NOT NULL,
     category_desc character varying NOT NULL,
     rank integer,
-    color character varying DEFAULT 'RED'::character varying NOT NULL,
+    color character varying DEFAULT '#000080'::character varying NOT NULL,
     visible_date date
 );
 
@@ -1006,11 +1006,9 @@ CREATE TABLE public.electronic_gradeable (
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
     eg_instructor_blind integer DEFAULT 1,
     eg_release_notifications_sent boolean DEFAULT false NOT NULL,
-    eg_release_incomplete_manual_grading boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT eg_max_team_size_check CHECK ((eg_max_team_size > 0)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT late_days_positive CHECK ((eg_late_days >= 0))
@@ -1208,9 +1206,7 @@ CREATE TABLE public.gradeable (
     g_min_grading_group integer NOT NULL,
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
-    g_allow_custom_marks boolean DEFAULT true NOT NULL,
-    g_use_custom_grading_order boolean DEFAULT false NOT NULL,
-    g_enable_custom_sort boolean DEFAULT false NOT NULL
+    g_allow_custom_marks boolean DEFAULT true NOT NULL
 );
 
 
@@ -1373,19 +1369,6 @@ CREATE SEQUENCE public.gradeable_component_mark_gcm_id_seq
 --
 
 ALTER SEQUENCE public.gradeable_component_mark_gcm_id_seq OWNED BY public.gradeable_component_mark.gcm_id;
-
-
---
--- Name: gradeable_custom_grading_order; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.gradeable_custom_grading_order (
-    g_id character varying(255) NOT NULL,
-    user_id character varying(255),
-    team_id character varying(255),
-    sort_order integer NOT NULL,
-    CONSTRAINT gradeable_custom_grading_order_submitter_check CHECK ((((user_id IS NOT NULL) AND (team_id IS NULL)) OR ((user_id IS NULL) AND (team_id IS NOT NULL))))
-);
 
 
 --
@@ -1743,9 +1726,7 @@ CREATE TABLE public.peer_grading_panel (
     rubric boolean DEFAULT true NOT NULL,
     files boolean DEFAULT true NOT NULL,
     solution_notes boolean DEFAULT true NOT NULL,
-    discussion boolean DEFAULT true NOT NULL,
-    peer_files_restricted boolean DEFAULT false NOT NULL,
-    peer_file_patterns jsonb DEFAULT '[]'::jsonb NOT NULL
+    discussion boolean DEFAULT true NOT NULL
 );
 
 
@@ -1954,8 +1935,7 @@ CREATE TABLE public.queue_settings (
     regex_pattern character varying,
     contact_information boolean DEFAULT true NOT NULL,
     message character varying(400) DEFAULT NULL::character varying,
-    message_sent_time timestamp with time zone,
-    color character varying(255) DEFAULT '#000000'::character varying
+    message_sent_time timestamp with time zone
 );
 
 
@@ -2670,30 +2650,6 @@ ALTER TABLE ONLY public.gradeable_component_mark
 
 ALTER TABLE ONLY public.gradeable_component
     ADD CONSTRAINT gradeable_component_pkey PRIMARY KEY (gc_id);
-
-
---
--- Name: gradeable_custom_grading_order gradeable_custom_grading_order_position_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_custom_grading_order
-    ADD CONSTRAINT gradeable_custom_grading_order_position_unique UNIQUE (g_id, sort_order);
-
-
---
--- Name: gradeable_custom_grading_order gradeable_custom_grading_order_team_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_custom_grading_order
-    ADD CONSTRAINT gradeable_custom_grading_order_team_unique UNIQUE (g_id, team_id);
-
-
---
--- Name: gradeable_custom_grading_order gradeable_custom_grading_order_user_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_custom_grading_order
-    ADD CONSTRAINT gradeable_custom_grading_order_user_unique UNIQUE (g_id, user_id);
 
 
 --
@@ -3667,30 +3623,6 @@ ALTER TABLE ONLY public.gradeable_component_mark_data
 
 ALTER TABLE ONLY public.gradeable_component_mark
     ADD CONSTRAINT gradeable_component_mark_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id) ON DELETE CASCADE;
-
-
---
--- Name: gradeable_custom_grading_order gradeable_custom_grading_order_gradeable_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_custom_grading_order
-    ADD CONSTRAINT gradeable_custom_grading_order_gradeable_fk FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
-
-
---
--- Name: gradeable_custom_grading_order gradeable_custom_grading_order_team_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_custom_grading_order
-    ADD CONSTRAINT gradeable_custom_grading_order_team_fk FOREIGN KEY (team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
-
-
---
--- Name: gradeable_custom_grading_order gradeable_custom_grading_order_user_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.gradeable_custom_grading_order
-    ADD CONSTRAINT gradeable_custom_grading_order_user_fk FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
