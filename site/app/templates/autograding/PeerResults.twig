@@ -168,38 +168,6 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
                             and peer.marks|filter(mark => mark.earned)|length == 0
                         ) %}
 
-{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded) -%}
-    <div class="box grade-results">
-        <div class="no-border-box-badge">
-            {% if component.graded is defined and not component.graded %}
-                <span class="badge" data-testid="not-yet-graded-badge">Not yet graded</span>
-            {% else %}
-                {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
-            {% endif %}
-        </div>
-        <div class="no-border-box-info" style="width:100%">
-            <h4>
-                {{ component.title|escape }}
-            </h4>
-            <div style="float:left; width:100%;">
-                <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
-                <p>
-
-                {# This is a layout table #}
-                <table class="mobile-table" style="border-color:white;">
-                     <thead>
-                        <tr>
-                            {% for grader in ordered_graders|filter(grader => grader in component.peer_ids) %}
-                                <th class="peer-table-header">
-                                    {{ peer_aliases[grader] }}
-                                </th>
-                            {% endfor %}
-                            <th> Points </th>
-                            <th class="peer-table-title-data"> Title  </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mark in component.marks|filter((mark) => mark.show_mark) %}
                         {% if no_credit_peers|length > 0 %}
                             <tr>
                                 <td class="peer-table-data">
@@ -228,28 +196,6 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
         <span style="float: right" id="save_status"></span>
         {% for grader in ordered_graders %}
             <div class="page-content" id="peer-feedback-{{grader}}" style="display: none;">
-                <table class="mobile-table" id="peer-feedback-table-{{grader}}">
-                    <tbody>
-                        {% for component in peer_components %}
-                            <div class="box-info">
-                                <h4>{{ component.title|escape }}</h4>
-                                <p>
-                                    {% for mark in component.marks %}
-                                        {# A component with no graders yet (partial grading) has an empty earned map #}
-                                        {% if mark.earned[anon_grader_id_mapping[grader]] is defined and mark.earned[anon_grader_id_mapping[grader]] %}
-                                            <i class="far fa-check-square fa-1g"></i>
-                                        {% else %}
-                                            <i class="far fa-square fa-1g"></i>
-                                        {% endif %}
-                                        {{ mark.points|round(num_decimals) }}
-                                        {{ mark.title|nl2br }}
-                                        </br>
-                                    {% endfor %}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    </tbody>
-                </table>
                 <div id="peer-feedback-table-{{grader}}">
                     {% set grader_id = anon_grader_id_mapping[grader] %}
                     {% for component in peer_components %}
