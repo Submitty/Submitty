@@ -1053,7 +1053,8 @@ class Gradeable extends AbstractModel {
         float $upper_clamp,
         bool $text,
         bool $peer,
-        int $pdf_page
+        int $pdf_page,
+        bool $is_itempool_linked
     ) {
         $component = new Component($this->core, $this, [
             'title' => $title,
@@ -1067,7 +1068,8 @@ class Gradeable extends AbstractModel {
             'peer_component' => $peer,
             'page' => $pdf_page,
             'id' => 0,
-            'order' => count($this->components)
+            'order' => count($this->components),
+            'is_itempool_linked' => $is_itempool_linked
         ]);
         $this->components[] = $component;
 
