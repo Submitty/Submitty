@@ -1,22 +1,24 @@
 {% import _self as self %}
 {% set grading_groups = {'1': 'Instructor', '2': 'Full Access Grader', '3': 'Limited Access Grader'} %}
 <div class="electronic_file">
-<label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
-    <a class="fa-question-circle" target=_blank aria-label="Help for grading user groups" href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
-<select name="min_grading_group" id="minimum_grading_group_autograding" data-testid="minimum_grading_group_autograding" class="int_val" style="width:180px;">
-    {% for num, role in grading_groups %}
-        <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
-    {% endfor %}
-</select>
+    <span data-saveindicator="minimum_grading_group_autograding">
+        <label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
+            <a class="fa-question-circle" target=_blank aria-label="Help for grading user groups" href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
+        <select name="min_grading_group" id="minimum_grading_group_autograding" data-testid="minimum_grading_group_autograding" class="int_val" style="width:180px;">
+            {% for num, role in grading_groups %}
+                <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
+            {% endfor %}
+        </select>
+    </span>
     <div class="option-title">
         What are students allowed to do?
     </div>
     <div class="perm-container">
         <fieldset>
-            <legend class="legend-header">View the gradeable on the course home page?</legend>
+            <legend class="legend-header" data-saveindicator="student_view_after_grades">View the gradeable on the course home page?</legend>
             <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                     {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
-            <input type="radio" id="no_student_view" name="student_view" value="false"
+            <input type="radio" id="no_student_view" name="student_view_after_grades" value="false"
                     {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
             <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
                     {{ gradeable.isBulkUpload() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
@@ -29,7 +31,7 @@
 
     <div id="student_download_view" class="perm-container">
         <div>
-            <fieldset><legend class="legend-header">View and download submitted files? 
+            <fieldset><legend class="legend-header" data-saveindicator="student_download">View and download submitted files? 
                 {% if gradeable.isBulkUpload() %}
                     <span class="red-message" id="view-files-warning"> WARNING: Students will see the grading score and TA feedback but will not be able to download the scanned and uploaded file.</span>
                 {% endif %}
@@ -43,7 +45,7 @@
 
     <div id="student_submit_view" class="perm-container">
         <div>
-            <fieldset><legend class="legend-header">Make new submissions and access all prior versions?</legend>
+            <fieldset><legend class="legend-header" data-saveindicator="student_submit">Make new submissions and access all prior versions?</legend>
             <input type="radio" id="yes_student_submit" name="student_submit" value="true"
                     {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
             <input type="radio" id="no_student_submit" name="student_submit" value="false"
@@ -58,7 +60,7 @@
     <div>
         <fieldset>
             <legend>Previous Gradeable:</legend>
-            <div class="option-input col-md-6" style="padding: 0;">
+            <div class="option-input col-md-6" style="padding: 0;" data-saveindicator="gradeable-lock">
                 <select name="depends_on" id="gradeable-lock">
                     <option value="">Select prerequisite gradeable (Off)</option>
                     {% for template in template_list %}
@@ -92,7 +94,7 @@
         {% endif %}
     </div>
 
-    <div class="select-config-container">
+    <div class="select-config-container" data-saveindicator="autograding_config_selector">
         <div>
             <div class="drop-down" id="config-drop-down">
                 <select name="autograding_config_path" id="autograding_config_selector">
@@ -163,7 +165,7 @@
     </div>
 
     <div class="notebook-builder-info">
-        <div class="option-title">Notebook Builder:</div>
+        <div class="option-title" data-saveindicator="notebook-builder">Notebook Builder:</div>
         <div>
             <a class="btn btn-primary notebook-btn" href="{{ notebook_builder_url ~ '/new' }}" data-testid="start-new-notebook">Start New</a>
             <span>Start a new configuration with notebook builder.</span>

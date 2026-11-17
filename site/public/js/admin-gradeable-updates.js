@@ -349,6 +349,69 @@ function addPeerFilePattern() {
     input.trigger('focus');
 }
 
+function addLabelsForSaveIndicators(){
+    const inputFields = $('input, select');
+    inputFields.each(function(){
+        const inputQuery = $(this);
+        const inputField = inputQuery.get(0);
+        const fieldId = inputField.id;
+        
+        //If there's a manually labeled indicator, just label the input field
+        let prelabledContainer = $(`[data-saveindicator="${fieldId}"]`);
+        if(prelabledContainer.length === 0){
+            prelabledContainer = $(`[data-saveindicator="${inputField.name}"]`);
+        }
+        if(prelabledContainer.length !== 0){
+            inputField.setAttribute('data-usesaveindicator', prelabledContainer.attr('data-saveindicator'));
+            return;
+        }
+
+        //Otherwise, attempt to label both the field and title
+        const titleContainer = $(`label[for='${fieldId}']`);
+        if(titleContainer.length === 0){return;}
+        const title = titleContainer.find('.option-title');
+        if(title.length === 0){return;}
+
+        title.get(0).setAttribute('data-saveindicator', `${fieldId}`);
+        inputField.setAttribute('data-usesaveindicator', `${fieldId}`);
+    });
+}
+function addSaveIndicators(){
+    const requiresSaveIndicators = $('*[data-saveindicator]');
+    requiresSaveIndicators.each(function () {
+        const titleQuery = $(this);
+        const title = titleQuery.get(0);
+        const indicatorId = title.getAttribute('data-saveindicator');
+
+        const titleRow = document.createElement('span');
+        titleRow.classList.add('title-row');
+        title.parentNode.insertBefore(titleRow, title);
+        titleRow.appendChild(title);
+
+        const saveDiv = document.createElement('span');
+        saveDiv.id = `${indicatorId}-save-div`;
+        saveDiv.classList.add('save-indicator', 'save-indicator-unchanged');
+        saveDiv.setAttribute('data-testid', `${indicatorId}-save-indicator`);
+        const saveIcon = document.createElement('i');
+        saveIcon.id = `${indicatorId}-save-icon`;
+        const saveText = document.createElement('span');
+        saveText.id = `${indicatorId}-save-text`;
+        saveText.setAttribute('data-testid', `${indicatorId}-save-text`);
+        saveText.classList.add('subtitle');
+        saveDiv.appendChild(saveIcon);
+        saveDiv.appendChild(saveText);
+        titleRow.appendChild(saveDiv);
+
+
+        saveDiv.classList.remove('save-indicator-unsaved');
+        saveIcon.classList.remove('fas', 'fa-circle-notch', 'fa-spin');
+        saveDiv.classList.add('save-indicator-saved');
+        saveIcon.classList.add('fa-solid', 'fa-check');
+        saveText.textContent = 'Saved!';
+    });
+}
+
+
 $(document).ready(() => {
     window.onbeforeunload = function (event) {
         if (Object.keys(errors).length !== 0) {
@@ -577,6 +640,10 @@ $(document).ready(() => {
                 return false;
             }
         });
+
+
+    addLabelsForSaveIndicators();
+    addSaveIndicators();
 });
 
 function checkWarningBanners() {
