@@ -397,8 +397,13 @@ function addSaveIndicators(){
         const title = titleQuery.get(0);
         const indicatorId = title.getAttribute('data-saveindicator');
 
+        let titleRowClassToUse = 'title-row';
+        if(titleQuery.is('legend') || titleQuery.find('legend').length !== 0){
+            titleRowClassToUse = 'title-row-for-radio';
+        }
+
         const titleRow = document.createElement('span');
-        titleRow.classList.add('title-row');
+        titleRow.classList.add(titleRowClassToUse);
         title.parentNode.insertBefore(titleRow, title);
         titleRow.appendChild(title);
 

@@ -651,3 +651,33 @@ pre.CodeMirror-line {
     flex: 1;
     min-width: 400px;
 }
+
+/*
+DELETE THIS IF COURSE-SETTINGS FIELD SAVE INDICATORS GETS MERGED
+*/
+.title-row {
+    display: inline-flex;
+    align-items: center;
+}
+.title-row-for-radio {
+    display: flex;
+    align-items: center;
+}
+.save-indicator {
+    margin: 0 0 0 1em;
+    pointer-events: none;
+}
+.save-indicator-unchanged {
+    visibility: hidden;
+}
+.save-indicator-unsaved {
+    visibility: visible;
+}
+.save-indicator-saved {
+    visibility: visible;
+    color: var(--standard-dark-green);
+}
+.save-indicator-fail {
+    visibility: visible;
+    color: var(--standard-light-red);
+}
