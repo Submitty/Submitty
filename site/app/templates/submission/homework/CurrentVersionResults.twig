@@ -66,7 +66,7 @@
                                     <button class = 'btn btn-default' onclick='openSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Open the file in a new tab"> View
                                         <i class="fas fa-external-link-alt" title="Open the file in a new tab"></i></button>
                                 {% endif %}
-                                <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "{{ is_vcs ? 'checkout' : 'submissions' }}")' aria-label="Download {{file.relative_name}}"> Download
                                     <i class="fas fa-download" title="Download the file"></i></button>
                             </div>
                         {% endif %}
