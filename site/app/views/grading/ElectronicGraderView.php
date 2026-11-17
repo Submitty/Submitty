@@ -1123,7 +1123,7 @@ HTML;
                 $overridden_message .= " (Reason: " . $overridden_comment . ")";
             }
             $error_message = [
-                "color" => "var(--standard-creamsicle-orange)",
+                "color" => "var(--standard-vibrant-yellow)",
                 "message" => $overridden_message
             ];
         }

@@ -154,10 +154,6 @@ function setMultiPanelModeVisiblities() {
         .filter((position) => taLayoutDet.currentActivePanels[position])
         .map((position) => taLayoutDet.currentTwoPanels[position]);
     panelElements.forEach((panel) => {
-        const id_str = document.getElementById(`#${panel.str}_btn`)
-            ? `#${panel.str}_btn`
-            : `#${panel.str}-btn`;
-
         if (shownPanels.includes(panel.str)) {
             $(`#${panel.str}`).toggle(true);
 
