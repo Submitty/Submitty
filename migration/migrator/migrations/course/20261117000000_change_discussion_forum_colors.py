@@ -94,4 +94,4 @@ def down(config, database, semester, course):
 
     database.execute("""
     ALTER TABLE categories_list
-    ALTER COLUMN color SET DEFAULT '#000080'""")
+    ALTER COLUMN color SET DEFAULT '#000000'""")
