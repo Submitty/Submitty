@@ -220,7 +220,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'date_registered' => null,
             'linkedin_username' => "",
             'github_username' => "",
-            'personal_webpage'=> "",
+            'personal_webpage' => "",
         ];
         $this->assertEquals($expected, $actual);
     }
