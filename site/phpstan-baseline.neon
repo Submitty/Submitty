@@ -1663,12 +1663,6 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
-			rawMessage: Foreach overwrites $user with its value variable.
-			identifier: foreach.valueOverwrite
-			count: 1
-			path: app/controllers/admin/LateController.php
-
-		-
 			rawMessage: 'Loose comparison via "!=" between app\models\Team|null and null is not allowed.'
 			identifier: notEqual.notAllowed
 			count: 1
@@ -2839,12 +2833,6 @@ parameters:
 			rawMessage: Foreach key variable $key is never read.
 			identifier: foreach.unusedKey
 			count: 2
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			rawMessage: Foreach overwrites $member with its value variable.
-			identifier: foreach.valueOverwrite
-			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -4426,12 +4414,6 @@ parameters:
 			path: app/controllers/student/TeamController.php
 
 		-
-			rawMessage: Foreach overwrites $student with its value variable.
-			identifier: foreach.valueOverwrite
-			count: 1
-			path: app/controllers/student/TeamController.php
-
-		-
 			rawMessage: 'Loose comparison via "==" between mixed and string is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
@@ -5455,12 +5437,6 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
-			rawMessage: Foreach overwrites $diff with its value variable.
-			identifier: foreach.valueOverwrite
-			count: 1
-			path: app/libraries/DiffViewer.php
-
-		-
 			rawMessage: Foreach value variable $value only flows into values that are never used.
 			identifier: foreach.unusedValueFlow
 			count: 1
@@ -5739,12 +5715,6 @@ parameters:
 		-
 			rawMessage: Foreach key variable $key is never read.
 			identifier: foreach.unusedKey
-			count: 1
-			path: app/libraries/FileUtils.php
-
-		-
-			rawMessage: Foreach overwrites $file with its key variable.
-			identifier: foreach.keyOverwrite
 			count: 1
 			path: app/libraries/FileUtils.php
 
@@ -13078,12 +13048,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			rawMessage: Foreach overwrites $user with its value variable.
-			identifier: foreach.valueOverwrite
-			count: 2
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			rawMessage: 'Method app\models\gradeable\Gradeable::__construct() has parameter $details with no value type specified in iterable type array.'
 			identifier: missingType.iterableValue
 			count: 1
@@ -15990,6 +15954,12 @@ parameters:
 		-
 			rawMessage: Foreach key variable $user is never read.
 			identifier: foreach.unusedKey
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			rawMessage: Foreach overwrites $section with its value variable.
+			identifier: foreach.valueOverwrite
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 

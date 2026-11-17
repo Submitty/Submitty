@@ -5,7 +5,8 @@ import tempfile
 import unittest
 import contextlib
 import copy
-from unittest.mock import MagicMock
+import subprocess
+from unittest.mock import MagicMock, patch
 
 import submitty_autograding_shipper as shipper
 from autograder import config
@@ -312,6 +313,128 @@ class TestAutogradingShipper(unittest.TestCase):
         shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, "shipper_config.json"))
         failed_files = [file for file in os.listdir(paths["checkout"]) if file.startswith("failed")]
         self.assertTrue(len(failed_files) == 0)
+
+    def create_outside_directory(self) -> str:
+        """Create a directory outside of any repository, holding files that must stay private."""
+        outside = os.path.join(WORKING_DIR, "outside_repository")
+        os.makedirs(os.path.join(outside, "nested"), exist_ok=True)
+        for path in ["secret.txt", "nested/secret.txt"]:
+            with open(os.path.join(outside, path), "w") as outfile:
+                outfile.write("private")
+        return outside
+
+    def checkout_repository(self, files: dict, links: dict, subdirectory: str = "") -> dict:
+        """
+        Commit the given files and symlinks to a new repository, run the shipper's
+        checkout on it, and return the resulting job object.
+        """
+        # The checkout leaves the process in a directory that it has deleted.
+        self.addCleanup(os.chdir, SCRIPT_DIR)
+        os.chdir(TEST_DATA_DIR)
+
+        repository = "symlink_homework"
+        repository_path = os.path.join(TEST_DATA_DIR, repository)
+        shutil.rmtree(repository_path, ignore_errors=True)
+        os.makedirs(repository_path)
+        for path, contents in files.items():
+            full_path = os.path.join(repository_path, path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w") as outfile:
+                outfile.write(contents)
+        for path, target in links.items():
+            full_path = os.path.join(repository_path, path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            os.symlink(target, full_path)
+
+        git = ["git", "-c", "user.email=test@email.com", "-c", "user.name=Test Shipper"]
+        for command in [
+            ["init", "--initial-branch", "master"],
+            ["add", "-A"],
+            ["commit", "-m", "testing"],
+        ]:
+            subprocess.run(git + command, cwd=repository_path, check=True)
+
+        with open(os.path.join(TEST_DATA_DIR, "config_files", "homework_form.json")) as form_file:
+            form = json.load(form_file)
+        form["subdirectory"] = subdirectory
+        form["vcs_partial_path"] = repository
+        course_path = get_paths()["course"]
+        with open(os.path.join(course_path, "config", "form", "form_homework_01.json"), "w") as f:
+            json.dump(form, f)
+
+        return shipper.checkout_vcs_repo(CONFIG, os.path.join(TEST_DATA_DIR, "shipper_config.json"))
+
+    def checkout_entries(self) -> list:
+        """List everything in the checkout directory, relative to that directory."""
+        checkout_path = get_paths()["checkout"]
+        entries = []
+        for root, directories, files in os.walk(checkout_path):
+            for name in directories + files:
+                entries.append(os.path.relpath(os.path.join(root, name), checkout_path))
+        return sorted(entries)
+
+    def test_symlinks_are_removed_without_copying_targets(self):
+        """Every kind of symlink is dropped from a checkout, and no target is copied into it."""
+        outside = self.create_outside_directory()
+        job = self.checkout_repository(
+            files={"kept.txt": "kept", "src/nested.txt": "nested"},
+            links={
+                "file_link": os.path.join(outside, "secret.txt"),
+                "directory_link": outside,
+                "src/nested_link": os.path.join(outside, "secret.txt"),
+                "dangling_link": os.path.join(outside, "missing.txt"),
+                "inside_link": "kept.txt",
+            },
+        )
+
+        self.assertEqual(self.checkout_entries(), ["kept.txt", "src", "src/nested.txt"])
+        self.assertTrue(job["checkout_included_symlinks"])
+        self.assertEqual(job["checkout_total_size"], len("kept") + len("nested"))
+
+    def test_symlinked_subdirectory_is_not_copied(self):
+        """A symlink at or above the gradeable's subdirectory cannot redirect the checkout."""
+        outside = self.create_outside_directory()
+        for subdirectory in ["homework", "homework/nested", "/homework"]:
+            with self.subTest(subdirectory=subdirectory):
+                job = self.checkout_repository(
+                    files={"kept.txt": "kept"},
+                    links={"homework": outside},
+                    subdirectory=subdirectory,
+                )
+
+                self.assertEqual(
+                    self.checkout_entries(), ["failed_subdirectory_invalid_or_empty.txt"]
+                )
+                self.assertTrue(job["checkout_included_symlinks"])
+
+    def test_symlink_free_repository_is_not_flagged(self):
+        """A repository without symlinks is checked out in full and is not flagged."""
+        job = self.checkout_repository(files={"kept.txt": "kept"}, links={})
+
+        self.assertEqual(self.checkout_entries(), ["kept.txt"])
+        self.assertFalse(job["checkout_included_symlinks"])
+        self.assertEqual(job["checkout_total_size"], len("kept"))
+
+    def test_symlink_cleanup_failure_discards_clone(self):
+        """
+        A failed symlink cleanup discards the temporary clone. Leaving it behind would
+        make the final cleanup fail too, and the shipper would retry the job forever.
+        """
+        outside = self.create_outside_directory()
+        real_cleanup = shipper.calculate_size_cleanup_symlinks
+
+        def fail_on_temporary_clone(directory):
+            if directory.endswith("/tmp"):
+                raise OSError("File name too long")
+            return real_cleanup(directory)
+
+        with patch.object(shipper, "calculate_size_cleanup_symlinks", fail_on_temporary_clone):
+            self.checkout_repository(
+                files={"kept.txt": "kept"},
+                links={"file_link": os.path.join(outside, "secret.txt")},
+            )
+
+        self.assertEqual(self.checkout_entries(), ["failed_subdirectory_invalid_or_empty.txt"])
 
 
 class TestLoadAutogradingWorkersJson(unittest.TestCase):
