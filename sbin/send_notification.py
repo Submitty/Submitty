@@ -127,6 +127,7 @@ def construct_notifications(term, course, pending, notification_type):
             "id": notification.get("g_id"),
             "title": notification.get("g_title"),
             "depends_on": notification.get("depends_on"),
+            "has_due_date": notification.get("has_due_date"),
             "submission_due_date": notification.get("submission_due_date"),
             "team_id": notification.get("team_id"),
             "user_id": notification.get("user_id"),
@@ -149,16 +150,24 @@ def construct_notifications(term, course, pending, notification_type):
         # Notification-related content
         if notification_type == "gradeable_release":
             email_subject = f"Submissions Open: {gradeable['title']}"
-            notification_content = (
-                f"{email_subject} | Due {format_timestamp(gradeable['submission_due_date'])}"
-            )
-            email_body = (
-                f'Submissions are now being accepted for "{gradeable["title"]}" in course '
-                f"{get_full_course_name(term, course)}.\n\n"
-                f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
-                f"Late Days: {gradeable['remaining_late_days']} remaining, "
-                f"{gradeable['max_late_days']} allowed"
-            )
+            if gradeable.get("has_due_date"):
+                notification_content = (
+                    f"{email_subject} | Due {format_timestamp(gradeable['submission_due_date'])}"
+                )
+                email_body = (
+                    f'Submissions are now being accepted for "{gradeable["title"]}" in course '
+                    f"{get_full_course_name(term, course)}.\n\n"
+                    f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
+                    f"Late Days: {gradeable['remaining_late_days']} remaining, "
+                    f"{gradeable['max_late_days']} allowed"
+                )
+            else:
+                notification_content = email_subject
+                email_body = (
+                    f'Submissions are now being accepted for "{gradeable["title"]}" in course '
+                    f"{get_full_course_name(term, course)}."
+                )
+
         else:
             email_subject = notification_content = f"Grade Available for {gradeable['title']}"
             email_body = (
@@ -384,6 +393,7 @@ def send_pending_notifications():
                 g.g_id AS g_id,
                 g.g_title AS g_title,
                 eg.eg_depends_on AS depends_on,
+                eg.eg_has_due_date AS has_due_date,
                 eg.eg_submission_due_date AS submission_due_date,
                 u.user_id AS user_id,
                 u.user_email AS user_email,
