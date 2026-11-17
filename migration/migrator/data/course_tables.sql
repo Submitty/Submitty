@@ -1955,7 +1955,7 @@ CREATE TABLE public.queue_settings (
     contact_information boolean DEFAULT true NOT NULL,
     message character varying(400) DEFAULT NULL::character varying,
     message_sent_time timestamp with time zone,
-    color character varying(255) DEFAULT '#000000'::character varying
+    color character varying(255) DEFAULT '#000080'::character varying NOT NULL
 );
 
 
