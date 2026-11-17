@@ -135,7 +135,7 @@
       <!-- This is only relevant to Electronic Files -->
         <div class="gradeable_type_options electronic_file" id="electronic_file">
             <fieldset>
-                <legend data-saveindicator="ta_grading">Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend>
+                <legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend>
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
                         {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
@@ -143,7 +143,7 @@
             </fieldset>
 
             <fieldset id="grade_inquiry_enable_container">
-                <legend data-saveindicator="grade_inquiry_allowed">Should grade inquiries be enabled for this assignment?</legend>
+                <legend>Should grade inquiries be enabled for this assignment?</legend>
                 <input type="radio" id="yes_grade_inquiry_allowed" name="grade_inquiry_allowed" value="true" class="bool_val auto_save date-related" data-testid="yes-grade-inquiry-allowed"
                         {{ action != 'new' and gradeable.isGradeInquiryAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_allowed">Yes</label>
                 <input type="radio" id="no_grade_inquiry_allowed" name="grade_inquiry_allowed" value="false" class="bool_val auto_save date-related" data-testid="no-grade-inquiry-allowed"
@@ -151,7 +151,7 @@
             </fieldset>
 
             <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
-                <legend data-saveindicator="grade_inquiry_per_component_allowed">Should grade inquiries be associated with a specific component of the rubric?</legend>
+                <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
                 <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save" data-testid="yes-component"
                         {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
                 <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
@@ -161,7 +161,7 @@
             {% if forum_enabled %}
                 <div>
                     <fieldset id="discussion_grading_enable_container">
-                        <legend data-saveindicator="discussion_based">Is there a discussion component for this assignment?</legend>
+                        <legend>Is there a discussion component for this assignment?</legend>
                         <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related" data-testid="yes-discussion"
                                 {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
                         <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related" data-testid="no-discussion"

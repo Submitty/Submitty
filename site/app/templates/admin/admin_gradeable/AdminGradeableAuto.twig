@@ -15,7 +15,7 @@
     </div>
     <div class="perm-container">
         <fieldset>
-            <legend class="legend-header" data-saveindicator="student_view_after_grades">View the gradeable on the course home page?</legend>
+            <legend class="legend-header">View the gradeable on the course home page?</legend>
             <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                     {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
             <input type="radio" id="no_student_view" name="student_view_after_grades" value="false"
@@ -23,7 +23,7 @@
             <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
                     {{ gradeable.isBulkUpload() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
             <div hidden>
-                <input type="radio" id="yes_student_view" name="student_view" value="true"
+                <input type="radio" id="yes_student_view" name="student_view_after_grades" value="true"
                     {{ gradeable.isStudentView() ? 'checked' : '' }} aria-label="student view"/>
             </div>
         </fieldset>
@@ -31,7 +31,7 @@
 
     <div id="student_download_view" class="perm-container">
         <div>
-            <fieldset><legend class="legend-header" data-saveindicator="student_download">View and download submitted files? 
+            <fieldset><legend class="legend-header">View and download submitted files? 
                 {% if gradeable.isBulkUpload() %}
                     <span class="red-message" id="view-files-warning"> WARNING: Students will see the grading score and TA feedback but will not be able to download the scanned and uploaded file.</span>
                 {% endif %}
@@ -45,7 +45,7 @@
 
     <div id="student_submit_view" class="perm-container">
         <div>
-            <fieldset><legend class="legend-header" data-saveindicator="student_submit">Make new submissions and access all prior versions?</legend>
+            <fieldset><legend class="legend-header">Make new submissions and access all prior versions?</legend>
             <input type="radio" id="yes_student_submit" name="student_submit" value="true"
                     {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
             <input type="radio" id="no_student_submit" name="student_submit" value="false"

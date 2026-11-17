@@ -114,8 +114,10 @@
                         {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> <label for="no_late_submission">No</label>
             </fieldset>
             <div class="yes-late-submission">
-                <label for="late_days">How many late days may students use on this assignment?</label>
-                <input style="width: 50px" id="late_days" name="late_days" data-testid="late-days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
+                <div data-saveindicator="late_days">
+                    <label for="late_days">How many late days may students use on this assignment?</label>
+                    <input style="width: 50px" id="late_days" name="late_days" data-testid="late-days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
+                </div>
 
                 <br />
 

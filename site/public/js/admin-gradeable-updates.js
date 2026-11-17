@@ -366,14 +366,28 @@ function addLabelsForSaveIndicators(){
             return;
         }
 
+        //For selections, label the legend using the selection's name
+        //Name should be the same for all selects under the same fieldset
+        if(inputField.type === 'radio'){
+            let legend = inputQuery.closest('fieldset');
+            if(legend.length !== 1){return;}
+            legend = legend.find('legend');
+            if(legend.length !== 1 || legend.attr('data-saveindicator')){return;}
+            legend.attr('data-saveindicator', inputField.name);
+            inputQuery.attr('data-usesaveindicator', inputField.name);
+            return;
+        }
+
         //Otherwise, attempt to label both the field and title
         const titleContainer = $(`label[for='${fieldId}']`);
         if(titleContainer.length === 0){return;}
         const title = titleContainer.find('.option-title');
-        if(title.length === 0){return;}
-
-        title.get(0).setAttribute('data-saveindicator', `${fieldId}`);
-        inputField.setAttribute('data-usesaveindicator', `${fieldId}`);
+        inputQuery.attr('data-usesaveindicator', `${fieldId}`);
+        if(title.length === 1){
+            title.attr('data-saveindicator', `${fieldId}`);
+        }else{
+            titleContainer.attr('data-saveindicator', `${fieldId}`);
+        }
     });
 }
 function addSaveIndicators(){
