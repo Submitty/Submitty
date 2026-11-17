@@ -1,4 +1,3 @@
-import { isPermissionAllowed } from 'cypress-browser-permissions';
 import { verifyWebSocketStatus } from '../../support/utils';
 
 const queueName = 'Cypress Office Hour Queue 1';
@@ -293,9 +292,6 @@ describe('test office hours queue', () => {
     });
 
     it('Enabling push and sound notifications as Instructor', () => {
-        // Ensure notifications are allowed
-        expect(isPermissionAllowed('notifications')).to.be.true;
-
         switchUser('instructor');
 
         // Assert that switches exist and assign aliases

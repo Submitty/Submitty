@@ -1205,7 +1205,7 @@ class HomeworkView extends AbstractView {
             'failed_file' => $failed_file,
             'file_count' => $file_count,
             'gradeable_id' => $gradeable->getId(),
-            'student_download' => !$gradeable->isVcs() && $gradeable->canStudentDownload(),
+            'student_download' => $gradeable->canStudentDownload(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
