@@ -7,7 +7,7 @@
 		Select the peer grader whose grades you want to edit.
 	</span>
 	<div id="peer-edit-active-version" data-active-version="{{active_version}}" hidden></div>
-	<select id = "edit-peer-select" onChange = "changeCurrentPeer()">
+	<select id = "edit-peer-select" data-testid="edit-peer-select" onChange = "changeCurrentPeer()">
 		{% for peer in peers %}
 			<option value = "{{peer}}">{{peer_names[peer]}}</option>
 		{% endfor %}
