@@ -204,6 +204,10 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         notBeVisible(['#has_due_date_no'], ['#date_due']);
 
+        // A gradeable without a due date can still toggle and have a grades released date
+        notBeVisible(['#has_release_date_no'], ['#date_released']);
+        beVisible(['#has_release_date_yes'], ['#date_released']);
+
         beVisible(['#has_due_date_yes'], ['#date_due']);
 
         beVisible(['#has_release_date_yes'], ['#date_released']);
