@@ -7417,6 +7417,7 @@ AND gc_id IN (
                 $gradeable->canStudentDownload(),
                 $gradeable->isStudentSubmit(),
                 $gradeable->hasDueDate(),
+                $gradeable->hasReleaseDate(),
                 $gradeable->getAutogradingConfigPath(),
                 $gradeable->getLateDays(),
                 $gradeable->isLateSubmissionAllowed(),
@@ -7453,6 +7454,7 @@ AND gc_id IN (
                   eg_student_download,
                   eg_student_submit,
                   eg_has_due_date,
+                  eg_has_release_date,
                   eg_config_path,
                   eg_late_days,
                   eg_allow_late_submission,
@@ -7469,7 +7471,7 @@ AND gc_id IN (
                   eg_depends_on,
                   eg_depends_on_points
                   )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 $params
             );
             $params = [
