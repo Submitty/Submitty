@@ -2884,12 +2884,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			rawMessage: 'Loose comparison via "==" between (float|int) and int is not allowed.'
-			identifier: equal.notAllowed
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			rawMessage: 'Loose comparison via "==" between app\models\User|null and null is not allowed.'
 			identifier: equal.notAllowed
 			count: 1
