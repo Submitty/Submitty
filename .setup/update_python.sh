@@ -20,7 +20,12 @@ umask 022
 
 VENV_PATH="${SUBMITTY_INSTALL_DIR}/venv"
 
-if [[ ! -d $VENV_PATH ]]; then
+if [[ ! -f "${VENV_PATH}/bin/activate" ]]; then
+    # python3-venv may not be installed on old workers
+    if ! dpkg -s python3-venv > /dev/null 2>&1; then
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get install -y python3-venv
+    fi
     python3 -m venv "$VENV_PATH"
 fi
 
