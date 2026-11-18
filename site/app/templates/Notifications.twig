@@ -1,0 +1,10 @@
+{% include 'Vue.twig' with {
+    'type': 'page',
+    'name': 'CourseNotificationsPage',
+    'args': {
+        'notifications': notifications,
+    },
+    'events': {
+        'badge-count-change': 'updateBadgeDOM',
+    },
+} %}

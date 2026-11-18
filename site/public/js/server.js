@@ -8,7 +8,7 @@
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
    newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
-   markAllViewed closePopup */
+   markAllViewed closePopup updateBadgeDOM */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
    createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
@@ -1626,6 +1626,25 @@ function toggleSidebar() {
     const shown = sidebar.hasClass('collapsed');
     Cookies.set('collapse_sidebar', !shown, { path: '/' });
     sidebar.toggleClass('collapsed', !shown);
+}
+
+/**
+ * Updates or removes notification badges in the desktop/mobile sidebars and menu button.
+ *
+ * @param {number} count - The current number of unseen notifications.
+ */
+function updateBadgeDOM(count) {
+    const badges = document.querySelectorAll(
+        '#nav-sidebar-notifications .notification-badge, #mobile-nav-sidebar-notifications .notification-badge, #menu-button .notification-badge',
+    );
+    if (count <= 0) {
+        badges.forEach((el) => el.remove());
+    }
+    else {
+        badges.forEach((el) => {
+            el.textContent = `${count}`;
+        });
+    }
 }
 
 $(document).ready(() => {

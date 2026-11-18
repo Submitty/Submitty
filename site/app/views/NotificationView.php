@@ -18,12 +18,8 @@ class NotificationView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Notifications");
         $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->enableMobileViewport();
-        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
-            "type" => "page",
-            "name" => "CourseNotificationsPage",
-            "args" => [
-                "notifications" => $all_notifications
-            ]
+        return $this->core->getOutput()->renderTwigTemplate("Notifications.twig", [
+            "notifications" => $all_notifications,
         ]);
     }
 
