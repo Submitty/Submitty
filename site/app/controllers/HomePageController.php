@@ -308,6 +308,16 @@ class HomePageController extends AbstractController {
                 new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
             );
         }
+
+        if (strlen($course_title) > 255) {
+            $error = "The course code must not exceed 255 characters.";
+            $this->core->addErrorMessage($error);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home', 'courses', 'new']))
+            );
+        }
         $course_title = strtolower($course_title);
 
         $semester = trim($_POST['course_semester']);

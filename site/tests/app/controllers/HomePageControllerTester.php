@@ -223,4 +223,36 @@ class HomePageControllerTester extends BaseUnitTest {
         $this->assertEquals($terms, $args[2]);
         $this->assertFalse($args[3]);
     }
+
+    public function testCreateCourseTooLongTitle(): void {
+        $core = $this->createMockCore([], ['access_faculty' => true]);
+        $_POST['course_semester'] = 'f24';
+        $_POST['course_title'] = str_repeat('a', 256);
+        $_POST['head_instructor'] = 'testUser';
+        $_POST['group_name'] = 'submitty__f24_test';
+
+        $controller = new HomePageController($core);
+        $response = $controller->createCourse();
+        $this->assertInstanceOf(MultiResponse::class, $response);
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('The course code must not exceed 255 characters.', $response->json_response->json['message']);
+    }
+
+    public function testCreateCourseInvalidCharacters(): void {
+        $core = $this->createMockCore([], ['access_faculty' => true]);
+        $_POST['course_semester'] = 'f24';
+        $_POST['course_title'] = 'Invalid-Course!';
+        $_POST['head_instructor'] = 'testUser';
+        $_POST['group_name'] = 'submitty__f24_test';
+
+        $controller = new HomePageController($core);
+        $response = $controller->createCourse();
+        $this->assertInstanceOf(MultiResponse::class, $response);
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals('The course code must contain only lowercase letters (a-z), digits (0-9), and the underscore character.', $response->json_response->json['message']);
+    }
+
+    protected function tearDown(): void {
+        $_POST = [];
+    }
 }
