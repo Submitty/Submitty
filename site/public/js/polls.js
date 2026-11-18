@@ -1,4 +1,4 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializeStudentSocketClient */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeIndexSocketClient initializePollCountdowns initializeStudentSocketClient */
 /* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
 
 $(document).ready(() => {
@@ -245,6 +245,36 @@ function updateTimer(endDate) {
     }
 
     const timerId = setInterval(tick, 500);
+}
+
+function initializePollCountdowns() {
+    const countdowns = $('.poll-countdown');
+
+    function tick() {
+        const now = new Date();
+        let anyRunning = false;
+
+        countdowns.each(function () {
+            const timeRemaining = new Date($(this).attr('data-end-time')) - now;
+            if (timeRemaining <= 0) {
+                $(this).text('Poll Ended');
+                return;
+            }
+            anyRunning = true;
+
+            const seconds = Math.floor((timeRemaining / 1000) % 60);
+            const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+            const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+            $(this).text(`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
+        });
+
+        if (!anyRunning) {
+            clearInterval(timerId);
+        }
+    }
+
+    const timerId = setInterval(tick, 500);
+    tick();
 }
 
 function toggle_section(section_id) {
