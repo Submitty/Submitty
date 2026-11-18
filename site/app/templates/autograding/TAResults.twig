@@ -96,8 +96,8 @@ $( document ).ready(function() {
                                 </div>
                                 <div class="no-border-box md-4">
                                     <div class="btn-annotation">
-                                        <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="window.popupAnnotatedImage('{{ gradeable_id }}', '{{ file.name }}', '{{ file.path }}', '{{ file.anon_path }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                                        <button class = 'btn btn-default' style="margin-right:20px;" onclick='window.quickDownload("{{ gradeable_id }}", "{{ file.name }}", "{{ file.path }}", "{{ file.anon_path }}")' aria-label="Download the file"> Download  
+                                        <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" data-testid="annotation-popup-button" onclick="window.popupAnnotatedImage('{{ gradeable_id }}', '{{ file.name }}', '{{ file.path }}', '{{ file.anon_path }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                                        <button class = 'btn btn-default' style="margin-right:20px;" data-testid="annotation-download-button" onclick='window.quickDownload("{{ gradeable_id }}", "{{ file.name }}", "{{ file.path }}", "{{ file.anon_path }}")' aria-label="Download the file"> Download  
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                     </div>
                                 </div>
