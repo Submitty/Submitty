@@ -445,4 +445,14 @@ class CalendarController extends AbstractController {
 
         return JsonResponse::getSuccessResponse();
     }
+
+    /**
+     * A new API key makes the old calendar feed link stop working.
+     */
+    #[Route("/calendar/feed/reset", methods: ["POST"])]
+    public function resetFeedLink(): RedirectResponse {
+        $this->core->getQueries()->refreshUserApiKey($this->core->getUser()->getId());
+        $this->core->addSuccessMessage("Calendar subscription link reset. The old link no longer works.");
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
+    }
 }

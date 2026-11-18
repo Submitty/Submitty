@@ -329,6 +329,7 @@ class WebRouter {
             $logged_in
             && str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'logout'
+            && $this->parameters['_method'] !== 'calendarFeed'
         ) {
             return MultiResponse::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildUrl(['home']))
