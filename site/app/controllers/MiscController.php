@@ -250,7 +250,6 @@ class MiscController extends AbstractController {
             header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
-            $this->core->getOutput()->renderString($path);
         }
         elseif (pathinfo($path, PATHINFO_EXTENSION) === 'ipynb') { // TODO: Do this "properly" by determining a better MIME type via FileUtils::getContentType()
             $this->core->getOutput()->setContentOnly(true);
@@ -289,7 +288,8 @@ class MiscController extends AbstractController {
                     $this->core->getOutput()->renderOutput('Misc', 'displayMarkdown', $contents);
                 }
                 else {
-                    $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
+                    // Title the page with the file name alone: the decoded path names the submitter, even in anonymous grading
+                    $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $file_name, $contents);
                 }
             }
             else {
