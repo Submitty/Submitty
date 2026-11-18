@@ -19,10 +19,11 @@
         <table id="today-table" class="table table-striped" style="width:100%;{{ dropdown_states['today'] ? '' : ' display: none;'}}">
             <col style="width: 5%">
             <col style="width: 5%">
-            <col style="width: 45%">
+            <col style="width: 30%">
             <col style="width: 10%">
             <col style="width: 10%">
             <col style="width: 10%">
+            <col style="width: 15%">
             <col style="width: 15%">
             <thead>
                 <tr>
@@ -32,6 +33,7 @@
                     <th scope="col">Visible</th>
                     <th scope="col">Accepting Answers</th>
                     <th scope="col">Responses</th>
+                    <th scope="col">Time Remaining</th>
                     <th scope="col" aria-label="Empty Cell"></th>
                 </tr>
             </thead>
@@ -56,6 +58,11 @@
                             <input type="checkbox" id="poll_{{ poll.getId() }}_view_results" aria-label="label" onclick='updatePollAcceptingAnswers("{{ poll.getId() }}", "{{ base_url }}")' {{ poll.isOpen ? 'checked' : ''}}>
                         </td>
                         <td id="poll_{{ poll.getId() }}_responses"> {{ poll.getId() not in response_counts|keys ? 0 : response_counts[poll.getId()] }} </td>
+                        <td id="poll_{{ poll.getId() }}_timer" class="poll-index-timer"
+                            {% if poll.isOpen() and poll.isTimerEnabled() %}
+                                data-end-time="{{ poll.getEndTime().format('Y-m-d\\TH:i:sP') }}"
+                            {% endif %}
+                        >{{ poll.isEnded() ? 'Poll Ended' : '—' }}</td>
                         <td>
                             <a href="{{base_url}}/{{ poll.getId() }}" class="btn btn-primary">
                             {% if poll.isHistogramAvailable() %}

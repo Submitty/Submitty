@@ -29,10 +29,9 @@ class PollController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/polls", methods: ["GET"])]
     public function showPollsPage(): WebResponse {
-        /** @var \app\repositories\poll\PollRepository */
-        $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
-
         if ($this->core->getUser()->accessAdmin()) {
+            /** @var \app\repositories\poll\PollRepository */
+            $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
             // Check if we have a saved cookie session with the dropdown states for each of the instructor polls sections
             $dropdown_states = ['today' => true, 'tomorrow' => true, 'old' => false, 'future' => false];
             foreach ($dropdown_states as $key => $val) {
@@ -87,25 +86,35 @@ class PollController extends AbstractController {
             );
         }
         else { // Student view
-            $todays_polls = [];
-            $old_polls = [];
-            /** @var Poll */
-            foreach ($repo->findAllByStudentIDWithAllOptions($this->core->getUser()->getId()) as $poll) {
-                if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
-                    $todays_polls[] = $poll;
-                }
-                elseif ($poll->getReleaseDate() < $this->core->getDateTimeNow()) {
-                    $old_polls[] = $poll;
-                }
-            }
-
-            return new WebResponse(
-                PollView::class,
-                'showPollsStudent',
-                $todays_polls,
-                $old_polls
-            );
+            return new WebResponse(PollView::class, 'showPollsStudent', ...$this->getStudentPolls());
         }
+    }
+
+    #[Route("/courses/{_semester}/{_course}/polls/student_index", methods: ["GET"])]
+    public function showStudentIndex(): JsonResponse {
+        // Background refreshes must not render the global header, which consumes flash messages.
+        $html = $this->core->getOutput()->renderTemplate(PollView::class, 'showPollsStudent', ...$this->getStudentPolls());
+        return JsonResponse::getSuccessResponse(['html' => $html]);
+    }
+
+    /**
+     * @return array{0: Poll[], 1: Poll[]}
+     */
+    private function getStudentPolls(): array {
+        $this->core->authorizeWebSocketToken(['page' => 'polls_student_index']);
+        /** @var \app\repositories\poll\PollRepository */
+        $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
+        $todays_polls = [];
+        $old_polls = [];
+        foreach ($repo->findAllByStudentIDWithAllOptions($this->core->getUser()->getId()) as $poll) {
+            if ($poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->format('Y-m-d')) {
+                $todays_polls[] = $poll;
+            }
+            elseif ($poll->getReleaseDate() < $this->core->getDateTimeNow()) {
+                $old_polls[] = $poll;
+            }
+        }
+        return [$todays_polls, $old_polls];
     }
 
     /**
@@ -276,6 +285,7 @@ class PollController extends AbstractController {
 
         $em->flush();
 
+        $this->sendSocketMessage(['type' => 'poll_state_changed'], 'polls_student_index');
         $this->core->addSuccessMessage("Poll successfully added");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
@@ -723,7 +733,6 @@ class PollController extends AbstractController {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
 
-        /** @var \app\repositories\poll\PollRepository */
         $repo = $em->getRepository(Poll::class);
 
         /** @var Poll|null */
@@ -746,6 +755,7 @@ class PollController extends AbstractController {
 
         $em->remove($poll);
         $em->flush();
+        $this->sendSocketMessage(['type' => 'poll_state_changed'], 'polls_student_index');
 
         return JsonResponse::getSuccessResponse();
     }
@@ -854,6 +864,9 @@ class PollController extends AbstractController {
 
         $em->flush();
 
+        if ($num_imported > 0) {
+            $this->sendSocketMessage(['type' => 'poll_state_changed'], 'polls_student_index');
+        }
         if ($num_errors === 0) {
             $this->core->addSuccessMessage("Successfully imported " . $num_imported . " polls");
         }
@@ -866,7 +879,7 @@ class PollController extends AbstractController {
     /**
      * This method opens a WebSocket client and sends a message containing corresponding poll updates
      */
-    private function sendSocketMessage(mixed $msg_array, string $page = 'polls'): void {
+    protected function sendSocketMessage(mixed $msg_array, string $page = 'polls'): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
         $params = [
             'page' => $page,
@@ -880,6 +893,16 @@ class PollController extends AbstractController {
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);
+            if ($page === 'polls' && in_array($msg_array['type'] ?? '', ['poll_opened', 'poll_closed', 'poll_ended', 'poll_updated'], true)) {
+                // Students fetch their own index state; never broadcast counts or poll details here.
+                $params['page'] = 'polls_student_index';
+                $index_client = new Client($this->core);
+                $index_client->json_send([
+                    'type' => 'poll_state_changed',
+                    'user_id' => $msg_array['user_id'],
+                    'page' => Utils::buildWebSocketPageIdentifier($params),
+                ]);
+            }
         }
         catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
