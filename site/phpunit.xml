@@ -9,6 +9,7 @@
   <testsuites>
     <testsuite name="Unit Tests">
       <directory suffix="Tester.php">./tests/app</directory>
+      <directory suffix="Tester.php">./tests/api</directory>
     </testsuite>
     <testsuite name="phpstan extension">
       <directory suffix="Tester.php">./tests/phpstan</directory>

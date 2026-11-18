@@ -141,6 +141,66 @@ class TermsControllerTester extends BaseUnitTest {
         );
     }
 
+    public function testAddNewTermFailsIfTermIdInvalidCharacters(): void {
+        $core = $this->buildCore(true);
+        $controller = new TermsController($core);
+
+        $_POST = [
+            'term_id' => 's 26!',
+            'term_name' => 'Spring 2026',
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-05-31',
+        ];
+
+        $response = $controller->addNewTerm();
+
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals(
+            'Term ID must contain only letters, numbers, underscores, and hyphens.',
+            $response->json_response->json['message']
+        );
+    }
+
+    public function testAddNewTermFailsIfTermIdTooLong(): void {
+        $core = $this->buildCore(true);
+        $controller = new TermsController($core);
+
+        $_POST = [
+            'term_id' => str_repeat('a', 256),
+            'term_name' => 'Spring 2026',
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-05-31',
+        ];
+
+        $response = $controller->addNewTerm();
+
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals(
+            'Term ID must not exceed 255 characters.',
+            $response->json_response->json['message']
+        );
+    }
+
+    public function testAddNewTermFailsIfTermNameTooLong(): void {
+        $core = $this->buildCore(true);
+        $controller = new TermsController($core);
+
+        $_POST = [
+            'term_id' => 's26',
+            'term_name' => str_repeat('a', 256),
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-05-31',
+        ];
+
+        $response = $controller->addNewTerm();
+
+        $this->assertEquals('fail', $response->json_response->json['status']);
+        $this->assertEquals(
+            'Term name must not exceed 255 characters.',
+            $response->json_response->json['message']
+        );
+    }
+
     public function testAddNewTermSucceeds(): void {
         $core = $this->buildCore(true, null, true);
         $controller = new TermsController($core);
