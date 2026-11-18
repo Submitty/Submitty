@@ -2053,7 +2053,11 @@ HTML;
                     ];
                 };
                 foreach ($participation as $user_id => $data) {
-                    $entries[] = array_merge($data, $student_link((string) $user_id));
+                    $graded_id = (string) $user_id;
+                    // A student can have graded someone who was later unassigned from them
+                    $entries[] = array_merge($data, $student_link($graded_id), [
+                        'assigned' => in_array($graded_id, $assigned_ids, true),
+                    ]);
                 }
                 foreach ($ungraded_ids as $user_id) {
                     $ungraded[] = $student_link($user_id);

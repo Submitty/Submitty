@@ -21,7 +21,7 @@
                 {% endif %}
             {% else %}
                 <p data-testid="peer-participation-not-assigned" style="margin-top:10px;">
-                    This student isn't assigned any peers to grade.
+                    This student isn't {{ participation is not empty ? 'currently ' : '' }}assigned any peers to grade.
                 </p>
             {% endif %}
             
@@ -32,6 +32,9 @@
                         <a data-testid="peer-participation-student-link" href="{{ entry.grade_url }}">{{ entry.display_id }}</a>
                     {% else %}
                         {{ entry.display_id }}
+                    {% endif %}
+                    {% if not entry.assigned %}
+                        <em data-testid="peer-participation-no-longer-assigned">(no longer assigned)</em>
                     {% endif %}
                     <div style="margin-left:15px;">
                         <div><strong>Peer Component Grading</strong></div>
