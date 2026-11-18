@@ -474,8 +474,15 @@ class ReportController extends AbstractController {
             if (!$gg->hasOverriddenGrades()) {
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
-                    if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
-                        // Version conflict or incomplete grading, so zero score
+                    if (
+                        $gg->getGradeable()->isTaGrading()
+                        && (
+                            $gg->getOrCreateTaGradedGradeable()->hasVersionConflict()
+                            // Incomplete grading zeroes the score unless the instructor releases partial grades
+                            || (!$gg->isTaGradingComplete() && !$gg->isTaGradingPartiallyReleased())
+                        )
+                    ) {
+                        // Version conflict or (unreleasable) incomplete grading, so zero score
                         $row[$gg->getGradeableId()] = 0;
                     }
                     elseif ($ldi !== null && $ldi->getStatus() === LateDayInfo::STATUS_BAD) {
@@ -631,7 +638,15 @@ class ReportController extends AbstractController {
 
                 // If the grading isn't complete or there are conflicts in which version is graded,
                 //  let the user know that
-                if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
+                $entry['incomplete_manual_grading'] = false;
+                if ($g->isTaGrading() && !$ta_gg->hasVersionConflict() && $gg->isTaGradingPartiallyReleased()) {
+                    // Manual grading is incomplete, but the instructor chose to release partial grades.
+                    // Ungraded components already count as zero in the totals, so keep the partial sums
+                    // and flag the entry so Rainbow Grades can highlight it.
+                    $entry['incomplete_manual_grading'] = true;
+                    $entry['note'] = 'Manual grading is incomplete. Partial score shown; ungraded components count as zero.';
+                }
+                elseif ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
                     $entry['score'] = 0;
                     $entry['autograding_score'] = 0;
                     $entry['tagrading_score'] = 0;

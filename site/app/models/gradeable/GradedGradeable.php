@@ -172,6 +172,24 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
+     * Gets whether some, but not all, manual grading exists AND the instructor has chosen to release
+     * partial manual grading to students for this gradeable.
+     */
+    public function isTaGradingPartiallyReleased(): bool {
+        return $this->hasTaGradingInfo()
+            && !$this->ta_graded_gradeable->isComplete()
+            && $this->getGradeable()->getReleaseIncompleteManualGrading();
+    }
+
+    /**
+     * Gets whether manual grading results should be shown to the student (once grades are released):
+     * either grading is complete, or it is partial and the instructor allows releasing partial grades.
+     */
+    public function canStudentSeeTaGrading(): bool {
+        return $this->isTaGradingComplete() || $this->isTaGradingPartiallyReleased();
+    }
+
+    /**
      * Gets whether a peer grader has graded all of the peer components for this submitter/gradeable
      * Later this will take in a userId and determine if that user graded all components
      * @param User|null $grader Peer grader to check if all peer components associated with this grader has been graded.

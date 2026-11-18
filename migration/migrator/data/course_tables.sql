@@ -1006,6 +1006,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
     eg_instructor_blind integer DEFAULT 1,
     eg_release_notifications_sent boolean DEFAULT false NOT NULL,
+    eg_release_incomplete_manual_grading boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
