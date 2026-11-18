@@ -1,4 +1,5 @@
-export {};
+import { VIEW_SECTIONS_COOKIE, setViewAllSections } from './utils/view-sections';
+
 declare global {
     interface Window {
         filter_overriden_grades: () => void;
@@ -50,15 +51,7 @@ window.filter_withdrawn_students = () => {
 };
 
 window.changeSections = () => {
-    const view_all = window.Cookies.get('view') ?? 'assigned';
-    if (view_all === 'all') {
-        window.Cookies.set('view', 'assigned', cookieArguments);
-        localStorage.setItem('general-setting-navigate-assigned-students-only', 'true');
-    }
-    else {
-        window.Cookies.set('view', 'all', cookieArguments);
-        localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
-    }
+    setViewAllSections(window.Cookies.get(VIEW_SECTIONS_COOKIE) !== 'all');
     location.reload();
 };
 

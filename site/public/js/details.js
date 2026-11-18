@@ -119,8 +119,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (full_access_grader_permission) {
         // Only Assigned Sections
         const assignedFilterBox = document.getElementById('toggle-view-sections');
-        const assignedFilterStatus = Cookies.get('view');
-        assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
+        assignedFilterBox.checked = Cookies.get('grading_view_sections') !== 'all';
 
         // Withdrawn Students
         const withdrawnFilterStatus = Cookies.get('include_withdrawn_students') || 'omit';
