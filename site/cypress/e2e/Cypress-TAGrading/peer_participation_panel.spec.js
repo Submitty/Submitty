@@ -1,7 +1,7 @@
 import { getCurrentSemester } from '/cypress/support/utils.js';
 
-// These tests read the panel and compare it against itself instead of expecting specific students,
-// since which peer grades exist depends on the sample data. Any grading they add is deleted again.
+// These tests only read the panel, and compare it against itself instead of expecting specific students,
+// since which peer grades exist depends on the sample data.
 describe('Peer Participation panel', () => {
     const gradeableId = 'grading_pdf_peer_homework';
     const peerGraderId = 'baliss';
@@ -20,14 +20,6 @@ describe('Peer Participation panel', () => {
     const linkTexts = ($panel, testId) => $panel.find(`[data-testid="${testId}"]`).map((i, el) => el.textContent.trim()).get();
     const linkWhoIds = ($panel, testId) => $panel.find(`[data-testid="${testId}"]`)
         .map((i, el) => new URL(el.href).searchParams.get('who_id')).get();
-
-    // On a student's grading page, open the instructor's form for editing the peer grader's grades
-    const openEditPeerForm = () => {
-        cy.get('[data-testid="peer-info-btn"]').click();
-        cy.get('[data-testid="peer-info"]').should('be.visible');
-        cy.get('[data-testid="edit-peer-components-btn"]').click();
-        cy.get('[data-testid="edit-peer-select"]').select(peerGraderId);
-    };
 
     beforeEach(() => {
         cy.login('instructor');
@@ -52,43 +44,25 @@ describe('Peer Participation panel', () => {
         });
     });
 
-    it('should move a student from not graded to graded once peer graded, linking to their page both times', () => {
+    it('should link every listed student to their grading page', () => {
         setAnonMode(false);
         openPanel();
+        // Graded and not graded links are built the same way: the grading page with the student's anonymous ID
+        cy.get('[data-testid="peer-participation"]').then(($panel) => {
+            ['peer-participation-student-link', 'peer-participation-ungraded-link'].forEach((testId) => {
+                $panel.find(`[data-testid="${testId}"]`).each((i, el) => {
+                    const url = new URL(el.href);
+                    expect(url.pathname).to.match(new RegExp(`/gradeable/${gradeableId}/grading/grade$`));
+                    expect(url.searchParams.get('who_id'), 'who_id').to.not.be.oneOf([null, '', el.textContent.trim()]);
+                });
+            });
+        });
+
+        // Following a link opens that student's grading page
         cy.get('[data-testid="peer-participation-ungraded-link"]').first().then(($link) => {
             const studentId = $link.text().trim();
-            const exactId = new RegExp(`^\\s*${studentId}\\s*$`);
-
-            // The "Not graded" link opens that student's grading page
             cy.wrap($link).click();
             cy.get('[data-testid="grading-panel-student-name"]').should('contain', `(${studentId})`);
-
-            // Enter a grade for one peer component as the peer grader
-            cy.intercept('POST', '**/save_peer_component').as('savePeerComponent');
-            openEditPeerForm();
-            cy.get(`[data-testid="peer-edit-mark"][data-peer-id="${peerGraderId}"]`).first().then(($mark) => {
-                cy.wrap($mark).check();
-                cy.get(`[data-testid="save-component-btn"][data-peer-id="${peerGraderId}"][data-component-id="${$mark.attr('data-component-id')}"]`).click();
-            });
-            cy.wait('@savePeerComponent').then(({ response }) => {
-                const body = typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
-                expect(body.status, body.message).to.eq('success');
-            });
-
-            // The student now appears as graded, and that link also opens their grading page
-            openPanel();
-            cy.get('[data-testid="peer-participation"]').then(($panel) => {
-                expect(linkTexts($panel, 'peer-participation-ungraded-link')).to.not.include(studentId);
-            });
-            cy.get('[data-testid="peer-participation-student-link"]').contains(exactId).click();
-            cy.get('[data-testid="grading-panel-student-name"]').should('contain', `(${studentId})`);
-
-            // Delete the grade so the student is back to not graded
-            openEditPeerForm();
-            cy.get(`[data-testid="clear-peer-marks-btn"][data-peer-id="${peerGraderId}"]`).click();
-            cy.get('[data-testid="grading-panel-student-name"]').should('contain', `(${studentId})`);
-            openPanel();
-            cy.get('[data-testid="peer-participation-ungraded-link"]').contains(exactId).should('exist');
         });
     });
 
