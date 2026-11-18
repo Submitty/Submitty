@@ -1,6 +1,6 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday, filter_course, changeView */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, deleteGlobalCalendarItem, openNewItemModal, openNewGlobalEventModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday, filter_course, changeView, updateFeedUrl, copyFeedUrl */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, global_items_by_date, instructor_courses, is_superuser, buildUrl */
-/* global csrfToken */
+/* global csrfToken, displaySuccessMessage */
 /* global luxon */
 
 // List of names of months in English
@@ -976,6 +976,24 @@ function saveOptions() {
     else {
         Cookies.set('show_legend', '0', { expires: 365 });
     }
+}
+
+// Rebuilds the subscription link from the Subscribe checkboxes. The options can only remove events from the feed.
+function updateFeedUrl() {
+    const input = document.getElementById('feed-url');
+    const url = new URL(input.dataset.base);
+    const courses = [...document.querySelectorAll('.feed-course')];
+    const kept = courses.filter((box) => box.checked);
+    if (kept.length < courses.length) {
+        url.searchParams.set('courses', kept.map((box) => box.value).join(','));
+    }
+    document.querySelectorAll('.feed-type:not(:checked)').forEach((box) => url.searchParams.set(box.value, '0'));
+    input.value = url.toString();
+}
+
+function copyFeedUrl() {
+    void navigator.clipboard.writeText(document.getElementById('feed-url').value)
+        .then(() => displaySuccessMessage('Calendar subscription link copied.'));
 }
 
 // Adds Color to Legend

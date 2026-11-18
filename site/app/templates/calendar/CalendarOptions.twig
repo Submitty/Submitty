@@ -29,6 +29,34 @@
             <input type="checkbox" id="show-legend-box" {% if show_legend %}checked{% endif %}>
         </div>
     </div>
+    <hr class="line-break">
+    <h2 class="cal-options-section-head">Subscribe</h2>
+    <p>
+        Add this link to Google, Apple or Outlook calendar with "add calendar from URL".
+        Anyone who has the link can see all of your calendar dates, whatever is checked below.
+    </p>
+    <div class="options-colors">
+        <div class="cal-option-area">
+            <label for="feed-gradeables">Gradeable due dates</label>
+            <input type="checkbox" class="feed-type" id="feed-gradeables" value="gradeables" onchange="updateFeedUrl()" checked>
+        </div>
+        <div class="cal-option-area">
+            <label for="feed-items">Course and global items</label>
+            <input type="checkbox" class="feed-type" id="feed-items" value="items" onchange="updateFeedUrl()" checked>
+        </div>
+        {% for course in course_names %}
+        <div class="cal-option-area">
+            <label for="feed-course-{{ loop.index }}">{{ course.display_name }}</label>
+            <input type="checkbox" class="feed-course" id="feed-course-{{ loop.index }}" value="{{ course.feed_key }}" onchange="updateFeedUrl()" checked>
+        </div>
+        {% endfor %}
+    </div>
+    <input type="text" readonly id="feed-url" style="width: 22rem; max-width: 100%;" aria-label="Calendar subscription link" data-base="{{ feed_url }}" value="{{ feed_url }}">
+    <button type="button" class="btn btn-default" onclick="copyFeedUrl()">Copy</button>
+    <form method="POST" action="{{ feed_reset_url }}" style="display: inline;" onsubmit="return confirm('Reset the link? Calendars that use the old link stop updating, and your API token stops working.');">
+        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
+        <button type="submit" class="btn btn-danger">Reset link</button>
+    </form>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}

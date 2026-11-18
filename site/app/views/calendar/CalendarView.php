@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\views\calendar;
 
 use app\libraries\FileUtils;
+use app\models\CalendarFeed;
 use app\models\CalendarInfo;
 use app\models\GlobalCalendarInfo;
 use app\models\User;
@@ -55,6 +56,7 @@ class CalendarView extends AbstractView {
             $courseWithName[] = [
                 'course_name' => $formatted_courses[$index],
                 'display_name' => $nameString,
+                'feed_key' => CalendarFeed::courseKey($course),
             ];
         }
 
@@ -109,6 +111,8 @@ class CalendarView extends AbstractView {
             "show_all_cookie" => isset($_COOKIE['calendar_show_all']) ? $_COOKIE['calendar_show_all'] : 1,
             "calendar_course_cookie" => $_COOKIE['calendar_course'] ?? ($formatted_courses[0] ?? null),
             "display_name_cookie" => $_COOKIE['calendar_course'] ?? '',
+            "feed_url" => CalendarFeed::getUrl($this->core, $this->core->getUser()->getId()),
+            "feed_reset_url" => $this->core->buildUrl(['calendar', 'feed', 'reset']),
         ]);
     }
 }
