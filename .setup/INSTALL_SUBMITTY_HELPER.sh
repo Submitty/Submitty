@@ -396,6 +396,12 @@ fi
 
 bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
+# some Python scripts used by submitty and COURSE_BUILDERS_GROUP (course admins)
+# use the global Submitty venv at ${SUBMITTY_INSTALL_DIR}/venv
+while IFS= read -r -d '' f; do
+ replace_fillin_variables "$f"
+done < <(find "${SUBMITTY_INSTALL_DIR}"/bin "${SUBMITTY_INSTALL_DIR}"/sbin -type f -name '*.py' -print0)
+
 # build the helper program for strace output and restrictions by system call categories
 g++ "${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp" -o "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
 
@@ -649,6 +655,13 @@ for i in "${ALL_DAEMONS[@]}"; do
         exit 1
     fi
 done
+
+if [ "${IS_WORKER}" == 0 ]; then
+    # Stop all workers on remote machines
+    echo -e -n "Stopping all remote machine workers...\n"
+    sudo -H -u "${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/venv/bin/python3" "${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py" stop --target perform_on_all_workers
+    echo -e "done"
+fi
 
 # force kill any other shipper processes that may be manually running on the primary machine
 if [ "${IS_WORKER}" == 0 ]; then

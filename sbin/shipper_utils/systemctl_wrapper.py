@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/venv/bin/python3
 
 import argparse
 import os
@@ -98,7 +98,7 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
     sys.exit(EXIT_CODES['bad_arguments'])
 
   script_directory = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'systemctl_wrapper.py')
-  command = "sudo /usr/local/submitty/venv/bin/python3 {0} {1} --daemon {2}".format(script_directory, mode, daemon)
+  command = "sudo {0} {1} --daemon {2}".format(script_directory, mode, daemon)
   try:
       (target_connection,
        intermediate_connection) = ssh_proxy_jump.ssh_connection_allowing_proxy_jump(user,host)
