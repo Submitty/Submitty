@@ -646,6 +646,7 @@ HTML;
             if ($gradeable->isTaGradeReleased()) {
                 $columns[] = ["title" => "Viewed Grade", "header_key" => "viewed_grade"];
             }
+            $columns[] = ["title" => "TA Time", "header_key" => "ta_time"];
         }
 
         //Convert rows into sections and prepare extra row info for things that
@@ -948,6 +949,7 @@ HTML;
             }
         }
 
+        $grading_details_columns += ['ta_time' => false];
         $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns) {
             return !array_key_exists($column['header_key'], $grading_details_columns) || $grading_details_columns[$column['header_key']];
         });
