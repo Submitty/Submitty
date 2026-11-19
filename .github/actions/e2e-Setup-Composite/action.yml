@@ -21,7 +21,6 @@ env:
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
   PHP_VER: 8.2
-  NODE_VERSION: 16
   PYTHON_VERSION: "3.10"
 
 runs:
@@ -50,6 +49,19 @@ runs:
     - uses: actions/setup-python@v7
       with:
         python-version: ${{ env.PYTHON_VERSION }}
+
+    - uses: actions/setup-node@v7
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Make setup-node's Node.js available to login shells
+      run: |
+        # install_site.sh builds the site through `su -`, which resets PATH and
+        # would otherwise use the Node.js preinstalled in /usr/local/bin.
+        for tool in node npm npx; do
+          sudo ln -sf "$(command -v "${tool}")" "/usr/local/bin/${tool}"
+        done
+      shell: bash
 
     - name: Disable php8.1-fpm before setup
       run: |
