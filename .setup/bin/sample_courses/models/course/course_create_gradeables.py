@@ -107,7 +107,6 @@ class Course_create_gradeables:
                 subprocess.check_call(
                     [
                         "sudo",
-                        f"{SUBMITTY_INSTALL_DIR}/venv/bin/python3",
                         f"{SUBMITTY_INSTALL_DIR}/bin/generate_repos.py",
                         str(self.semester),
                         str(self.code),
