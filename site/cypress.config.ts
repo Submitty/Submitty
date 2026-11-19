@@ -42,7 +42,7 @@ export default defineConfig({
     forceHttp1: true,
     keystrokeDelay: 10,
     retries: {
-        runMode: 2,
+        runMode: 0,
         openMode: 0,
     },
 
