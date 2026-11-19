@@ -5007,6 +5007,34 @@ SQL;
     }
 
     /**
+     * Get how many peer components each peer grader has graded for each student in a gradeable.
+     * For team gradeables, a graded team submission counts for every member of the team.
+     *
+     * @return array<string, array<string, int>> grader id => student user id => number of peer components graded
+     */
+    public function getPeerGradedComponentCounts(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT gcd.gcd_grader_id AS grader_id,
+                COALESCE(gd.gd_user_id, t.user_id) AS user_id,
+                COUNT(DISTINCT gcd.gc_id) AS graded_count
+            FROM gradeable_component_data gcd
+            JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
+            JOIN gradeable_component gc ON gc.gc_id = gcd.gc_id
+            LEFT JOIN teams t ON t.team_id = gd.gd_team_id
+            WHERE gd.g_id = ? AND gc.gc_is_peer = true
+            GROUP BY gcd.gcd_grader_id, COALESCE(gd.gd_user_id, t.user_id)",
+            [$gradeable_id]
+        );
+        $counts = [];
+        foreach ($this->course_db->rows() as $row) {
+            if ($row['user_id'] !== null) {
+                $counts[$row['grader_id']][$row['user_id']] = (int) $row['graded_count'];
+            }
+        }
+        return $counts;
+    }
+
+    /**
      * Adds an assignment for someone to get the peer feedback for a given user for a given gradeable
      *
      * @param string $gradeable_id
