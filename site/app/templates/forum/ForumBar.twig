@@ -53,6 +53,7 @@
 			{% include "Vue.twig" with {
 				'type': 'component',
 				'name': 'FullScreenButton',
+				'class': 'fullscreen-btn-wrapper',
 				'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
 			} %}
 			{% if show_more is defined and show_more %}
