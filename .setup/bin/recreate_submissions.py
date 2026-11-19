@@ -10,6 +10,7 @@ import sys
 import typing
 
 from submitty_utils import dateutils as submitty_dateutils
+from submitty_utils import db_utils
 
 """
 DOCUMENTATION
@@ -192,8 +193,13 @@ def parseArgs():
 def main():
     parseArgs()
     dbengine_course = create_engine(
-        f"postgresql:///submitty_{ARG_SEMESTER}_{ARG_COURSE}?host={ARG_DB_HOST}"
-        f"&port={ARG_DB_PORT}&user={ARG_DB_USER}&password={ARG_DB_PASS}"
+        db_utils.generate_connect_string(
+            ARG_DB_HOST,
+            ARG_DB_PORT,
+            f"submitty_{ARG_SEMESTER}_{ARG_COURSE}",
+            ARG_DB_USER,
+            ARG_DB_PASS,
+        )
     )
     dbconn_course = dbengine_course.connect()
     metadata = MetaData()
