@@ -36,9 +36,30 @@ class WebSocketClient {
         my_url.pathname = 'ws';
         this.url = my_url.href;
         this.serverError = null;
+        this.page = null;
+        this.args = {};
+        this.client = null;
+        this.reconnectTimer = null;
     }
 
     open(page, args = {}) {
+        this.page = page;
+        this.args = args;
+        this.serverError = null;
+
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+
+        if (this.client) {
+            this.removeClientListeners();
+            if (this.client.readyState !== WebSocket.CLOSED) {
+                this.client.close();
+            }
+            this.client = null;
+        }
+
         console.log(`WebSocket: connecting to ${this.url}`);
         const [term, course] = document.body.dataset.courseUrl.split('/').slice(4);
         const urlWithParams = new URL(this.url);
@@ -86,7 +107,7 @@ class WebSocketClient {
                     }
                     break;
                 default:
-                    this.reconnect(page);
+                    this.reconnect(page, args);
                     break;
             }
             // this.onclose(event);
@@ -96,7 +117,7 @@ class WebSocketClient {
             const sys_message = $('#socket-server-system-message');
             switch (error.code) {
                 case 'ECONNREFUSED':
-                    this.reconnect(page);
+                    this.reconnect(page, args);
                     sys_message.show();
                     break;
                 default:
@@ -109,24 +130,57 @@ class WebSocketClient {
     }
 
     send(data) {
-        if (this.client.readyState === WebSocket.OPEN) {
+        if (this.client && this.client.readyState === WebSocket.OPEN) {
             this.client.send(JSON.stringify(data));
         }
     }
 
     removeClientListeners() {
+        if (!this.client) {
+            return;
+        }
         this.client.onopen = null;
         this.client.onmessage = null;
         this.client.onclose = null;
         this.client.onerror = null;
     }
 
-    reconnect(page) {
-        console.log(`WebSocketClient: Retry in ${this.autoReconnectInterval}ms`);
+    reconnect(page = this.page, args = this.args, immediate = false) {
+        if (typeof page === 'boolean') {
+            immediate = page;
+            page = this.page;
+            args = this.args;
+        }
+        if (!page) {
+            return;
+        }
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
         this.removeClientListeners();
-        setTimeout(() => {
+        if (this.client) {
+            if (this.client.readyState !== WebSocket.CLOSED) {
+                this.client.close();
+            }
+            this.client = null;
+        }
+
+        const delay = immediate ? 0 : this.autoReconnectInterval;
+        if (delay > 0) {
+            console.log(`WebSocketClient: Retry in ${delay}ms`);
+        }
+        this.reconnectTimer = setTimeout(async () => {
+            this.reconnectTimer = null;
             console.log('WebSocketClient: Reconnecting...');
-            this.open(page);
-        }, this.autoReconnectInterval);
+            try {
+                // Re-request page headers so PHP re-issues a fresh WebSocket token cookie if expired
+                await fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' });
+            }
+            catch (exc) {
+                console.error(`Failed to refresh WebSocket token: ${exc}`);
+            }
+            this.open(page, args);
+        }, delay);
     }
 }
