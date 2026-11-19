@@ -2,46 +2,68 @@
     <div class="draggable_content" style="width:100%">
         <div style="padding:20px; margin-top:10px;">
             <span class="col grading_label" style="padding-left:0;">Peer Participation</span>
-            {% if participation is empty %}
-                <p data-testid="peer-participation-empty">No peer grading participation found.</p>
+            {% if assigned_count > 0 %}
+                <p data-testid="peer-participation-summary" style="margin-top:10px;">
+                    Graded {{ graded_count }} of {{ assigned_count }} assigned {{ assigned_count == 1 ? 'student' : 'students' }} ({{ ungraded|length }} ungraded)
+                </p>
+                {% if ungraded is not empty %}
+                    <div data-testid="peer-participation-ungraded">
+                        <strong>Not graded:</strong>
+                        {% for student in ungraded %}
+                            {% if student.grade_url %}
+                                <a data-testid="peer-participation-ungraded-link" href="{{ student.grade_url }}">{{ student.display_id }}</a>
+                            {%- else -%}
+                                {{ student.display_id }}
+                            {%- endif -%}
+                            {{- not loop.last ? ',' : '' }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             {% else %}
-                {% for entry in participation %}
-                    <div data-testid="peer-participation-entry" style="margin-top:15px;">
-                        <strong>Student graded:</strong>
-                        {% if entry.grade_url %}
-                            <a data-testid="peer-participation-student-link" href="{{ entry.grade_url }}">{{ entry.display_id }}</a>
-                        {% else %}
-                            {{ entry.display_id }}
+                <p data-testid="peer-participation-not-assigned" style="margin-top:10px;">
+                    This student isn't {{ participation is not empty ? 'currently ' : '' }}assigned any peers to grade.
+                </p>
+            {% endif %}
+            
+            {% for entry in participation %}
+                <div data-testid="peer-participation-entry" style="margin-top:15px;">
+                    <strong>Student graded:</strong>
+                    {% if entry.grade_url %}
+                        <a data-testid="peer-participation-student-link" href="{{ entry.grade_url }}">{{ entry.display_id }}</a>
+                    {% else %}
+                        {{ entry.display_id }}
+                    {% endif %}
+                    {% if not entry.assigned %}
+                        <em data-testid="peer-participation-no-longer-assigned">(no longer assigned)</em>
+                    {% endif %}
+                    <div style="margin-left:15px;">
+                        <div><strong>Peer Component Grading</strong></div>
+                        {% if entry.components is empty %}
+                            <div data-testid="peer-participation-no-components"><em>No components graded</em></div>
                         {% endif %}
-                        <div style="margin-left:15px;">
-                            <div><strong>Peer Component Grading</strong></div>
-                            {% if entry.components is empty %}
-                                <div data-testid="peer-participation-no-components"><em>No components graded</em></div>
-                            {% endif %}
-                            {% for component in entry.components %}
-                                <div data-testid="peer-participation-component">
-                                    <strong>{{ component.title }}:</strong>
-                                    {% if component.score is null %}
-                                        <em>No score</em>
-                                    {% elseif component.max > 0 %}
-                                        {{ component.score }} / {{ component.max }}
-                                    {% else %}
-                                        {{ component.score }}
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                            <div data-testid="peer-participation-overall">
-                                <strong>Overall comment:</strong>
-                                {% if entry.overall_comment %}
-                                    {{ entry.overall_comment }}
+                        {% for component in entry.components %}
+                            <div data-testid="peer-participation-component">
+                                <strong>{{ component.title }}:</strong>
+                                {% if component.score is null %}
+                                    <em>No score</em>
+                                {% elseif component.max > 0 %}
+                                    {{ component.score }} / {{ component.max }}
                                 {% else %}
-                                    <em>No overall comment</em>
+                                    {{ component.score }}
                                 {% endif %}
                             </div>
+                        {% endfor %}
+                        <div data-testid="peer-participation-overall">
+                            <strong>Overall comment:</strong>
+                            {% if entry.overall_comment %}
+                                {{ entry.overall_comment }}
+                            {% else %}
+                                <em>No overall comment</em>
+                            {% endif %}
                         </div>
                     </div>
-                {% endfor %}
-            {% endif %}
+                </div>
+            {% endfor %}
         </div>
     </div>
 </div>
