@@ -240,6 +240,10 @@
         color: var(--standard-tangerine-yellow);
     }
 
+    .annotated-image-grader {
+        margin: 8px 0;
+    }
+
     img {
         max-width: 100%;
         max-height: 100vh;
