@@ -1,0 +1,10 @@
+ #nonpos         AVG          SD  
++--------------------------------+
+|   NONE |     4.625 |     2.669 | extra words
+|      1 |     4.860 |     3.296 | extra words
+|   NONE |    62.167 |    32.437 | extra words
+|      2 |    73.500 |    29.192 | extra words
+|      7 |     1.500 |     0.707 | extra words
+|   NONE |   277.750 |   483.570 | extra words
+|      3 |     5.900 |     0.000 | extra words
++--------------------------------+
