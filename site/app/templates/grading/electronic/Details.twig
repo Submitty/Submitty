@@ -257,6 +257,22 @@
                                 <i class="expand-icon fas fa-caret-down"></i>
                                 {% if is_group_by_clusters %}
                                     Students in Cluster {{ section.title }}
+                                    {% if section.cluster_id is defined and section.cluster_id is not null %}
+                                        {% include 'Vue.twig' with {
+                                            'type': 'component',
+                                            'name': 'ta_grading/RenameClusterModal',
+                                            'style': 'display: inline-block;',
+                                            'args': {
+                                                'clusterId': section.cluster_id,
+                                                'clusterName': section.title,
+                                                'renameUrl': core.buildCourseUrl(['gradeable', gradeable.getId(), 'clustering', section.cluster_id, 'rename']),
+                                                'csrfToken': core.getCsrfToken()
+                                            },
+                                            'events': {
+                                                'renamed': '() => { window.location.reload(); }'
+                                            }
+                                        } %}
+                                    {% endif %}
                                 {% elseif gradeable.isGradeByRegistration()%}
                                     Students Enrolled in Registration Section {{ section.title }}
                                 {% else %}
