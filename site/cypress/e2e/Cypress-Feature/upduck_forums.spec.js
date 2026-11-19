@@ -26,7 +26,12 @@ const removeUpduck = (thread_title, thread_number = 0, num_ducks = 1) => {
 const checkStaffUpduck = (title, visible, thread_number = 0) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
-    cy.get('[data-testid="instructor-like"]').eq(thread_number).should(visible);
+    // A thread reload restores the old scroll position, which can leave this post out of view
+    cy.get('[data-testid="instructor-like"]').eq(thread_number)
+        .should(($like) => {
+            $like[0].scrollIntoView();
+        })
+        .should(visible);
 };
 
 const checkThreadduck = (title, ducks) => {

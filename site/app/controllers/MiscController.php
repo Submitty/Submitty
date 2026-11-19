@@ -103,7 +103,7 @@ class MiscController extends AbstractController {
             $section = $submitter->getRotatingSection();
         }
 
-        if (!str_starts_with($file_path, $check_path)) {
+        if (!str_starts_with($file_path, $check_path . "/")) {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid file path")
             );
@@ -193,23 +193,23 @@ class MiscController extends AbstractController {
                 $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
                 return false;
             }
+        }
 
-            if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
-                if ($cm === null) {
-                    $access_failure = 'Course material not found';
-                }
-                else {
-                    $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
-                }
-                if ($access_failure) {
-                    $this->core->getOutput()->showError($access_failure);
-                    return false;
-                }
+        if ($dir == 'course_materials' && !$this->core->getUser()->accessGrading()) {
+            if ($cm === null) {
+                $access_failure = 'Course material not found';
             }
+            else {
+                $access_failure = CourseMaterialsUtils::finalAccessCourseMaterialCheck($this->core, $cm);
+            }
+            if ($access_failure) {
+                $this->core->getOutput()->showError($access_failure);
+                return false;
+            }
+        }
 
-            if ($dir === "course_materials") {
-                CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
-            }
+        if ($dir === "course_materials") {
+            CourseMaterialsUtils::insertCourseMaterialAccess($this->core, $path);
         }
 
         $file_name = basename($path);
@@ -250,7 +250,6 @@ class MiscController extends AbstractController {
             header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
-            $this->core->getOutput()->renderString($path);
         }
         elseif (pathinfo($path, PATHINFO_EXTENSION) === 'ipynb') { // TODO: Do this "properly" by determining a better MIME type via FileUtils::getContentType()
             $this->core->getOutput()->setContentOnly(true);
@@ -289,7 +288,8 @@ class MiscController extends AbstractController {
                     $this->core->getOutput()->renderOutput('Misc', 'displayMarkdown', $contents);
                 }
                 else {
-                    $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
+                    // Title the page with the file name alone: the decoded path names the submitter, even in anonymous grading
+                    $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $file_name, $contents);
                 }
             }
             else {
@@ -301,7 +301,9 @@ class MiscController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/read_file")]
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
-        if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
+        // Only files in the course's site directory need to be served raw
+        $path = $dir === 'site' ? $this->core->getAccess()->resolveDirPath($dir, $path) : false;
+        if ($path === false || !$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path]) || !is_file($path)) {
             $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
             return false;
         }
@@ -351,6 +353,10 @@ class MiscController extends AbstractController {
                 $dir = 'course_materials';
                 $path = $cm->getPath();
                 $title = $cm->getTitle();
+            }
+            else {
+                $this->core->getOutput()->showError(self::GENERIC_NO_ACCESS_MSG);
+                return false;
             }
         }
 
