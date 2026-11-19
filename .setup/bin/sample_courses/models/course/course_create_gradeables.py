@@ -104,13 +104,11 @@ class Course_create_gradeables:
             if gradeable.is_repository:
                 # generate the repos for the vcs gradeable
                 print(f"generating repositories for gradeable {gradeable.id}")
-                subprocess.check_call(
-                    [
-                        "sudo", f"{SUBMITTY_INSTALL_DIR}/bin/generate_repos.py",
-                        str(self.semester), str(self.code), str(gradeable.id),
-                    ],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
-                )
+                result = subprocess.run(f"sudo {SUBMITTY_INSTALL_DIR}/bin/generate_repos.py {self.semester} {self.code} {gradeable.id}", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, check=True)
+                if result.returncode != 0:
+                    # only show the (very long) output when it failed, so the cause shows up in the log
+                    print(result.stdout.decode('utf-8', errors='replace'))
+                    result.check_returncode()
 
             gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
 
