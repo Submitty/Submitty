@@ -1,0 +1,35 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}edit-linkedin-username-form{% endblock %}
+{% block title %}Edit LinkedIn username{% endblock %}
+{% block body %}
+    <div class="flex-col" id="user_settings_modal">
+        <p class="std-margin">Share your professional experience with your instructors by adding your LinkedIn username!</p>
+        <p>On LinkedIn, go to your profile and find your profile URL on the right side of the page. Your username is visible in your profile URL.</p>
+        <p>(linkedin.com/in/YOUR-USERNAME)</p> 
+        <br>
+            <input id="user-linkedin-csrf" type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <h2>My LinkedIn Username</h2>
+            <div class="edit_user_row ui-front">
+                <label for="user-linkedin-username-change">LinkedIn Username:&emsp;</label>
+                <input type="text"
+                    name="linkedin_username"
+                    data-testid="linkedin-input"
+                    value="{{ linkedin_username }}"
+                    id="user-linkedin-username-change"
+                    placeholder="Type"
+                    size="30"
+                    maxlength = "50"/>
+                </input>
+            </div>
+            <br>  
+        </div>
+    {% endblock %}
+    {% block form %}
+    <form method="post" onsubmit="return updateUserLinkedin(event)">
+            {{ parent() }}
+        </form>
+    {% endblock %}
+    {% block buttons %}
+        {{ block('close_button') }}
+        <input class="btn btn-primary" type="submit" value="Submit" id="edit-linkedin-submit" data-testid="edit-linkedin-submit" />
+{% endblock %}
