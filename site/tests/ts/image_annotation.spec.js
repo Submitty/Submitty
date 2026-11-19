@@ -1,5 +1,16 @@
 import '../../ts/ImageAnnotationEmbedded';
 
+// jsdom has no ResizeObserver, so keep the callback to call it like a panel resize would
+let resizePanel;
+global.ResizeObserver = class {
+    constructor(callback) {
+        resizePanel = callback;
+    }
+
+    observe() {}
+    disconnect() {}
+};
+
 function addImage({ width = 200, height = 100, loaded = true, panel = 'file-content' } = {}) {
     const container = document.getElementById(panel);
     const img = document.createElement('img');
@@ -158,4 +169,60 @@ test('resizes the MarkerView target and retains zoom when cleaning up annotation
     expect(img.style.width).toBe('280px');
     expect(img.style.height).toBe('140px');
     expect(localStorage.getItem('image-scale')).toBe('1.4');
+});
+
+function addMarkerView(img) {
+    const markerView = document.createElement('div');
+    markerView.id = 'annotation-marker-view';
+    markerView.targetImage = img;
+    markerView.style.display = 'flex';
+    img.replaceWith(markerView);
+    return markerView;
+}
+
+test('refits the MarkerView to the panel when it is resized, keeping the zoom', () => {
+    localStorage.setItem('image-scale', '1.5');
+    const img = addImage();
+    window.initImageZoom();
+    const markerView = addMarkerView(img);
+
+    // The stylesheet now fits the image to a narrower panel
+    jest.spyOn(window, 'getComputedStyle').mockReturnValue({ width: '120px', height: '60px' });
+    resizePanel();
+    expect(img.dataset.fitWidth).toBe('120px');
+    expect(img.dataset.fitHeight).toBe('60px');
+    expect(markerView.style.width).toBe('180px');
+    expect(markerView.style.height).toBe('90px');
+    expect(markerView.targetWidth).toBe(180);
+    expect(markerView.targetHeight).toBe(90);
+
+    // The image was only shown long enough to measure it
+    expect(markerView.style.display).toBe('flex');
+    expect(img.isConnected).toBe(false);
+    expect(document.getElementById('file-content').firstChild).toBe(markerView);
+    expect(img.style.width).toBe('180px');
+});
+
+test('keeps the fitted size while the panel is hidden', () => {
+    const img = addImage();
+    window.initImageZoom();
+    window.zoomImage(0.5);
+
+    jest.spyOn(window, 'getComputedStyle').mockReturnValue({ width: '0px', height: '0px' });
+    resizePanel();
+    expect(img.dataset.fitWidth).toBe('200px');
+    expect(img.style.width).toBe('300px');
+    expect(img.style.height).toBe('150px');
+});
+
+test('keeps the image aspect ratio when the panel is wider than the image', () => {
+    const img = addImage();
+    window.initImageZoom();
+    const markerView = addMarkerView(img);
+
+    // The box is 4:1 but the image is 2:1, so it only fills the height
+    jest.spyOn(window, 'getComputedStyle').mockReturnValue({ width: '400px', height: '100px' });
+    resizePanel();
+    expect(markerView.style.width).toBe('200px');
+    expect(markerView.style.height).toBe('100px');
 });
