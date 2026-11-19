@@ -6,7 +6,7 @@ Documentation=http://submitty.org
 User=submitty_daemon
 Restart=always
 Type=simple
-ExecStart=/usr/local/submitty/sbin/submitty_daemon_jobs/submitty_daemon_jobs.py
+ExecStart=/usr/local/submitty/venv/bin/python3 /usr/local/submitty/sbin/submitty_daemon_jobs/submitty_daemon_jobs.py
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 

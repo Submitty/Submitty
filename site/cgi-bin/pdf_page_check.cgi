@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/venv/bin/python3
 
 """
 This script reads a PDF file and checks if the number of pages is divisible by a specified number of pages per document.

@@ -106,10 +106,14 @@ class Course_create_gradeables:
                 print(f"generating repositories for gradeable {gradeable.id}")
                 subprocess.check_call(
                     [
-                        "sudo", f"{SUBMITTY_INSTALL_DIR}/bin/generate_repos.py",
-                        str(self.semester), str(self.code), str(gradeable.id),
+                        "sudo",
+                        f"{SUBMITTY_INSTALL_DIR}/bin/generate_repos.py",
+                        str(self.semester),
+                        str(self.code),
+                        str(gradeable.id),
                     ],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.STDOUT,
                 )
 
             gradeable_annotation_path = os.path.join(self.course_path, "annotations", gradeable.id)
