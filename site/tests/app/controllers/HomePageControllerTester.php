@@ -223,4 +223,48 @@ class HomePageControllerTester extends BaseUnitTest {
         $this->assertEquals($terms, $args[2]);
         $this->assertFalse($args[3]);
     }
+    
+    public function testSearchStudentsRejectsNonFaculty() {
+        $core = $this->createCore([], 'student');
+        $core->getUser()->method('accessFaculty')->willReturn(false);
+        $core->getQueries()->expects($this->never())->method('searchStudentsForInstructor');
+
+        $response = (new HomePageController($core))->searchStudents('al');
+
+        $this->assertSame('fail', $response->json['status']);
+    }
+
+    public function testSearchStudentsShortQueryReturnsEmpty() {
+        $core = $this->createCore([], 'instructor');
+        $core->getUser()->method('accessFaculty')->willReturn(true);
+        $core->getQueries()->expects($this->never())->method('searchStudentsForInstructor');
+
+        $controller = new HomePageController($core);
+        foreach (['', 'a', '  a  '] as $q) {
+            $response = $controller->searchStudents($q);
+            $this->assertSame('success', $response->json['status']);
+            $this->assertSame([], $response->json['data']);
+        }
+    }
+
+    public function testSearchStudentsPassesTrimmedQueryAndInstructorId() {
+        $core = $this->createCore([], 'instructor');
+        $core->getUser()->method('accessFaculty')->willReturn(true);
+        $expected = [[
+            'user_id' => 'student1',
+            'given_name' => 'Noah',
+            'family_name' => 'Tester',
+            'courses' => [['term' => 'f26', 'course' => 'sample']],
+        ]];
+        $core->getQueries()
+            ->expects($this->once())
+            ->method('searchStudentsForInstructor')
+            ->with('instructor', 'oah')
+            ->willReturn($expected);
+
+        $response = (new HomePageController($core))->searchStudents('  oah  ');
+
+        $this->assertSame('success', $response->json['status']);
+        $this->assertSame($expected, $response->json['data']);
+    }
 }
