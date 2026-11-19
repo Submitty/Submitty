@@ -811,6 +811,7 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         }
+        $peer_grader_pairs = $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId());
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'num_checkpoints' => $num_checkpoints,
             'num_text_components' => $num_text,
@@ -862,7 +863,8 @@ class AdminGradeableController extends AbstractController {
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken(),
             'peer' => $gradeable->hasPeerComponent(),
-            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
+            'peer_grader_pairs' => $peer_grader_pairs,
+            'peer_grading_status' => $this->getPeerGradingStatus($gradeable, $peer_grader_pairs),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
             'hidden_files' => $gradeable->getStringHiddenFiles() ?? "",
             'template_list' => $template_list,
@@ -881,6 +883,52 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeableEditPeersForm', $gradeable);
         $this->core->getOutput()->renderOutput(['admin', 'Gradeable'], 'AdminGradeableAddPeersForm', $gradeable);
+    }
+
+    /**
+     * How far each peer grader has gotten with their assigned students, for highlighting the peer matrix.
+     * A student is "complete" when every peer component is graded, "started" when some are, and "none"
+     * when none are. A grader is "complete" when all their students are complete and "none" when none
+     * are started. Returns null before peer graders are able to grade.
+     *
+     * @param array<string, string[]> $peer_grader_pairs grader id => assigned student ids
+     * @return array<string, array{grader: string, students: array<string, string>}>|null
+     */
+    private function getPeerGradingStatus(Gradeable $gradeable, array $peer_grader_pairs): ?array {
+        $grade_start_date = $gradeable->getGradeStartDate();
+        if (!$gradeable->hasPeerComponent() || $grade_start_date === null || $grade_start_date > $this->core->getDateTimeNow()) {
+            return null;
+        }
+        $peer_component_count = count(array_filter(
+            $gradeable->getComponents(),
+            fn (Component $component) => $component->isPeerComponent()
+        ));
+        $graded_counts = $this->core->getQueries()->getPeerGradedComponentCounts($gradeable->getId());
+        $status = [];
+        foreach ($peer_grader_pairs as $grader_id => $student_ids) {
+            if ($student_ids === []) {
+                continue;
+            }
+            $student_status = [];
+            foreach ($student_ids as $student_id) {
+                $graded = $graded_counts[$grader_id][$student_id] ?? 0;
+                if ($graded === 0) {
+                    $student_status[$student_id] = 'none';
+                }
+                elseif ($graded >= $peer_component_count) {
+                    $student_status[$student_id] = 'complete';
+                }
+                else {
+                    $student_status[$student_id] = 'started';
+                }
+            }
+            $distinct = array_values(array_unique($student_status));
+            $status[$grader_id] = [
+                'grader' => count($distinct) === 1 && $distinct[0] !== 'started' ? $distinct[0] : 'started',
+                'students' => $student_status,
+            ];
+        }
+        return $status;
     }
 
     /**
