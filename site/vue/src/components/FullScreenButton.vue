@@ -56,7 +56,7 @@ function onEscape() {
 </template>
 
 <style>
-.full-screen-mode {
+.full-screen-mode main {
     position: fixed;
     top: 0;
     left: 0;
@@ -64,9 +64,22 @@ function onEscape() {
     height: 100vh;
     margin: 0;
     z-index: 10;
+    overflow: scroll;
 }
 
 .full-screen-mode .content {
     margin: 0;
+}
+
+.full-screen-mode nav {
+    display: none;
+}
+
+.full-screen-mode aside {
+    display: none;
+}
+
+.full-screen-mode footer {
+    display: none;
 }
 </style>
