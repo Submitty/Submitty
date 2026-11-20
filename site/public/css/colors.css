@@ -198,6 +198,11 @@
     --category-color-19: #e57fcf;
     --category-color-20: #c0c246;
 
+    --colorblind-pastel-red: #ff746c;
+    --colorblind-pastel-green: #77dd77;
+    --colorblind-pastel-purple: #c9a0dc;
+    --colorblind-pastel-blue: #b6ccff;
+
     /* rainbow */
     --rainbow-gradient: linear-gradient(
         135deg,
