@@ -668,7 +668,7 @@ progress::-webkit-progress-value {
 }
 
 .banner {
-    border: solid 6px var(--default-border-color);
+    border: solid 6px var(--text-black);
     position: relative;
     display: block;
     width: fit-content;
