@@ -64,7 +64,7 @@ function onEscape() {
     height: 100vh;
     margin: 0;
     z-index: 10;
-    overflow: scroll;
+    overflow-y: auto;
 }
 
 .full-screen-mode .content {
