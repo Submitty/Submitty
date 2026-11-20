@@ -108,3 +108,121 @@
         {% endif %}
     </div>
 </div>
+{% if ta_grading_time_session_id is not null and ta_grading_time_close_url is not null and ta_grading_time_activity_url is not null and ta_grading_time_start_url is not null %}
+    <script>
+        (() => {
+            const idleTimeout = 5 * 60 * 1000;
+            const activityInterval = 15 * 1000;
+            const closeUrl = {{ ta_grading_time_close_url|json_encode|raw }};
+            const activityUrl = {{ ta_grading_time_activity_url|json_encode|raw }};
+            const startUrl = {{ ta_grading_time_start_url|json_encode|raw }};
+            const csrfToken = {{ csrf_token|json_encode|raw }};
+            const submitterId = {{ ta_grading_time_submitter_id|json_encode|raw }};
+            let sessionId = {{ ta_grading_time_session_id|json_encode|raw }};
+            let lastInteraction = Date.now();
+            let lastActivitySent = 0;
+            let idleTimer;
+            let sessionStartPromise = null;
+            let lastPointerActivity = 0;
+
+            function formData(values) {
+                return new URLSearchParams({ csrf_token: csrfToken, ...values });
+            }
+
+            function logTrackingError(error) {
+                console.error('Unable to update TA grading time session', error);
+            }
+
+            function closeSession() {
+                if (sessionId === null) {
+                    return;
+                }
+                const closingSessionId = sessionId;
+                sessionId = null;
+                const data = formData({ session_id: closingSessionId });
+                if (typeof navigator.sendBeacon !== 'function' || !navigator.sendBeacon(closeUrl, data)) {
+                    fetch(closeUrl, {
+                        method: 'POST',
+                        body: data,
+                        credentials: 'same-origin',
+                        keepalive: true
+                    }).catch(logTrackingError);
+                }
+            }
+
+            async function startSession() {
+                if (sessionId !== null) {
+                    return;
+                }
+                if (sessionStartPromise === null) {
+                    sessionStartPromise = fetch(startUrl, {
+                        method: 'POST',
+                        body: formData({ submitter_id: submitterId }),
+                        credentials: 'same-origin'
+                    }).then((response) => response.json()).then((response) => {
+                        if (
+                            response.status !== 'success'
+                            || !response.data
+                            || typeof response.data.session_id !== 'string'
+                        ) {
+                            throw new Error(response.message || 'The server rejected the grading session.');
+                        }
+                        sessionId = response.data.session_id;
+                        lastActivitySent = Date.now();
+                    }).finally(() => {
+                        sessionStartPromise = null;
+                    });
+                }
+                await sessionStartPromise;
+            }
+
+            function recordActivity() {
+                const now = Date.now();
+                if (now - lastInteraction >= idleTimeout) {
+                    closeSession();
+                }
+                lastInteraction = now;
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => {
+                    if (Date.now() - lastInteraction >= idleTimeout) {
+                        closeSession();
+                    }
+                }, idleTimeout);
+
+                if (now - lastActivitySent < activityInterval && sessionId !== null) {
+                    return;
+                }
+                lastActivitySent = now;
+                startSession().then(() => fetch(activityUrl, {
+                    method: 'POST',
+                    body: formData({ session_id: sessionId }),
+                    credentials: 'same-origin'
+                })).then((response) => response.json()).then((response) => {
+                    if (response.status !== 'success') {
+                        throw new Error(response.message || 'The server rejected the grading activity.');
+                    }
+                }).catch(logTrackingError);
+            }
+
+            ['click', 'keydown', 'input', 'change', 'scroll', 'touchstart'].forEach((eventName) => {
+                window.addEventListener(eventName, recordActivity, { passive: true });
+            });
+            window.addEventListener('pointermove', () => {
+                if (Date.now() - lastPointerActivity >= 5000) {
+                    lastPointerActivity = Date.now();
+                    recordActivity();
+                }
+            }, { passive: true });
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && Date.now() - lastInteraction >= idleTimeout) {
+                    closeSession();
+                }
+            });
+            window.addEventListener('pagehide', () => {
+                clearTimeout(idleTimer);
+                closeSession();
+            }, { once: true });
+            idleTimer = setTimeout(closeSession, idleTimeout);
+        })();
+    </script>
+{% endif %}

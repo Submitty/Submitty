@@ -146,6 +146,9 @@
                 'forced': [
                     'grading'
                 ],
+                'hiddenColumns': [
+                    'ta_time'
+                ],
                 'cookie': 'grading_details_columns',
                 'format': 'json',
             },
@@ -393,6 +396,8 @@
                 {{ _self.render_column_user_family(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.header_key == "viewed_grade" %}
                 {{ _self.render_column_viewed_grade(context, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
+            {% elseif column.header_key == "ta_time" %}
+                {{ _self.render_ta_time(info.ta_time, info.ta_time_tooltip) }}
             {% endif %}
         {% endfor %}
     </tr>
@@ -451,6 +456,8 @@
             {% elseif column.header_key == "user_family" %}
                 <td></td>
             {% elseif column.header_key == "viewed_grade" %}
+                <td></td>
+            {% elseif column.header_key == "ta_time" %}
                 <td></td>
             {% endif %}
         {% endfor %}
@@ -587,7 +594,7 @@
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
 
-    {% elseif graded_gradeable.getGradeable().isTaGrading() or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
+    {% elseif (graded_gradeable.getGradeable().isTaGrading() and core.getUser().accessGrading()) or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
 
@@ -650,7 +657,7 @@
     {% elseif info.on_time_submission == false %}
         {% set contents = "Too Many Days Late" %}
         {% set btn_class = "btn-danger" %}
-    {% elseif graded_gradeable.getGradeable().isTaGrading() or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
+    {% elseif (graded_gradeable.getGradeable().isTaGrading() and core.getUser().accessGrading()) or (graded_gradeable.getGradeable().hasPeerComponent() and core.getUser().getGroup() == 4) or peer_only_grader %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
         {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
@@ -892,6 +899,17 @@
     {% else %}
         <td></td>
     {% endif %}
+{% endmacro %}
+
+{# TA Time #}
+{% macro render_ta_time(ta_time, ta_time_tooltip) %}
+    <td style="text-align: center;">
+        {% if ta_time_tooltip is not empty %}
+            <span title="{{ ta_time_tooltip }}">{{ ta_time }}</span>
+        {% else %}
+            {{ ta_time }}
+        {% endif %}
+    </td>
 {% endmacro %}
 
 {# /Column functions #}
