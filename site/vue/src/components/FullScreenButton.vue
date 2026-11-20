@@ -1,7 +1,7 @@
 <!-- This component only emits `toggle`, applying full screen is the host page's job.
      Wire it up in the Twig include:
 
-     'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
+     'events': { 'toggle': '(on) => { document.querySelector("#submitty-body")?.classList.toggle("full-screen-mode", on); }' }
 
      The `.full-screen-mode` styles below are bundled into submitty-vue.css, which
      loads on every page, so no per-page CSS is needed.
