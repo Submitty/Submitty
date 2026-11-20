@@ -10330,6 +10330,119 @@ ORDER BY
             $graded_id,
             ]);
     }
+
+    public function startTaGradingTime(string $session_id, string $gradeable_id, string $submitter_id, string $grader_id): void {
+        $now = $this->core->getDateTimeNow();
+        $this->course_db->query(
+            'INSERT INTO ta_grading_time (session_id, g_id, submitter_id, grader_id, opened_at, last_activity_at) VALUES (?, ?, ?, ?, ?, ?)',
+            [$session_id, $gradeable_id, $submitter_id, $grader_id, $now, $now]
+        );
+    }
+
+    public function recordTaGradingTimeActivity(string $session_id, string $gradeable_id, string $grader_id): void {
+        $this->course_db->query(
+            'UPDATE ta_grading_time
+             SET last_activity_at = GREATEST(last_activity_at, ?)
+             WHERE session_id = ? AND g_id = ? AND grader_id = ? AND closed_at IS NULL',
+            [$this->core->getDateTimeNow(), $session_id, $gradeable_id, $grader_id]
+        );
+    }
+
+    public function closeTaGradingTime(string $session_id, string $gradeable_id, string $grader_id): void {
+        $this->course_db->query(
+            "UPDATE ta_grading_time
+             SET closed_at = LEAST(?, last_activity_at + INTERVAL '5 minutes')
+             WHERE session_id = ? AND g_id = ? AND grader_id = ? AND closed_at IS NULL",
+            [$this->core->getDateTimeNow(), $session_id, $gradeable_id, $grader_id]
+        );
+    }
+
+    /**
+     * Gets total completed grading time, in seconds, grouped by submitter.
+     * @return array<string, int>
+     */
+    public function getTaGradingTimesForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT submitter_id,
+                    SUM(EXTRACT(EPOCH FROM (
+                        LEAST(COALESCE(closed_at, CURRENT_TIMESTAMP), last_activity_at + INTERVAL '5 minutes') - opened_at
+                    ))) AS time_seconds
+             FROM ta_grading_time
+             WHERE g_id = ?
+             GROUP BY submitter_id",
+            [$gradeable_id]
+        );
+        $times = [];
+        foreach ($this->course_db->rows() as $row) {
+            $times[$row['submitter_id']] = (int) $row['time_seconds'];
+        }
+        return $times;
+    }
+
+    /**
+     * Gets TA grading time, in seconds, grouped by submitter and grader.
+     * @return array<array{submitter_id: string, grader_id: string, grader_name: string, time_seconds: int}>
+     */
+    public function getTaGradingTimesBySubmitterAndGraderForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT t.submitter_id,
+                    t.grader_id,
+                    COALESCE(NULLIF(u.user_preferred_givenname, ''), u.user_givenname, t.grader_id) AS grader_givenname,
+                    COALESCE(NULLIF(u.user_preferred_familyname, ''), u.user_familyname) AS grader_familyname,
+                    SUM(EXTRACT(EPOCH FROM (
+                        LEAST(COALESCE(t.closed_at, CURRENT_TIMESTAMP), t.last_activity_at + INTERVAL '5 minutes') - t.opened_at
+                    ))) AS time_seconds
+             FROM ta_grading_time t
+             LEFT JOIN users u ON u.user_id = t.grader_id
+             WHERE t.g_id = ?
+             GROUP BY t.submitter_id, t.grader_id, u.user_preferred_givenname, u.user_givenname,
+                      u.user_preferred_familyname, u.user_familyname
+             ORDER BY t.submitter_id, time_seconds DESC, grader_familyname, grader_givenname, t.grader_id",
+            [$gradeable_id]
+        );
+        $times = [];
+        foreach ($this->course_db->rows() as $row) {
+            $times[] = [
+                'submitter_id' => $row['submitter_id'],
+                'grader_id' => $row['grader_id'],
+                'grader_name' => trim($row['grader_givenname'] . ' ' . $row['grader_familyname']),
+                'time_seconds' => (int) $row['time_seconds'],
+            ];
+        }
+        return $times;
+    }
+
+    /**
+     * Gets total completed grading time, in seconds, grouped by grader.
+     * @return array<array{grader_id: string, grader_name: string, time_seconds: int}>
+     */
+    public function getTaGradingTimesByGraderForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT t.grader_id,
+                    COALESCE(NULLIF(u.user_preferred_givenname, ''), u.user_givenname) AS grader_givenname,
+                    COALESCE(NULLIF(u.user_preferred_familyname, ''), u.user_familyname) AS grader_familyname,
+                    SUM(EXTRACT(EPOCH FROM (
+                        LEAST(COALESCE(t.closed_at, CURRENT_TIMESTAMP), t.last_activity_at + INTERVAL '5 minutes') - t.opened_at
+                    ))) AS time_seconds
+             FROM ta_grading_time t
+             JOIN users u ON u.user_id = t.grader_id
+             WHERE t.g_id = ?
+             GROUP BY t.grader_id, u.user_preferred_givenname, u.user_givenname,
+                      u.user_preferred_familyname, u.user_familyname
+             ORDER BY time_seconds DESC, grader_familyname, grader_givenname, t.grader_id",
+            [$gradeable_id]
+        );
+        $times = [];
+        foreach ($this->course_db->rows() as $row) {
+            $times[] = [
+                'grader_id' => $row['grader_id'],
+                'grader_name' => trim($row['grader_givenname'] . ' ' . $row['grader_familyname']),
+                'time_seconds' => (int) $row['time_seconds'],
+            ];
+        }
+        return $times;
+    }
+
     /**
      * @param string $image the full name of the image to get
      * @return string|false the user id of the image's owner or false if the image is not in the db
