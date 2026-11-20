@@ -169,3 +169,26 @@ form {
 .break-above {
     margin-top: 1.5em;
 }
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.toolbar-right {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    margin-left: auto;
+    gap: 0.35rem;
+}
+
+.toolbar-left {
+    flex: 0 1 28rem;
+    min-width: 12rem;
+    display: flex;
+    align-items: stretch;
+    gap: 0.35rem;
+}
