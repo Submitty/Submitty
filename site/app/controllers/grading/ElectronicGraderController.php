@@ -3194,7 +3194,8 @@ class ElectronicGraderController extends AbstractController {
                 0,
                 false,
                 $peer,
-                $page
+                $page,
+                false
             );
             $component->addMark('No Credit', 0.0, false);
             $this->core->getQueries()->updateGradeable($gradeable);
