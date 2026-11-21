@@ -110,6 +110,13 @@ a.cal-btn:focus {
 
 .cal-week-title {
     padding-left: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cal-day-short {
+    display: none;
 }
 
 /* the day number in each cell */
@@ -334,6 +341,14 @@ div.legend-color {
 }
 
 @media (max-width: 800px) {
+    .cal-day-full {
+        display: none;
+    }
+
+    .cal-day-short {
+        display: inline;
+    }
+
     #calendar-list {
         margin: 0;
     }

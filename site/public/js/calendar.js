@@ -482,11 +482,25 @@ function generateCalendarHeader(title_area) {
     const weekTitleRow = document.createElement('tr');
     weekTitleRow.classList.add('cal-week-title-row');
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const daysOfWeekShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const shortDaysOfWeek = ['sun', 'mon', 'tue', 'wed', 'thr', 'fri', 'sat'];
     for (let i = 0; i < daysOfWeek.length; i++) {
         const th = document.createElement('th');
         th.classList.add('cal-week-title', `cal-week-title-${shortDaysOfWeek[i]}`);
-        th.textContent = daysOfWeek[i];
+        th.setAttribute('scope', 'col');
+        th.setAttribute('aria-label', daysOfWeek[i]);
+
+        const fullDay = document.createElement('span');
+        fullDay.classList.add('cal-day-full');
+        fullDay.textContent = daysOfWeek[i];
+
+        const shortDay = document.createElement('span');
+        shortDay.classList.add('cal-day-short');
+        shortDay.setAttribute('aria-hidden', 'true');
+        shortDay.textContent = daysOfWeekShort[i];
+
+        th.appendChild(fullDay);
+        th.appendChild(shortDay);
         weekTitleRow.appendChild(th);
     }
 
