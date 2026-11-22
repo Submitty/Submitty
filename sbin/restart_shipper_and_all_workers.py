@@ -17,7 +17,7 @@ import sys
 import time
 
 SUBMITTY_INSTALL_DIR = "/usr/local/submitty"
-VENV_PATH = "/usr/local/submitty/venv/bin/python3"
+VENV_PATH = os.path.join(SUBMITTY_INSTALL_DIR, "venv", "bin", "python3")
 
 SYSTEMCTL_WRAPPER_SCRIPT = path.join(
     path.dirname(path.realpath(__file__)), "shipper_utils", "systemctl_wrapper.py"
