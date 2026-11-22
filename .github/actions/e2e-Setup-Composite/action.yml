@@ -14,23 +14,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set environment variables
-      run: |
-        {
-          echo "PGPASSWORD=submitty_dbuser"
-          echo "PHP_USER=submitty_php"
-          echo "PHP_GROUP=submitty_php"
-          echo "CGI_USER=submitty_cgi"
-          echo "SUBMITTY_DATA_DIR=/var/local/submitty"
-          echo "SUBMITTY_INSTALL_DIR=/usr/local/submitty"
-          echo "SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty"
-          echo "VENV_PATH=/usr/local/submitty/venv"
-          echo "POSTGRES_HOST=localhost"
-          echo "PHP_VER=8.2"
-          echo "NODE_VERSION=16"
-          echo "PYTHON_VERSION=3.10"
-        } >> "$GITHUB_ENV"
-      shell: bash
     - name: Delete huge unnecessary folders, and clean apt cache
       run: |
         rm -rf /opt/hostedtoolcache

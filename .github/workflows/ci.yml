@@ -18,6 +18,7 @@ env:
   SUBMITTY_DATA_DIR: /var/local/submitty
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
+  VENV_PATH: /usr/local/submitty/venv
   POSTGRES_HOST: localhost
   PHP_VER: 8.2
   NODE_VERSION: 20
