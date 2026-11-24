@@ -103,6 +103,23 @@ class ImageController extends AbstractController {
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotation_jsons = $this->loadAnnotationJsons($annotation_path, $path);
 
+        // Label each grader's annotations with their abbreviated name (e.g. "Alice S."). Anyone without grading
+        // access is left unnamed. Sorted by grader ID so the order stays the same, and the IDs themselves are
+        // not sent to the student.
+        ksort($annotation_jsons);
+        $annotations = [];
+        $unnamed_count = 0;
+        foreach ($annotation_jsons as $grader_id => $annotation_json) {
+            $grader = $this->core->getQueries()->getUserById((string) $grader_id);
+            if ($grader !== null && $grader->accessGrading()) {
+                $label = $grader->getDisplayAbbreviatedName();
+            }
+            else {
+                $label = 'Grader ' . (++$unnamed_count);
+            }
+            $annotations[] = ['label' => $label, 'annotations' => $annotation_json];
+        }
+
         // Construct the image URL for display_file endpoint
         $image_url = $this->core->buildCourseUrl(['display_file']) .
             '?dir=submissions_processed' .
@@ -114,7 +131,7 @@ class ImageController extends AbstractController {
         return JsonResponse::getSuccessResponse([
             'image_url' => $image_url,
             'filename' => $filename,
-            'annotations' => $annotation_jsons,
+            'annotations' => $annotations,
             'gradeable_id' => $gradeable_id,
             'user_id' => $id
         ]);
