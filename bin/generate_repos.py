@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/venv/bin/python3
+
 """
 This script will generate the repositories for a specified course and semester
 for each student that currently does not have a repository. You can either make

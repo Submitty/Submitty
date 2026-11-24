@@ -78,12 +78,16 @@ def get_testcases(
 
 
 def killall(config, which_untrusted, log_file):
-    """Killalll removes any stray processes belonging to the untrusted user"""
+    """Killall removes any stray processes belonging to the untrusted user"""
+    INSTALL_DIR = config.submitty["submitty_install_dir"]
+    VENV_PYTHON = os.path.join(INSTALL_DIR, "venv", "bin", "python3")
+
     killall_success = subprocess.call(
         [
-            os.path.join(config.submitty["submitty_install_dir"], "sbin", "untrusted_execute"),
+            os.path.join(INSTALL_DIR, "sbin", "untrusted_execute"),
             which_untrusted,
-            os.path.join(config.submitty["submitty_install_dir"], "sbin", "killall.py"),
+            VENV_PYTHON,
+            os.path.join(INSTALL_DIR, "sbin", "killall.py"),
         ],
         stdout=log_file,
     )

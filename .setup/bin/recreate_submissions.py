@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
 from sqlalchemy import create_engine, Table, MetaData, select, insert, update
 import sys
 import typing
@@ -293,10 +294,11 @@ def main():
     # initiate batch regrade
     print("ADDING SUBMISSIONS TO GRADING QUEUE")
     regrade_py = Path(ARG_INSTALL_DIR, "bin", "regrade.py")
+    venv_python = Path(ARG_INSTALL_DIR, "venv", "bin", "python3")
     gradeable_path = Path(
         ARG_DATA_DIR, "courses", ARG_SEMESTER, ARG_COURSE, "submissions", ARG_GRADEABLE
     )
-    os.system(f"{regrade_py} {gradeable_path}")
+    subprocess.run([str(venv_python), str(regrade_py), str(gradeable_path)], check=True)
 
 
 if __name__ == "__main__":

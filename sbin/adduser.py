@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/venv/bin/python3
 
 """
 Use this script to create new users.
