@@ -29,6 +29,9 @@ type SemesterCourses = {
 };
 
 const props = defineProps<Props>();
+const emit = defineEmits<{
+    'badge-count-change': [count: number];
+}>();
 const archivedCoursesVisible = ref(true);
 const hasArchivedCourses = computed(() => {
     const archivedRanks = props.statuses.archived_courses;
@@ -172,6 +175,7 @@ const buildCourseUrl = (course: Course) => {
         :notifications="notifications"
         :unseen-count="unseenCount"
         :course="false"
+        @badge-count-change="(count: number) => emit('badge-count-change', count)"
       />
     </div>
   </div>
