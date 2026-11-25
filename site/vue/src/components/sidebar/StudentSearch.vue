@@ -9,6 +9,7 @@ type Result = {
     family_name: string;
     courses: Course[];
 };
+type SearchResponse = { status: string; data: Result[] };
 
 const query = ref('');
 const results = ref<Result[]>([]);
@@ -51,7 +52,7 @@ async function search() {
             `${buildUrl(['home', 'students', 'search'])}?q=${encodeURIComponent(q)}`,
             { signal: controller.signal },
         );
-        const json = await res.json();
+        const json = await res.json() as SearchResponse;
         results.value = json.status === 'success' ? json.data : [];
         searched.value = true;
         open.value = true;
@@ -140,7 +141,7 @@ async function search() {
     color: var(--default-black);
     border: 1px solid var(--standard-light-medium-gray);
     border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
 }
 .result {
     padding: 6px 0;

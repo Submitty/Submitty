@@ -223,7 +223,7 @@ class HomePageControllerTester extends BaseUnitTest {
         $this->assertEquals($terms, $args[2]);
         $this->assertFalse($args[3]);
     }
-    
+
     public function testSearchStudentsRejectsNonFaculty() {
         $core = $this->createCore([], 'student');
         $core->getUser()->method('accessFaculty')->willReturn(false);

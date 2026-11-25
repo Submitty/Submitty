@@ -5195,7 +5195,7 @@ SQL;
         $this->submitty_db->query("SELECT term, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
         return $this->submitty_db->rows();
     }
-    
+
     /**
      * Search students in courses where the given user is an instructor.
      * Only courses the instructor has instructor-level access to are searched,
