@@ -86,7 +86,7 @@ aside {
         padding: 2px 0;
         margin: 0 15px;
     }
-    
+
     aside.collapsed .student-search {
         display: none;
     }
