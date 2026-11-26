@@ -3163,6 +3163,27 @@ CREATE INDEX notifications_user_gradeable_unseen_index ON public.notifications U
 
 
 --
+-- Name: queue_active_time_in_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX queue_active_time_in_idx ON public.queue USING btree (time_in) WHERE (current_state = ANY (ARRAY['waiting'::text, 'being_helped'::text]));
+
+
+--
+-- Name: queue_time_in_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX queue_time_in_idx ON public.queue USING btree (time_in);
+
+
+--
+-- Name: queue_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX queue_user_id_idx ON public.queue USING btree (user_id);
+
+
+--
 -- Name: ta_grading_clusters_config_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
