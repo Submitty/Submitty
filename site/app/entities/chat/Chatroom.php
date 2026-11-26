@@ -68,12 +68,8 @@ class Chatroom {
         return $this->host;
     }
 
-    public function getHostId(): string {
-        return $this->host->getId();
-    }
-
-    public function getHostName(): string {
-        return $this->host->getDisplayFullName();
+    public function setHost(UserEntity $host): void {
+        $this->host = $host;
     }
 
     public function getTitle(): string {
@@ -124,18 +120,12 @@ class Chatroom {
         return $this->is_deleted;
     }
 
-    public function calcAnonName(string $user_id): string {
-        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
-        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
-        $adj_hash = crc32($seed_string);
-        $noun_hash = crc32(strrev($seed_string));
-        $adj_index = abs($adj_hash) % count($adjectives);
-        $noun_index = abs($noun_hash) % count($nouns);
-        $adj  = $adjectives[$adj_index];
-        $noun = $nouns[$noun_index];
-        return "Anonymous {$adj} {$noun}";
+    public function getHostId(): string {
+        return $this->host->getId();
+    }
+
+    public function getHostName(): string {
+        return $this->host->getDisplayFullName();
     }
 
     public function getSessionStartedAt(): ?\DateTime {
@@ -156,5 +146,54 @@ class Chatroom {
 
     public function isReadOnly(): bool {
         return !$this->isActive() && $this->allowReadOnlyAfterEnd();
+    }
+
+    public function calcAnonName(string $user_id, string $global_secret): string {
+        $adjectives = [
+            "Quick", "Lazy", "Cheerful", "Pensive", "Mysterious", "Bright", "Sly", "Brave",
+            "Calm", "Eager", "Fierce", "Gentle", "Jolly", "Kind", "Lively", "Nice",
+            "Proud", "Quiet", "Rapid", "Swift", "Bold", "Clever", "Daring", "Fancy",
+            "Happy", "Keen", "Noble", "Polite", "Silly", "Wise", "Brisk", "Crisp",
+            "Grand", "Neat", "Rich", "Warm", "Cold", "Dark", "Deep", "Fair",
+            "Good", "High", "Just", "Pure", "Rare", "True", "Vast", "Wild",
+            "Cool", "Firm", "Free", "Glad", "Hard", "Loud", "Mild", "Real",
+            "Safe", "Sure", "Tough", "Huge", "Smart", "Bland", "Stark", "Plump"
+        ]; // 64 items
+
+        $nouns = [
+            "Duck", "Goose", "Swan", "Eagle", "Parrot", "Owl", "Sparrow", "Robin",
+            "Pigeon", "Falcon", "Hawk", "Flamingo", "Pelican", "Seagull", "Cardinal", "Canary",
+            "Finch", "Hummingbird", "Ostrich", "Penguin", "Stork", "Woodpecker", "Crow", "Raven",
+            "Peacock", "Vulture", "Crane", "Heron", "Dove", "Jay", "Magpie", "Wren",
+            "Quail", "Lark", "Gull", "Tern", "Kite", "Swift", "Cuckoo", "Puffin",
+            "Ibis", "Egret", "Macaw", "Toucan", "Starling", "Oriole", "Weaver", "Shrike",
+            "Thrush", "Martin", "Grouse", "Pheasant", "Bustard", "Rhea", "Emu", "Kiwi",
+            "Moa", "Dodo", "Rook", "Fowl", "Chough", "Snipe", "Knot", "Teal"
+        ]; // 64 items
+
+        $index = abs(crc32($user_id));
+
+        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format("Y-m-d H:i:s") : "unknown";
+        $info = "chatroom_" . $this->getId() . "_" . $session_started_at;
+
+        $randomizer_key = hash_hkdf('sha256', $global_secret, 32, $info, '');
+
+        $a = ($index >> 16) & 0xFFFF;
+        $b = $index & 0xFFFF;
+
+        for ($i = 0; $i < 10; $i++) {
+            $hmac = hash_hmac('sha256', $i . '+' . $b, $randomizer_key, true);
+            $hash_val = (ord($hmac[0]) << 8) | ord($hmac[1]);
+            $a = ($a ^ $hash_val) & 0xFFFF;
+            $temp = $a;
+            $a = $b;
+            $b = $temp;
+        }
+
+        $final_index = (($a << 16) | $b) % 4096;
+        $adj_idx = intdiv($final_index, 64);
+        $noun_idx = $final_index % 64;
+
+        return "Anonymous {$adjectives[$adj_idx]} {$nouns[$noun_idx]}";
     }
 }
