@@ -92,4 +92,24 @@ describe('SortableTableHeader', () => {
                 .and('have.attr', 'aria-label', 'Sort by Score (out of 100%)');
         });
     });
+
+    describe('active sort state', () => {
+        it('applies active-sort class and up icon when active with ASC', () => {
+            cy.mount(SortableTableHeader, { props: { ...defaultProps, active: true, sortDirection: 'ASC' } });
+            cy.get('[data-testid=sortable-header-link]').should('have.class', 'active-sort');
+            cy.get('[data-testid=sortable-header-link] i').should('have.class', 'fa-sort-up');
+        });
+
+        it('shows down icon when active with DESC', () => {
+            cy.mount(SortableTableHeader, { props: { ...defaultProps, active: true, sortDirection: 'DESC' } });
+            cy.get('[data-testid=sortable-header-link]').should('have.class', 'active-sort');
+            cy.get('[data-testid=sortable-header-link] i').should('have.class', 'fa-sort-down');
+        });
+
+        it('keeps plain sort icon when not active', () => {
+            cy.mount(SortableTableHeader, { props: defaultProps });
+            cy.get('[data-testid=sortable-header-link]').should('not.have.class', 'active-sort');
+            cy.get('[data-testid=sortable-header-link] i').should('have.class', 'fa-sort');
+        });
+    });
 });
