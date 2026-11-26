@@ -1,0 +1,22 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: ubuntu
+    username: vagrant
+    # "vagrant"
+    password: "$6$vagrantsalt$tx6cR8EhN6G4kZRctafCOQJHk2AIXYKB5lE1Kdne2mx.OJ8g5fp.ybguoF7MTC7OaU4rxLaxJN2jJF7aSua5d0"
+  ssh:
+    install-server: true
+    allow-pw: true
+  storage:
+    # The default LVM layout only uses half the disk on 22.04.
+    layout:
+      name: direct
+  updates: security
+  late-commands:
+    - echo 'vagrant ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/vagrant
+    - chmod 440 /target/etc/sudoers.d/vagrant
