@@ -213,7 +213,7 @@ for entry in "${result_array[@]}"; do
 done
 
 # Update ownership for cgi-bin to CGI_USER
-find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} +
 
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
@@ -252,8 +252,8 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
 
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} +
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} +
 else
     # TODO: We can skip this step in the future by checking whether there are any new files.
     if [ ${VAGRANT} == 1 ]; then
@@ -263,8 +263,8 @@ else
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor/composer -type d -exec chmod 551 {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor/composer -type f -exec chmod 440 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor/composer -type d -exec chmod 551 {} +
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor/composer -type f -exec chmod 440 {} +
 fi
 
 # create doctrine proxy classes
@@ -412,9 +412,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp ${NODE_FOLDER}/katex/dist/katex.min.css ${VENDOR_FOLDER}/katex
     cp ${NODE_FOLDER}/katex/dist/fonts/*.woff2 ${VENDOR_FOLDER}/katex/fonts
 
-    find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
-    find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
-    find ${VENDOR_FOLDER} -type d -exec chmod 551 {} \;
+    find ${NODE_FOLDER} -type d -exec chmod 551 {} +
+    find ${NODE_FOLDER} -type f -exec chmod 440 {} +
+    find ${VENDOR_FOLDER} -type d -exec chmod 551 {} +
     find ${VENDOR_FOLDER} -type f | while read file; do set_permissions "$file"; done
 fi
 
@@ -455,7 +455,7 @@ chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # cache needs to be writable
-find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} +
 
 # reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
 # as expected (Travis for example will fail here otherwise).
