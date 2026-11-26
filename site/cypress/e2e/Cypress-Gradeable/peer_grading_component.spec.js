@@ -48,6 +48,10 @@ describe('Peer Grading Component testing', () => {
                 cy.get('[data-testid="table-wrapper"]').should('contain', 'aphacker');
             }
         });
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
+        cy.get('[data-testid="stats-and-charts"]').click();
+        cy.contains('Peer components graded:').should('exist');
+        cy.contains('Submitted students who started peer grading:').should('exist');
         cy.visit('/');
         cy.logout();
         cy.login('student');
