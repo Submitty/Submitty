@@ -77,9 +77,11 @@ Required Input:
             </span>
         {% endif %}
     {% endif %}
-    <span class="col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onGetMarkStats(this);event.stopPropagation()">
-        <i class="fas fa-users icon-mark-stats" title="See who got this mark"></i>
-    </span>
+       {% if not peer_component %}
+           <span class="col-no-gutters mark-tools key_to_click" tabindex="0" onclick="onGetMarkStats(this);event.stopPropagation()">
+               <i class="fas fa-users icon-mark-stats" title="See who got this mark"></i>
+           </span>
+       {% endif %}
     {% if edit_marks_enabled %}
         {% if first_mark %}
             {# The first mark shouldn't get a real delete button, but to keep the tools aligned, put a hidden one in #}
