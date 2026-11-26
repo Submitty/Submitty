@@ -11,6 +11,7 @@ use app\models\gradeable\TaGradedGradeable;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\ImageAnnotationUtils;
 
 class AutoGradingView extends AbstractView {
     /**
@@ -434,17 +435,21 @@ class AutoGradingView extends AbstractView {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $id)->getId();
         }
 
-        $img_annotation_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable->getId(), $id, $active_version);
-        $img_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'submissions_processed', $gradeable->getId(), $id, $active_version);
-        $img_files = FileUtils::getAllFiles($img_dir);
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $img_annotation_dir = FileUtils::joinPaths($course_path, 'annotations', $gradeable->getId(), $id, $active_version);
         $uploaded_imgs = [];
-        foreach ($img_files as $file) {
-            if (array_key_exists('path', $file)) {
-                $content_type = mime_content_type($file['path']);
-                if (substr($content_type, 0, 5) === 'image') {
-                    $file['encoded_name'] = md5($this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId()));
-                    $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
-                    $uploaded_imgs[] = $file;
+        foreach (ImageAnnotationUtils::ANNOTATABLE_DIRS as $img_dir_name) {
+            $img_dir = FileUtils::joinPaths($course_path, $img_dir_name, $gradeable->getId(), $id, $active_version);
+            foreach (FileUtils::getAllFiles($img_dir, [], true) as $file) {
+                if (array_key_exists('path', $file)) {
+                    $content_type = mime_content_type($file['path']);
+                    if (substr($content_type, 0, 5) === 'image') {
+                        $file['annotation_key'] = ImageAnnotationUtils::getAnnotationKey($file['path'], $course_path, $gradeable->getId(), $id);
+                        $file['anon_path'] = $this->convertToAnonPath($gradeable, $file['path'], $gradeable->getId());
+                        if ($file['annotation_key'] !== null) {
+                            $uploaded_imgs[] = $file;
+                        }
+                    }
                 }
             }
         }
@@ -455,26 +460,11 @@ class AutoGradingView extends AbstractView {
         }
 
         // Check for image annotation files
-        $img_annotation_paths = [];
+        $annotated_img_keys = [];
         foreach ($uploaded_imgs as $image_file) {
-            // Following ImageController pattern - use MD5 of path for matching
-            /*
-                TODO: switching path to anon_path allows for image annotations not just made on
-                files in submissions_processed to be shown to the student through TAResults.twig,
-                but when trying to view the annotation the student gets 'No annotations found.' error
-            */
-            $image_path_md5 = md5($image_file['path']);
-
-            if (is_dir($img_annotation_dir)) {
-                $dir_iter = new \FilesystemIterator($img_annotation_dir);
-                foreach ($dir_iter as $file_info) {
-                    $annotation_file_parts = explode("_", $file_info->getFilename());
-
-                    if ($annotation_file_parts[0] === $image_path_md5 && file_get_contents($file_info->getPathname()) !== "") {
-                        $img_annotation_paths[$image_file['name']] = $file_info->getPathname();
-                        break;
-                    }
-                }
+            $annotation_jsons = ImageAnnotationUtils::loadAnnotationJsons($img_annotation_dir, $image_file['annotation_key'], [$image_file['path'], $image_file['anon_path']]);
+            if (count($annotation_jsons) > 0) {
+                $annotated_img_keys[] = $image_file['annotation_key'];
             }
         }
 
@@ -537,7 +527,7 @@ class AutoGradingView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'display_version' => $display_version,
             "uploaded_imgs" => $uploaded_imgs,
-            "img_annotation_paths" => $img_annotation_paths,
+            "annotated_img_keys" => $annotated_img_keys,
             "grader_info" => $grader_info
         ]);
     }
