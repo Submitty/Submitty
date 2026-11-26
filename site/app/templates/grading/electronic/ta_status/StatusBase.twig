@@ -227,6 +227,9 @@
             <a class="nav-bar key_to_click" id="page_3_nav" onclick="onChangeNavTab(3);">Autograding Histogram</a>
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Overall Histogram</a>
             <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Scatterplot</a>
+            {% if ta_grading_enabled and core.getUser().accessFullGrading() %}
+                <a class="nav-bar key_to_click" id="page_7_nav" onclick="onChangeNavTab(7);">TA Grading Time</a>
+            {% endif %}
         </div>
         <div class="modal-body gradeable-status-body">
             <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
@@ -268,6 +271,16 @@
                 <div class="page-content missing-data-container" id="page_4_content"><p>No overall data available.</p></div>
             {% else %}
                 <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'total'})  }}</div>
+            {% endif %}
+
+            {% if ta_grading_enabled and core.getUser().accessFullGrading() %}
+                <div class="page-content" id="page_7_content">
+                    {% if ta_grading_times_by_grader|length == 0 %}
+                        <p>No TA grading time has been recorded for this gradeable yet.</p>
+                    {% else %}
+                        {{ include('grading/electronic/ta_status/GraderTimeChart.twig') }}
+                    {% endif %}
+                </div>
             {% endif %}
         </div>
         <br/>
@@ -360,7 +373,7 @@
     let adminGradeableNavTab = 0;
 
     function onChangeNavTab(tab) {
-        if (tab > 6 || tab < 0) {
+        if (tab > 7 || tab < 0) {
             alert('Invalid Navigation');
             return;
         }
@@ -371,7 +384,7 @@
 
         //$('.page-content').hide();
         
-        for (var i =0 ; i<7 ;i++) {
+        for (var i =0 ; i<8 ;i++) {
             $('#page_' + i + '_nav').removeClass('active-btn');
             $('#page_' + i + '_content').hide();
         }

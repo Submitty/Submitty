@@ -1,0 +1,40 @@
+<div id="grader-grading-time-chart"></div>
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Grader</th>
+            <th>Cumulative Grading Time (minutes)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for grader_time in ta_grading_times_by_grader %}
+            <tr>
+                <td>{{ grader_time.grader_name }} ({{ grader_time.grader_id }})</td>
+                <td>{{ grader_time.time_minutes }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    const graderNames = [
+        {% for grader_time in ta_grading_times_by_grader %}
+            {{ (grader_time.grader_name ~ ' (' ~ grader_time.grader_id ~ ')')|json_encode|raw }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    const graderTimes = [
+        {% for grader_time in ta_grading_times_by_grader %}
+            {{ grader_time.time_seconds / 60 }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    Plotly.newPlot('grader-grading-time-chart', [{
+        x: graderNames,
+        y: graderTimes,
+        type: 'bar',
+        name: 'Cumulative grading time'
+    }], {
+        title: 'Cumulative TA Grading Time by Grader',
+        xaxis: { title: 'Grader' },
+        yaxis: { title: 'Cumulative Grading Time (minutes)' },
+        font: { family: '"Source Sans Pro", sans-serif' }
+    }, { displayModeBar: false, displaylogo: false, responsive: true });
+</script>

@@ -1020,7 +1020,10 @@ class ElectronicGraderController extends AbstractController {
             $show_warnings,
             $submissions_in_queue,
             $override_counts['with_submission'],
-            $override_counts['without_submission']
+            $override_counts['without_submission'],
+            $gradeable->isTaGrading() && $this->core->getUser()->accessFullGrading()
+                ? $this->core->getQueries()->getTaGradingTimesByGraderForGradeable($gradeable_id)
+                : []
         );
     }
 
@@ -1095,6 +1098,7 @@ class ElectronicGraderController extends AbstractController {
         if (isset($_COOKIE['grading_details_columns'])) {
             $grading_details_columns = json_decode($_COOKIE['grading_details_columns'], true);
         }
+        $grading_details_columns += ['ta_time' => false];
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
@@ -1241,7 +1245,9 @@ class ElectronicGraderController extends AbstractController {
             ];
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_group_by_clusters, $algorithms, $current_algorithm, $cluster_map);
+        $ta_grading_times = $this->core->getQueries()->getTaGradingTimesForGradeable($gradeable_id);
+        $ta_grading_times_by_grader = $this->core->getQueries()->getTaGradingTimesBySubmitterAndGraderForGradeable($gradeable_id);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $override_data, $anon_ids, $inquiry_status, $grading_details_columns, $activeGraders, $is_group_by_clusters, $algorithms, $current_algorithm, $cluster_map, $ta_grading_times, $ta_grading_times_by_grader);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -2182,7 +2188,17 @@ class ElectronicGraderController extends AbstractController {
                 }
             }
         }
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollback_submission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_clustered, $cluster_student_count, $cluster_name);
+        $ta_grading_time_session_id = null;
+        if ($gradeable->isTaGrading() && $this->core->getUser()->accessGrading()) {
+            $ta_grading_time_session_id = bin2hex(random_bytes(32));
+            $this->core->getQueries()->startTaGradingTime(
+                $ta_grading_time_session_id,
+                $gradeable_id,
+                $graded_gradeable->getSubmitter()->getId(),
+                $this->core->getUser()->getId()
+            );
+        }
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $rollback_submission, $sort, $direction, $who_id, $solution_ta_notes, $submitter_itempool_map, $anon_mode, $blind_grading, $clustering_enabled, $clusters_exist, $ta_grading_cluster_mode, $is_clustered, $cluster_student_count, $cluster_name, $ta_grading_time_session_id);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupSettings');
@@ -2774,6 +2790,80 @@ class ElectronicGraderController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
     public function ajaxCloseGradedComponent($gradeable_id) {
         return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', GradingAction::CLOSE_COMPONENT);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/time/close", methods: ["POST"])]
+    public function ajaxCloseTaGradingTime(string $gradeable_id): JsonResponse {
+        $csrf_token = $_POST['csrf_token'] ?? null;
+        if (!is_string($csrf_token) || !$this->core->checkCsrfToken($csrf_token)) {
+            return JsonResponse::getErrorResponse("Invalid CSRF token.");
+        }
+        $session_id = $_POST['session_id'] ?? '';
+        if (!is_string($session_id) || !preg_match('/^[a-f0-9]{64}$/', $session_id)) {
+            return JsonResponse::getErrorResponse("Invalid grading time session.");
+        }
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false || !$gradeable->isTaGrading() || !$this->core->getUser()->accessGrading()) {
+            return JsonResponse::getErrorResponse("You do not have permission to close this grading session.");
+        }
+        $this->core->getQueries()->closeTaGradingTime($session_id, $gradeable_id, $this->core->getUser()->getId());
+        return JsonResponse::getSuccessResponse([]);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/time/activity", methods: ["POST"])]
+    public function ajaxRecordTaGradingTimeActivity(string $gradeable_id): JsonResponse {
+        $csrf_token = $_POST['csrf_token'] ?? null;
+        if (!is_string($csrf_token) || !$this->core->checkCsrfToken($csrf_token)) {
+            return JsonResponse::getErrorResponse("Invalid CSRF token.");
+        }
+        $session_id = $_POST['session_id'] ?? '';
+        if (!is_string($session_id) || !preg_match('/^[a-f0-9]{64}$/', $session_id)) {
+            return JsonResponse::getErrorResponse("Invalid grading time session.");
+        }
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false || !$gradeable->isTaGrading() || !$this->core->getUser()->accessGrading()) {
+            return JsonResponse::getErrorResponse("You do not have permission to update this grading session.");
+        }
+        $this->core->getQueries()->recordTaGradingTimeActivity(
+            $session_id,
+            $gradeable_id,
+            $this->core->getUser()->getId()
+        );
+        return JsonResponse::getSuccessResponse([]);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/time/start", methods: ["POST"])]
+    public function ajaxStartTaGradingTime(string $gradeable_id): JsonResponse {
+        $csrf_token = $_POST['csrf_token'] ?? null;
+        if (!is_string($csrf_token) || !$this->core->checkCsrfToken($csrf_token)) {
+            return JsonResponse::getErrorResponse("Invalid CSRF token.");
+        }
+        $submitter_id = $_POST['submitter_id'] ?? '';
+        if (!is_string($submitter_id) || $submitter_id === '') {
+            return JsonResponse::getErrorResponse("Invalid submitter.");
+        }
+        $gradeable = $this->tryGetGradeable($gradeable_id, false);
+        if ($gradeable === false || !$gradeable->isTaGrading() || !$this->core->getUser()->accessGrading()) {
+            return JsonResponse::getErrorResponse("You do not have permission to start this grading session.");
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id, false);
+        if (
+            $graded_gradeable === false
+            || !$this->core->getAccess()->canI("grading.electronic.grade", [
+                "gradeable" => $gradeable,
+                "graded_gradeable" => $graded_gradeable,
+            ])
+        ) {
+            return JsonResponse::getErrorResponse("You do not have permission to grade this submission.");
+        }
+        $session_id = bin2hex(random_bytes(32));
+        $this->core->getQueries()->startTaGradingTime(
+            $session_id,
+            $gradeable_id,
+            $submitter_id,
+            $this->core->getUser()->getId()
+        );
+        return JsonResponse::getSuccessResponse(['session_id' => $session_id]);
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
