@@ -138,9 +138,8 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     const index = post_box_id - 1;
     const files = [];
     for (let j = 0; j < file_array[index].length; j++) {
-        if (file_array[index][j].name.indexOf('\'') !== -1
-            || file_array[index][j].name.indexOf('"') !== -1) {
-            alert(`ERROR! You may not use quotes in your filename: ${file_array[index][j].name}`);
+        if (file_array[index][j].name.indexOf('"') !== -1) {
+            alert(`ERROR! You may not use double quotes in your filename: ${file_array[index][j].name}`);
             return false;
         }
         else if (file_array[index][j].name.indexOf('\\\\') !== -1

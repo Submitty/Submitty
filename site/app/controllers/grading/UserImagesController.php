@@ -65,14 +65,14 @@ class UserImagesController extends AbstractController {
             for ($j = 0; $j < $count_item; $j++) {
                 if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                     if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
+                        return $this->core->getOutput()->renderResultMessage("Error: You may not use double quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = true;
                     $file_size += FileUtils::getZipSize($uploaded_files[1]["tmp_name"][$j]);
                 }
                 else {
                     if (FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name " . $uploaded_files[1]["name"][$j] . ".", false);
+                        return $this->core->getOutput()->renderResultMessage("Error: You may not use double quotes, backslashes or angle brackets in your file name " . $uploaded_files[1]["name"][$j] . ".", false);
                     }
                     elseif (!FileUtils::isValidImage($uploaded_files[1]["tmp_name"][$j])) {
                         return $this->core->getOutput()->renderResultMessage("Error: " . $uploaded_files[1]['name'][$j] . " is not a valid image file.", false);

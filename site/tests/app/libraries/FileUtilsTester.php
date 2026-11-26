@@ -314,7 +314,7 @@ STRING;
     public static function validFileNameProvider() {
         return [
             ['01_File.txt', true],
-            ["file'.txt", false],
+            ["file'.txt", true],
             ['file\".txt', false],
             ['<file', false],
             ['file>', false],

@@ -382,7 +382,7 @@
     function populatePreviousFiles(part){
         let prev_files = {
             {% for file in old_files %}
-                {{file.part}} : {'name' : '{{file.name}}', 'size' : '{{file.size}}' },
+                {{file.part}} : {'name' : {{ file.name|json_encode|raw }}, 'size' : {{ file.size|json_encode|raw }} },
             {% endfor %}
         };
 
@@ -430,8 +430,8 @@
         createArray({{ num_file_submissions }});
 
         {% for file in old_files %}
-            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-            readPrevious('{{ file.name }}', {{ file.part }});
+            addLabel({{ file.name|json_encode|raw }}, {{ file.size|json_encode|raw }}, {{ file.part }}, true);
+            readPrevious({{ file.name|json_encode|raw }}, {{ file.part }});
         {% endfor %}
         setUsePrevious();
 
