@@ -20,7 +20,7 @@ const DateTime = luxon.DateTime;
 function changeView(view_type, view_year, view_month, view_day) {
     const type = view_type.value;
 
-    Cookies.set('view', type);
+    Cookies.set('calendar_view', type);
 
     let cookie_year = parseInt(Cookies.get('calendar_year'));
     let cookie_month = parseInt(Cookies.get('calendar_month'));
