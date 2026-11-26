@@ -651,3 +651,33 @@ pre.CodeMirror-line {
     flex: 1;
     min-width: 400px;
 }
+
+/* Peer matrix grading progress */
+.peer-status-complete {
+    background-color: var(--alert-background-success-green);
+    color: var(--alert-success-green);
+}
+
+.peer-status-started {
+    background-color: var(--alert-background-warning-yellow);
+    color: var(--warning-brown);
+}
+
+.peer-status-none {
+    background-color: var(--alert-background-danger-red);
+    color: var(--alert-danger-red);
+}
+
+.peer-table-students .peer-status-complete,
+.peer-table-students .peer-status-started,
+.peer-table-students .peer-status-none,
+.peer-status-legend span {
+    display: inline-block;
+    padding: 0 4px;
+    margin: 1px 0;
+    border-radius: 3px;
+}
+
+.peer-status-legend {
+    margin-bottom: 8px;
+}

@@ -43,6 +43,15 @@
     <div class="row mt-3">
         <div id="peer_loader" class="loader hide"></div>
         <div class="table-wrapper" data-testid="table-wrapper">
+            {% set status_labels = {'complete': 'Fully graded', 'started': 'Partially graded', 'none': 'Not started'} %}
+            {% if peer_grading_status is not null %}
+                <div class="peer-status-legend" data-testid="peer-status-legend">
+                    Grading progress:
+                    {% for status, label in status_labels %}
+                        <span class="peer-status-{{ status }}">{{ label }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
             <table id="peer-table" class="table table-striped mobile-table directory-table">
                 <thead>
                 <tr>
@@ -54,11 +63,21 @@
                 </thead>
                 <tbody>
                 {% for key,value in peer_grader_pairs %}
+                    {% set grading_status = peer_grading_status[key] ?? null %}
                     <tr>
-                        <td class="peer-table-grader">{{key}}</td>
+                        {% if grading_status %}
+                            <td class="peer-table-grader peer-status-{{ grading_status.grader }}" data-testid="peer-table-grader" data-grading-status="{{ grading_status.grader }}" title="{{ status_labels[grading_status.grader] }}">{{key}}</td>
+                        {% else %}
+                            <td class="peer-table-grader" data-testid="peer-table-grader">{{key}}</td>
+                        {% endif %}
                         <td class="peer-table-students">
                             {% for entry in value %}
-                                <span>{{entry}} </span>
+                                {% if grading_status %}
+                                    {% set student_status = grading_status.students[entry] %}
+                                    <span class="peer-status-{{ student_status }}" data-testid="peer-table-student" data-grading-status="{{ student_status }}" title="{{ status_labels[student_status] }}">{{entry}} </span>
+                                {% else %}
+                                    <span data-testid="peer-table-student">{{entry}} </span>
+                                {% endif %}
                             {% endfor %}
                         </td>
                         <td>
