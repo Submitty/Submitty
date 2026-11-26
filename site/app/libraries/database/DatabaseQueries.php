@@ -4717,7 +4717,7 @@ SQL;
     }
 
     /**
-     * Updates a given user's extensions for a given homework
+     * Updates a given user's extensions for a given gradeable
      *
      * @param string  $user_id
      * @param string  $g_id
