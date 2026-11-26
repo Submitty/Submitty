@@ -47,7 +47,6 @@
     "wget":                    { "path": "/usr/bin/wget" },
 
     // Submitty Analysis Tools
-    "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},
     "commonast": 	       { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/commonast.py" },
     "comment_count":           { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/bin/comment_count.py" },
 
