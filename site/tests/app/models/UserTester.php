@@ -218,6 +218,9 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'instructor_courses' => false,
             'date_format' => 'YMD',
             'date_registered' => null,
+            'linkedin_username' => "",
+            'github_username' => "",
+            'personal_webpage' => "",
         ];
         $this->assertEquals($expected, $actual);
     }
