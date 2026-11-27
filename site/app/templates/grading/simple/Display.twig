@@ -25,7 +25,7 @@
 				'type': 'component',
 				'name': 'FullScreenButton',
                 'class': 'fullscreen-btn-wrapper',
-				'events': { 'toggle': '(on) => { document.querySelector("main#main")?.classList.toggle("full-screen-mode", on); }' }
+				'events': { 'toggle': '(on) => { document.querySelector("#submitty-body")?.classList.toggle("full-screen-mode", on); }' }
 			} %}
             {% if action == 'numeric' and core.getUser().accessAdmin() %}
                 <a href="javascript:newNumericCsvUploadForm()" class="btn btn-primary" data-testid="numeric-csv-upload-button">

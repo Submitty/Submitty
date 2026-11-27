@@ -3,7 +3,7 @@
                 </main>
             </div> {# /#wrapper #}
             {% if not content_only %}
-                <footer>
+                <footer id="footer">
                     &copy; {{ "now"|date("Y") }}
                     <a href="https://submitty.org" target="_blank" class="black-btn">Submitty</a>
                     <a href="https://github.com/Submitty/Submitty/releases/tag/{{ latest_tag }}" target="_blank" title = "{{ latest_tag }} {{ latest_commit }}" class="black-btn">{{ latest_tag }}</a>
