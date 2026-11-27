@@ -3,6 +3,7 @@
 import os
 import json
 import subprocess
+import sys
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 CONFIG_DIR = os.path.join(CURRENT_PATH, "..", "..", "config")
@@ -30,6 +31,7 @@ if __name__ == "__main__":
     print("Commit {0} is currently installed on this system.".format(current_commit_hash))
   except:
     print("ERROR: could not determine commit hash.")
+    current_short_commit_hash = 'unknown'
     current_commit_hash = 'unknown'
 
   try:
