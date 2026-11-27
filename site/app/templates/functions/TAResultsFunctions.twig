@@ -7,7 +7,11 @@
     {% import 'functions/Badge.twig' as Badge %}
     <div class="box grade-results" data-testid="ta-grade-results">
         <div class="box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
+            {% if component.graded is defined and not component.graded %}
+                <span class="badge" data-testid="not-yet-graded-badge">Not yet graded</span>
+            {% else %}
+                {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
+            {% endif %}
         </div>
         <div class="box-info">
             <h4>{{ component.title|escape }}
@@ -23,7 +27,7 @@
                 <p>
                 {# This is a layout table #}
                 <table class="gradeable_comment">
-                    {% for mark in component.marks|filter((mark) => mark.show_mark) %}
+                    {% for mark in component.marks|filter((mark) => mark.show_mark and (component.graded is not defined or component.graded)) %}
                         <tr>
                             <td>
                                 {% if mark.earned %}
@@ -40,7 +44,7 @@
                             </td>
                         </tr>
                     {% endfor %}
-                    {% if component.custom_mark_score != 0 or component.comment != '' %}
+                    {% if (component.graded is not defined or component.graded) and (component.custom_mark_score != 0 or component.comment != '') %}
                         <tr>
                             <td>
                                 <i class="far fa-check-square fa-1g"></i>

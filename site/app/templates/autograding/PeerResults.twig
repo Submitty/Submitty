@@ -123,7 +123,11 @@ function set_peer_feedback(grader_id, user_id, g_id, feedback, send=true) {
 {%- macro renderPeerSummary(component, num_decimals, active_same_as_graded) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
+            {% if component.graded is defined and not component.graded %}
+                <span class="badge" data-testid="not-yet-graded-badge">Not yet graded</span>
+            {% else %}
+                {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
+            {% endif %}
         </div>
         <div class="no-border-box-info" style="width:100%">
             <h4>

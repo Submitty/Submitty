@@ -424,19 +424,27 @@ class GradedComponentContainer extends AbstractModel {
 
     /**
      * Gets the score for this component (custom mark for electronic gradeables)
-     * Note: check that `isComplete` is true before calling this
+     * Returns 0.0 if the component has not been graded yet (e.g. partially released grading)
      * @return float
      */
     public function getScore() {
-        return $this->component->isPeerComponent() ? 0.0 : $this->getGradedComponent()->getScore();
+        if ($this->component->isPeerComponent()) {
+            return 0.0;
+        }
+        $graded_component = $this->getGradedComponent();
+        return $graded_component !== null ? $graded_component->getScore() : 0.0;
     }
 
     /**
      * Gets the comment for this component (custom mark comment for electronic gradeables)
-     * Note: check that `isComplete` is true before calling this
+     * Returns an empty string if the component has not been graded yet (e.g. partially released grading)
      * @return string
      */
     public function getComment() {
-        return $this->component->isPeerComponent() ? '' : $this->getGradedComponent()->getComment();
+        if ($this->component->isPeerComponent()) {
+            return '';
+        }
+        $graded_component = $this->getGradedComponent();
+        return $graded_component !== null ? $graded_component->getComment() : '';
     }
 }

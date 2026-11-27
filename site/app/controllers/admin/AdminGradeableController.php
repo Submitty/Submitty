@@ -1726,6 +1726,7 @@ class AdminGradeableController extends AbstractController {
             'ta_grading',
             'student_view',
             'student_view_after_grades',
+            'release_incomplete_manual_grading',
             'student_download',
             'student_submit',
             'peer_grading',
