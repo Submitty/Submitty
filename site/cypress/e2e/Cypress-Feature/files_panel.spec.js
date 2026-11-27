@@ -1,5 +1,3 @@
-import { getCurrentSemester } from '/cypress/support/utils.js';
-
 function assertSubmissionsBrowserClosed() {
     cy.get('#div_viewer_sd1').should('not.be.visible');
 }
@@ -261,20 +259,19 @@ describe('Test cases involving auto opening single file submissions', () => {
         assertSingleImageSubmissionOpen();
 
         // switching between single image file submission with different names works with auto open
-        cy.get('#next-student').click();
-        // cy.get('[data-testid="grading-panel-student-name"] b').contains('bitdiddle');
+        // the arrows wait for running requests before they load the next page,
+        // so wait for that page or the steps below run on the old one
+        cy.waitPageChange(() => cy.get('#next-student').click());
         assertSingleImageSubmissionOpen();
 
         clickFileViewCollapseButton();
         assertSingleImageSubmissionClosed();
 
-        cy.get('#prev-student').click();
-        // cy.get('[data-testid="grading-panel-student-name"] b').contains('beahaf');
+        cy.waitPageChange(() => cy.get('#prev-student').click());
         assertSingleImageSubmissionOpen();
 
         // wait for PDF to fully load in, or an error will occur when it's interrupted by logout
-        cy.intercept(`/courses/${getCurrentSemester()}/sample/gradeable/grading_homework_pdf/encode_pdf`).as('pdf');
-        cy.wait('@pdf');
+        cy.get('#pageContainer1[data-loaded="true"]', { timeout: 20000 });
     });
 
     it('test that multi-file submissions are unaffected', () => {

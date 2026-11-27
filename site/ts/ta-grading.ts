@@ -805,6 +805,8 @@ const fileFullPanelOptions = {
 
 export function viewFileFullPanel(name: string, path: string, page_num = 0, panelStr: string = 'submission') {
     const panel = panelStr as FileFullPanelOptions;
+    // A collapse that is still sliding would hide the file view again when it ends
+    $(`${fileFullPanelOptions[panel]['innerPanel']}, ${fileFullPanelOptions[panel]['fileView']}`).finish();
     if ($(fileFullPanelOptions[panel]['viewer']).length !== 0) {
         $(fileFullPanelOptions[panel]['viewer']).remove();
     }
@@ -961,6 +963,8 @@ window.collapseFile = function (rawPanel: string = 'submission') {
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
     }
+    // An open that is still sliding would give a partial offset and leave the file list off-screen
+    $(`${fileFullPanelOptions[panel]['innerPanel']}, ${fileFullPanelOptions[panel]['fileView']}`).finish();
     $(fileFullPanelOptions[panel]['innerPanel']).show();
     const offset1 = $(fileFullPanelOptions[panel]['innerPanel']).css('left');
     const offset2 = $(fileFullPanelOptions[panel]['innerPanel']).width();
