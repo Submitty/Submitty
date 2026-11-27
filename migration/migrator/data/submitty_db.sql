@@ -993,6 +993,20 @@ CREATE INDEX courses_users_user_id_user_group_idx ON public.courses_users USING 
 
 
 --
+-- Name: emails_sent_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX emails_sent_idx ON public.emails USING btree (sent);
+
+
+--
+-- Name: emails_unsent_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX emails_unsent_idx ON public.emails USING btree (id) WHERE (sent IS NULL);
+
+
+--
 -- Name: courses_users after_delete_sync_delete_user_cleanup; Type: TRIGGER; Schema: public; Owner: -
 --
 
