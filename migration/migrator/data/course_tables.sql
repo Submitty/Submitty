@@ -3072,6 +3072,13 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 
 
 --
+-- Name: forum_upducks_post_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX forum_upducks_post_id_idx ON public.forum_upducks USING btree (post_id);
+
+
+--
 -- Name: gradeable_allowed_minutes_override_g_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3160,6 +3167,20 @@ CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree 
 --
 
 CREATE INDEX notifications_user_gradeable_unseen_index ON public.notifications USING btree (to_user_id, gradeable_id) WHERE ((gradeable_id IS NOT NULL) AND (seen_at IS NULL));
+
+
+--
+-- Name: posts_parent_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX posts_parent_id_idx ON public.posts USING btree (parent_id);
+
+
+--
+-- Name: posts_thread_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX posts_thread_id_idx ON public.posts USING btree (thread_id);
 
 
 --
