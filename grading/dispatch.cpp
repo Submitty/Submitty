@@ -1400,15 +1400,16 @@ bool dispatch::tolerance_diff(
 
     // iterating over expected words
     for (std::size_t word = 0; word < expected_words; word++) {
-      student_char_index += student_line_words[word].size();
-      // move past spaces
-      if (word != 0)   student_char_index += student_spaces[line][word - 1];
-
+      // check before indexing into the student words
       if (word >= student_words) { // student has fewer words than expected
         std::cout << "TOLERANCE: word count mismatch" << std::endl;
         line_has_diff = true;   // mark line as having a diff
         break;                  // break to next line
       }
+
+      student_char_index += student_line_words[word].size();
+      // move past spaces
+      if (word != 0)   student_char_index += student_spaces[line][word - 1];
 
       if (expected_line_words[word] == student_line_words[word])  continue;
 
@@ -1445,6 +1446,11 @@ bool dispatch::tolerance_diff(
         }
       } // if (expected_line_words[word].size() != student_line_words[word].size())
     } // for (std::size_t word = 0; word < expected_words; word++)
+
+    if (student_words > expected_words) { // extra words at the end of the student line
+      std::cout << "TOLERANCE: word count mismatch" << std::endl;
+      line_has_diff = true;
+    }
 
     bool wsle = whiteSpaceListsEqual(expected_spaces[line], student_spaces[line]);
     if (!wsle) {

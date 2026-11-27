@@ -190,6 +190,23 @@ def negative_tolerance(test):
 
 
 @testcase
+def surplus_words(test):
+    cleanup(test)
+    subprocess.call(
+        [
+            "cp",
+            os.path.join(SAMPLE_SUBMISSIONS, "surplus_words.py"),
+            os.path.join(test.testcase_path, "data"),
+        ]
+    )
+    test.run_run()
+    test.run_validator()
+    test.diff("test01/STDOUT.txt", "STDOUT_surplus_words.txt")
+    test.diff("grade.txt", "grade.txt_surplus_words", "-b")
+    test.json_diff("results.json", "results.json_surplus_words")
+
+
+@testcase
 def fewer_spaces(test):
     cleanup(test)
     subprocess.call(
