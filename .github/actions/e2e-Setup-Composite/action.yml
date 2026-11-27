@@ -20,6 +20,9 @@ runs:
         rm -rf /usr/share/dotnet
         rm -rf /opt/ghc
         rm -rf "$AGENT_TOOLSDIRECTORY"
+        # The runner image installs Rust and nvm into /etc/skel, so every
+        # adduser that creates a home directory would copy them
+        sudo rm -rf /etc/skel/.rustup /etc/skel/.cargo /etc/skel/.nvm
         sudo apt-get clean
       shell: bash
     - uses: actions/checkout@v7
