@@ -988,19 +988,6 @@ jobs:
 
           sudo systemctl restart submitty_autograding_worker
 
-      - name: Cache Node Modules
-        uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-              ${{ runner.os }}-cache-node-modules-dev
-
-      - name: Install node dependencies
-        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
-        run: |
-          npm ci
-
       - name: Get status of daemons
         run: |
           sudo systemctl status submitty_daemon_jobs_handler

@@ -306,7 +306,8 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
         chmod 640 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
     fi
 
-    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error --no-save"
+    # The installed site never runs Cypress, so skip downloading its binary
+    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && CYPRESS_INSTALL_BINARY=0 npm install --loglevel=error --no-save"
 
     VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
 
