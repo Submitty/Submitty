@@ -1123,7 +1123,7 @@ HTML;
                 $overridden_message .= " (Reason: " . $overridden_comment . ")";
             }
             $error_message = [
-                "color" => "var(--standard-vibrant-yellow)",
+                "color" => "var(--standard-tangerine-yellow)",
                 "message" => $overridden_message
             ];
         }
@@ -1163,7 +1163,7 @@ HTML;
         }
         elseif ($late_status === LateDayInfo::STATUS_LATE) {
             $error_message = [
-                "color" => "var(--standard-vibrant-yellow)",
+                "color" => "var(--standard-tangerine-yellow)",
                 "message" => "Late Submission (Using one or more late days)"
             ];
         }
@@ -1178,7 +1178,7 @@ HTML;
             // This would be more dynamic if $display_version_instance included an expected number, requires more database changes
             if ($pattern_match_flag === true) {
                 $error_message = [
-                    "color" => "var(--standard-vibrant-yellow)",
+                    "color" => "var(--standard-tangerine-yellow)",
                     "message" => "Multiple files within submissions"
                 ];
             }

@@ -282,7 +282,7 @@ progress::-webkit-progress-value {
 
 .grade-panel.active button,
 .grade-panel:hover button {
-    color: var(--default-white);
+    color: var(--always-default-white);
 }
 
 /* Default Btn CSS (background + hover + active) */
