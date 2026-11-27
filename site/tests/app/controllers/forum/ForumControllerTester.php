@@ -3,15 +3,22 @@
 namespace tests\app\controllers\forum;
 
 use app\controllers\forum\ForumController;
+use app\entities\forum\Post;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\User;
+use app\repositories\forum\PostRepository;
 use tests\BaseUnitTest;
 
 class ForumControllerTester extends BaseUnitTest {
+    public function tearDown(): void {
+        $_POST = [];
+        parent::tearDown();
+    }
+
     private function createControllerWithCapturedStats(array $deleted_post_counts, ?User $submitty_user): array {
         $core = new Core();
 
@@ -105,5 +112,48 @@ class ForumControllerTester extends BaseUnitTest {
         $this->assertSame([], $users['deleted_only']['timestamps']);
         $this->assertSame([], $users['deleted_only']['thread_id']);
         $this->assertSame([], $users['deleted_only']['thread_title']);
+    }
+
+    private function createSinglePostController(bool $access_grading, Post $post): array {
+        $_POST = ['post_id' => '5', 'reply_level' => '1', 'post_box_id' => '1'];
+        $core = $this->createMockCore([], ['access_grading' => $access_grading]);
+        $repo = $this->createMock(PostRepository::class);
+        $repo->method('getPostDetail')->willReturn($post);
+        $core->getCourseEntityManager()->method('getRepository')->willReturn($repo);
+        return [new ForumController($core), $core];
+    }
+
+    public function testGetSinglePostHidesDeletedPostFromStudents(): void {
+        $post = $this->createMock(Post::class);
+        $post->method('isDeleted')->willReturn(true);
+        $post->expects($this->never())->method('setReplyLevel');
+        [$controller, $core] = $this->createSinglePostController(false, $post);
+
+        $controller->getSinglePost();
+
+        $response = json_decode($core->getOutput()->getOutput(), true);
+        $this->assertSame('fail', $response['status']);
+        $this->assertSame('Invalid post id : 5', $response['message']);
+    }
+
+    public function testGetSinglePostShowsDeletedPostToGraders(): void {
+        // Stop at the first step after the access check, so the test doesn't need to render the post
+        $post = $this->createMock(Post::class);
+        $post->method('isDeleted')->willReturn(true);
+        $post->expects($this->once())->method('setReplyLevel')->willThrowException(new \RuntimeException('post loaded'));
+        [$controller] = $this->createSinglePostController(true, $post);
+
+        $this->expectExceptionMessage('post loaded');
+        $controller->getSinglePost();
+    }
+
+    public function testGetSinglePostShowsLivePostToStudents(): void {
+        $post = $this->createMock(Post::class);
+        $post->method('isDeleted')->willReturn(false);
+        $post->expects($this->once())->method('setReplyLevel')->willThrowException(new \RuntimeException('post loaded'));
+        [$controller] = $this->createSinglePostController(false, $post);
+
+        $this->expectExceptionMessage('post loaded');
+        $controller->getSinglePost();
     }
 }
