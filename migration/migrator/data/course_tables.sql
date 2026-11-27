@@ -3058,6 +3058,13 @@ ALTER TABLE ONLY public.viewed_responses
 
 
 --
+-- Name: electronic_gradeable_data_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX electronic_gradeable_data_user_id_idx ON public.electronic_gradeable_data USING btree (user_id);
+
+
+--
 -- Name: forum_posts_history_edit_timestamp_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3076,6 +3083,13 @@ CREATE INDEX forum_posts_history_post_id_index ON public.forum_posts_history USI
 --
 
 CREATE INDEX gradeable_allowed_minutes_override_g_id_idx ON public.gradeable_allowed_minutes_override USING btree (g_id);
+
+
+--
+-- Name: gradeable_anon_g_id_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX gradeable_anon_g_id_user_id_idx ON public.gradeable_anon USING btree (g_id, user_id);
 
 
 --
