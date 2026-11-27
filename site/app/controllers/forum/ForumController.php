@@ -660,7 +660,8 @@ class ForumController extends AbstractController {
         $post_id = $_POST['post_id'];
         $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
         $post = $repo->getPostDetail($post_id);
-        if (is_null($post)) {
+        // Deleted posts are only visible to graders, as in showDeleted()
+        if (is_null($post) || ($post->isDeleted() && !$this->core->getUser()->accessGrading())) {
             return $this->core->getOutput()->renderJsonFail("Invalid post id : {$post_id}");
         }
         $post->setReplyLevel($_POST['reply_level']);
