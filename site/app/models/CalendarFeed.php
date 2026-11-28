@@ -113,7 +113,15 @@ class CalendarFeed {
      * @param FeedEvent[] $events
      */
     public static function render(array $events, \DateTimeInterface $now): string {
-        $lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Submitty//Calendar//EN', 'X-WR-CALNAME:Submitty'];
+        $lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Submitty//Calendar//EN',
+            'X-WR-CALNAME:Submitty',
+            // Ask calendar applications to poll once an hour. The second property is the form Outlook reads.
+            'REFRESH-INTERVAL;VALUE=DURATION:PT1H',
+            'X-PUBLISHED-TTL:PT1H',
+        ];
         foreach ($events as $event) {
             $lines[] = 'BEGIN:VEVENT';
             $lines[] = 'UID:' . $event['uid'];

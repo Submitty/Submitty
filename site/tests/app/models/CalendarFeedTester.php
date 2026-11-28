@@ -144,6 +144,7 @@ class CalendarFeedTester extends BaseUnitTest {
         ], $now);
 
         $this->assertStringStartsWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n", $feed);
+        $this->assertStringContainsString("\r\nREFRESH-INTERVAL;VALUE=DURATION:PT1H\r\nX-PUBLISHED-TTL:PT1H\r\nBEGIN:VEVENT\r\n", $feed);
         $this->assertStringEndsWith("END:VEVENT\r\nEND:VCALENDAR\r\n", $feed);
         // The due date is converted to UTC, and an item is an all-day event on its own date.
         $this->assertStringContainsString("\r\nDTSTART:20261202T045959Z\r\n", $feed);
