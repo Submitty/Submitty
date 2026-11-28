@@ -91,7 +91,7 @@
 
                         <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
                             {% for color_name, color_code in category_colors %}
-                                <option value="{{ color_code }}" style="color: white;background-color: {{ get_color(color_code) }};" {% if color_name == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
+                                <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_name == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
                             {% endfor %}
                         </select>
                         &nbsp;
