@@ -818,15 +818,21 @@ class ForumThreadView extends AbstractView {
             $visible_username = "Anonymous";
         }
 
+        // Only instructors and full-access graders get the controls that reveal a poster's full name,
+        // user ID and email, so don't send them to anyone else. This keeps anonymous posts anonymous.
+        $show_author_details = $user->accessFullGrading();
+
         $post_user_info = [
-            "info_name" => json_encode($author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")"),
             "visible_user_json" => json_encode($visible_username),
             "jscriptAnonFix" => json_encode($post->isAnonymous() ? 'true' : 'false'),
-            "full_name" => $author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")",
+            "full_name" => $show_author_details ? $author_display_info["given_name"] . " " . $author_display_info["family_name"] . " (" . $post->getAuthor()->getId() . ")" : "",
             "is_anonymous" => $post->isAnonymous(),
-            "pronouns" => trim($author_display_info["pronouns"]),
+            // Pronouns are never shown on anonymous posts
+            "pronouns" => $post->isAnonymous() ? "" : trim($author_display_info["pronouns"]),
             "display_pronouns" => $author_display_info["display_pronouns"],
             "is_OP" => ($post->getAuthor()->getId() === $first_post->getAuthor()->getId()) && ($post->isAnonymous() === $first_post->isAnonymous()),
+            // Author named in the delete confirmation
+            "delete_confirm_author" => ($post->isAnonymous() && !$show_author_details) ? $visible_username : $post->getAuthor()->getId(),
         ];
 
         $post_attachment = ForumUtils::getForumAttachments(
@@ -857,7 +863,7 @@ class ForumThreadView extends AbstractView {
             "thread_resolve_state" => $thread->getStatus(),
             "show_unresolve" => false,
             "current_user" => $user->getId(),
-            "author_email" => $author_display_info["user_email"],
+            "author_email" => $show_author_details ? $author_display_info["user_email"] : "",
             "post_user_info" => $post_user_info,
             "post_up_duck" => $post_up_duck,
             "post_date" => $date,

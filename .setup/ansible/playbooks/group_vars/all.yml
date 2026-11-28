@@ -1,0 +1,3 @@
+---
+submitty_install_dir: /usr/local/submitty
+submitty_venv_path: "{{ submitty_install_dir }}/venv"

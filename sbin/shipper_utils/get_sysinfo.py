@@ -185,7 +185,7 @@ if __name__ == "__main__":
             # try to run tasks
             print(f"System Info :: {name}", flush=True)
             cmd = [
-                "python3",
+                os.path.join(args.install_path, "venv", "bin", "python3"),
                 os.path.join(
                     args.install_path, "sbin", "shipper_utils", os.path.basename(__file__)
                 ),
