@@ -4028,6 +4028,27 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         );
     }
 
+    /**
+     * Gets whether a user has any pending team invitations for a gradeable
+     *
+     * @param string $g_id
+     * @param string $user_id
+     * @return bool
+     */
+    public function hasPendingTeamInvite(string $g_id, string $user_id): bool {
+        $this->course_db->query("
+            SELECT EXISTS (
+                SELECT 1 FROM teams AS t
+                INNER JOIN gradeable_teams AS gt ON gt.team_id = t.team_id
+                WHERE gt.g_id=? AND t.user_id=? AND t.state=0
+            )
+        ", [
+            $g_id,
+            $user_id,
+        ]);
+        return $this->course_db->row()['exists'] ?? false;
+    }
+
 
     /**
      * Return Team object for team with given Team ID

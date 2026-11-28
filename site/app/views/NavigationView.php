@@ -373,12 +373,8 @@ class NavigationView extends AbstractView {
                 $team_button_type = 'btn-danger';
             }
             $team_button_text = 'CREATE TEAM';
-            $teams = $core->getQueries()->getTeamsByGradeableId($gradeable->getId());
-            foreach ($teams as $t) {
-                if ($t->sentInvite($core->getUser()->getId())) {
-                    $team_button_text = 'CREATE/JOIN TEAM';
-                    break;
-                }
+            if ($core->getQueries()->hasPendingTeamInvite($gradeable->getId(), $core->getUser()->getId())) {
+                $team_button_text = 'CREATE/JOIN TEAM';
             }
         }
         else {
