@@ -55,7 +55,7 @@ declare global {
     }
 }
 
-type Stats = { section_submitter_count: string; total_submitter_count: string; section_graded_component_count: string; total_graded_component_count: string; section_total_component_count: string; total_total_component_count: string; submitter_ids: string[]; submitter_anon_ids: Record<string, string> };
+type Stats = { section_submitter_count: string; total_submitter_count: string; is_full_grader?: boolean; submitter_ids: string[]; submitter_anon_ids: Record<string, string>; graded_by_me_with_mark?: string[]; graded_by_others_with_mark?: string[]; graded_by_me_without_mark?: string[]; graded_by_others_without_mark?: string[] };
 type Gradeable = {
     id: string;
     precision: number;
@@ -1825,27 +1825,25 @@ function toggleDOMCustomMark(component_id: number) {
 }
 
 /**
- * Computes student links for the mark stats popup.
+ * Computes student links for a list of submitters in the mark stats popup.
  */
-function computeStudentLinks(stats: Stats): { name: string; url: string }[] {
+function computeStudentLinksList(ids: string[], stats: Stats): { name: string; url: string }[] {
     const loc = window.location.href.split('?');
     let base = loc[0];
     if (base.endsWith('update')) {
         base = `${base.slice(0, -6)}grading/grade`;
     }
     const params = new URLSearchParams(loc[1] ?? '');
-    return stats.submitter_ids.map((id) => {
+    return ids.map((id) => {
         params.set('who_id', stats.submitter_anon_ids[id] ?? id);
         return { name: id, url: `${base}?${params.toString()}` };
     });
 }
 
-/**
- * Reloads the Vue ReceivedMarkForm component with updated mark stats data.
- * @param {string} component_title
- * @param {string} mark_title
- * @param {Object} stats
- */
+function computeStudentLinks(stats: Stats): { name: string; url: string }[] {
+    return computeStudentLinksList(stats.submitter_ids, stats);
+}
+
 function openMarkStatsPopup(component_title: string, mark_title: string, stats: Stats) {
     $('.popup-form').hide();
 
@@ -1855,6 +1853,10 @@ function openMarkStatsPopup(component_title: string, mark_title: string, stats: 
     }
 
     const studentLinks = computeStudentLinks(stats);
+    const gradedByMeWithMark = computeStudentLinksList(stats.graded_by_me_with_mark ?? [], stats);
+    const gradedByOthersWithMark = computeStudentLinksList(stats.graded_by_others_with_mark ?? [], stats);
+    const gradedByMeWithoutMark = computeStudentLinksList(stats.graded_by_me_without_mark ?? [], stats);
+    const gradedByOthersWithoutMark = computeStudentLinksList(stats.graded_by_others_without_mark ?? [], stats);
 
     updateVueComponent(el, {
         show: true,
@@ -1862,6 +1864,10 @@ function openMarkStatsPopup(component_title: string, mark_title: string, stats: 
         markTitle: mark_title,
         stats: stats,
         studentLinks: studentLinks,
+        gradedByMeWithMark: gradedByMeWithMark,
+        gradedByOthersWithMark: gradedByOthersWithMark,
+        gradedByMeWithoutMark: gradedByMeWithoutMark,
+        gradedByOthersWithoutMark: gradedByOthersWithoutMark,
     });
 }
 

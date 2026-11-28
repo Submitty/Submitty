@@ -3675,6 +3675,79 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     }
 
     /**
+     * Get submitters graded for a component and checks whether they received a mark or not.
+     * 
+     * @return array<array<string, mixed>>
+     */
+    public function getGradedComponentSubmitters(Mark $mark, User $grader, Gradeable $gradeable, string $anon = 'unblind', bool $full_access = false): array {
+        $type = $gradeable->isTeamAssignment() ? 'team' : 'user';
+        $component_id = $mark->getComponent()->getId();
+        $mark_id = $mark->getId();
+        $gradeable_id = $gradeable->getId();
+        $table = $gradeable->isTeamAssignment() ? 'gradeable_teams' : 'users';
+        $gradeable_anon_inject = '';
+        $section_join = '';
+        $params = [];
+
+        if ($type === 'user' && $anon !== 'unblind') {
+            $gradeable_anon_inject = 'JOIN gradeable_anon ga ON ga.user_id = u.user_id AND ga.g_id = ?';
+            $params[] = $gradeable_id;
+            $select_col = 'ga.anon_id';
+        }
+        else {
+            $select_col = "gd.gd_{$type}_id";
+        }
+
+        if (!$full_access) {
+            $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+            if ($grade_type === 'rotating') {
+                $section_join = "
+                JOIN (
+                    SELECT gr.sections_{$grade_type}_id
+                    FROM grading_{$grade_type} AS gr
+                    WHERE gr.user_id = ? AND gr.g_id = ?
+                ) AS gr ON gr.sections_{$grade_type}_id = u.{$grade_type}_section";
+                $params[] = $grader->getId();
+                $params[] = $gradeable_id;
+            }
+            else {
+                $section_join = "
+                JOIN (
+                    SELECT gr.sections_{$grade_type}_id
+                    FROM grading_{$grade_type} AS gr
+                    WHERE gr.user_id = ?
+                ) AS gr ON gr.sections_{$grade_type}_id = u.{$grade_type}_section";
+                $params[] = $grader->getId();
+            }
+        }
+
+        $params[] = $mark_id;
+        $params[] = $component_id;
+        $params[] = $gradeable_id;
+
+        $this->course_db->query(
+            "SELECT
+                {$select_col} AS submitter_id,
+                gcd.gcd_grader_id,
+                CASE WHEN gcmd.gcm_id IS NOT NULL THEN 1 ELSE 0 END AS has_mark
+            FROM gradeable_component_data gcd
+            JOIN gradeable_data gd ON gd.gd_id = gcd.gd_id
+            JOIN {$table} u ON u.{$type}_id = gd.gd_{$type}_id
+            {$gradeable_anon_inject}
+            {$section_join}
+            LEFT JOIN gradeable_component_mark_data gcmd
+                ON gcmd.gd_id = gcd.gd_id
+                AND gcmd.gc_id = gcd.gc_id
+                AND gcmd.gcd_grader_id = gcd.gcd_grader_id
+                AND gcmd.gcm_id = ?
+            WHERE gcd.gc_id = ? AND gd.g_id = ?
+            ORDER BY submitter_id ASC",
+            $params
+        );
+        return $this->course_db->rows();
+    }
+
+    /**
      * Finds the viewed time for a specific user on a team.
      * Assumes team_ids are unique (cannot be used for 2 different gradeables)
      *

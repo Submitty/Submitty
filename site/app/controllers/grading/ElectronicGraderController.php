@@ -3859,30 +3859,63 @@ class ElectronicGraderController extends AbstractController {
         // Show all submitters if grader has permissions, otherwise just section submitters
         $submitter_ids = ($grader->accessFullGrading() ? $all_submitter_ids : $section_submitter_ids);
 
+        $graded_components = $this->core->getQueries()->getGradedComponentSubmitters(
+            $mark,
+            $grader,
+            $gradeable,
+            $anon,
+            $grader->accessFullGrading()
+        );
+
+        $graded_by_me_with_mark = [];
+        $graded_by_others_with_mark = [];
+        $graded_by_me_without_mark = [];
+        $graded_by_others_without_mark = [];
+
+        foreach ($graded_components as $row) {
+            $sub_id = $row['submitter_id'];
+            $is_me = ($row['gcd_grader_id'] === $grader->getId());
+            $has_mark = (intval($row['has_mark']) === 1);
+
+            if ($has_mark) {
+                if ($is_me) {
+                    $graded_by_me_with_mark[] = $sub_id;
+                }
+                else {
+                    $graded_by_others_with_mark[] = $sub_id;
+                }
+            }
+            else {
+                if ($is_me) {
+                    $graded_by_me_without_mark[] = $sub_id;
+                }
+                else {
+                    $graded_by_others_without_mark[] = $sub_id;
+                }
+            }
+        }
+
+        $all_submitters = array_values(array_unique(array_merge($submitter_ids, array_column($graded_components, 'submitter_id'))));
+
         if ($gradeable->isTeamAssignment()) {
-            $submitter_anon_ids = ($anon != 'unblind') ? $submitter_ids : $this->core->getQueries()->getTeamAnonId($submitter_ids);
+            $submitter_anon_ids = ($anon != 'unblind') ? [] : $this->core->getQueries()->getTeamAnonId($all_submitters);
         }
         else {
-            $submitter_anon_ids = ($anon != 'unblind') ? $submitter_ids : $this->core->getQueries()->getAnonId($submitter_ids, $gradeable->getId());
+            $submitter_anon_ids = ($anon != 'unblind') ? [] : $this->core->getQueries()->getAnonId($all_submitters, $gradeable->getId());
         }
 
-        $section_graded_component_count = 0;
-        $section_total_component_count  = 0;
-        $total_graded_component_count   = 0;
-        $total_total_component_count    = 0;
-
-        $this->getStats($gradeable, $grader, true, $total_graded_component_count, $total_total_component_count);
-        $this->getStats($gradeable, $grader, false, $section_graded_component_count, $section_total_component_count);
+        $is_full_grader = $grader->accessFullGrading();
 
         return [
-            'section_submitter_count' => count($section_submitter_ids),
+            'section_submitter_count' => $is_full_grader ? count($all_submitter_ids) : count($section_submitter_ids),
             'total_submitter_count'   => count($all_submitter_ids),
-            'section_graded_component_count' => $section_graded_component_count,
-            'total_graded_component_count'   => $total_graded_component_count,
-            'section_total_component_count' => $section_total_component_count,
-            'total_total_component_count'   => $total_total_component_count,
+            'is_full_grader'          => $is_full_grader,
             'submitter_ids' => $submitter_ids,
-            'submitter_anon_ids' => $submitter_anon_ids
+            'submitter_anon_ids' => $submitter_anon_ids,
+            'graded_by_me_with_mark' => $graded_by_me_with_mark,
+            'graded_by_others_with_mark' => $graded_by_others_with_mark,
+            'graded_by_me_without_mark' => $graded_by_me_without_mark,
+            'graded_by_others_without_mark' => $graded_by_others_without_mark,
         ];
     }
 
@@ -3892,6 +3925,7 @@ class ElectronicGraderController extends AbstractController {
      * @param User      $grader
      * @param bool      $full_stats
      */
+    // @phpstan-ignore-next-line method.unused
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
         $sections = [];
