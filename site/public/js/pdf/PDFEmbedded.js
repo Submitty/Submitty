@@ -24,6 +24,9 @@ const GENERAL_INFORMATION = {
     broken: false,
 };
 
+let currentRescaleToken = 0;
+let pendingZoomAnchor = null;
+
 {
     let timeout = null;
     window.triggerPDFScale = (delta) => {
@@ -90,6 +93,7 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                     standardFontDataUrl: `${pdfJsBaseUrl}standard_fonts/`,
                 }).promise.then((pdf) => {
                     RENDER_OPTIONS.pdfDocument = pdf;
+                    pendingZoomAnchor = null;
                     if (GENERAL_INFORMATION.broken) {
                         return;
                     }
@@ -147,12 +151,16 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                             }
                             e.preventDefault();
 
+                            if (zoomTimeout === null) {
+                                scale = RENDER_OPTIONS.scale;
+                            }
+
                             const k = 0.0065;
                             const factor = Math.exp(-k * e.deltaY);
                             const newScale = Math.min(RENDER_OPTIONS.maxScale, Math.max(RENDER_OPTIONS.minScale, scale * factor));
 
                             const viewer = $('#viewer');
-                            const scroller = $('#submission_browser');
+                            const scroller = getPDFScrollContainer();
                             let page = $('#viewer > .page:hover');
 
                             if (!page.length) {
@@ -166,7 +174,7 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                                 }
                             }
 
-                            if (page.length) {
+                            if (page.length && scroller) {
                                 const pageBounds = page[0].getBoundingClientRect();
                                 viewer.css('--pdf-scale', newScale / RENDER_OPTIONS.scale);
                                 const newPageBounds = page[0].getBoundingClientRect();
@@ -177,8 +185,8 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                                 const newXoff = (e.clientX - newPageBounds.left) / newPageBounds.width;
                                 const newYoff = (e.clientY - newPageBounds.top) / newPageBounds.height;
 
-                                scroller[0].scrollLeft -= (newXoff - xoff) * newPageBounds.width;
-                                scroller[0].scrollTop -= (newYoff - yoff) * newPageBounds.height;
+                                scroller.scrollLeft -= (newXoff - xoff) * newPageBounds.width;
+                                scroller.scrollTop -= (newYoff - yoff) * newPageBounds.height;
                             }
                             else {
                                 viewer.css('--pdf-scale', newScale / RENDER_OPTIONS.scale);
@@ -192,6 +200,7 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
                         }
 
                         function rescale() {
+                            zoomTimeout = null;
                             rescalePDF(scale);
                         }
 
@@ -207,28 +216,106 @@ function renderPDF(gradeable_id, user_id, grader_id, file_name, file_path, page_
     }
 }
 
+function getPDFScrollContainer() {
+    const candidates = [$('#file-content')[0], $('#submission_browser')[0]].filter(Boolean);
+    const scrollable = candidates.find(
+        (el) => el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth,
+    );
+    return scrollable || candidates[0] || null;
+}
+
+function captureZoomAnchor(scroller, viewer) {
+    if (!scroller || !viewer.length) {
+        return null;
+    }
+    const scrollerRect = scroller.getBoundingClientRect();
+    const centerX = scrollerRect.left + scrollerRect.width / 2;
+    const centerY = scrollerRect.top + scrollerRect.height / 2;
+    const pages = [...viewer.find('.page')];
+    if (!pages.length) {
+        return null;
+    }
+    let targetPage = pages.find((p) => {
+        const rect = p.getBoundingClientRect();
+        return centerY >= rect.top && centerY <= rect.bottom;
+    });
+    if (!targetPage) {
+        targetPage = pages.reduce((best, p) => {
+            const bestRect = best.getBoundingClientRect();
+            const pRect = p.getBoundingClientRect();
+            const bestDist = Math.abs((bestRect.top + bestRect.bottom) / 2 - centerY);
+            const pDist = Math.abs((pRect.top + pRect.bottom) / 2 - centerY);
+            return pDist < bestDist ? p : best;
+        });
+    }
+    const rect = targetPage.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+        return null;
+    }
+    return {
+        page: targetPage,
+        relX: (centerX - rect.left) / rect.width,
+        relY: (centerY - rect.top) / rect.height,
+    };
+}
+
+function restoreZoomAnchor(scroller, anchor) {
+    if (!scroller || !anchor || !anchor.page.isConnected) {
+        return;
+    }
+    const scrollerRect = scroller.getBoundingClientRect();
+    const centerX = scrollerRect.left + scrollerRect.width / 2;
+    const centerY = scrollerRect.top + scrollerRect.height / 2;
+    const newRect = anchor.page.getBoundingClientRect();
+    const targetX = newRect.left + anchor.relX * newRect.width;
+    const targetY = newRect.top + anchor.relY * newRect.height;
+    const maxLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    const maxTop = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    scroller.scrollLeft = Math.min(maxLeft, Math.max(0, scroller.scrollLeft + (targetX - centerX)));
+    scroller.scrollTop = Math.min(maxTop, Math.max(0, scroller.scrollTop + (targetY - centerY)));
+}
+
 function rescalePDF(scale) {
     if (scale < RENDER_OPTIONS.minScale || scale > RENDER_OPTIONS.maxScale) {
         return;
     }
 
+    const pdf = RENDER_OPTIONS.pdfDocument;
+    if (!pdf) {
+        return;
+    }
+
     const viewer = $('#viewer');
+    const scroller = getPDFScrollContainer();
+    if (!pendingZoomAnchor || !pendingZoomAnchor.page.isConnected) {
+        pendingZoomAnchor = captureZoomAnchor(scroller, viewer);
+    }
+    const rescaleToken = ++currentRescaleToken;
+
     RENDER_OPTIONS.scale = scale;
     localStorage.setItem('pdf-scale', scale);
-    const pdf = RENDER_OPTIONS.pdfDocument;
     const NUM_PAGES = pdf.numPages;
     const renderPagePromises = [];
     for (let i = 1; i <= NUM_PAGES; i++) {
         renderPagePromises.push(renderPage(i, RENDER_OPTIONS));
     }
-    viewer.css('--pdf-scale', 1);
     $('#file-zoom-display').text(`${Math.round(scale * 100)}%`);
 
     Promise.all(renderPagePromises).then(() => {
+        if (rescaleToken !== currentRescaleToken) {
+            return;
+        }
+        const zoomAnchor = pendingZoomAnchor;
+        pendingZoomAnchor = null;
+        if (!viewer[0] || !viewer[0].isConnected) {
+            return;
+        }
+        viewer.css('--pdf-scale', 1);
         $('.pdfViewer .page').each(function () {
             $(this).css('width', `calc(${this.offsetWidth}px * var(--pdf-scale))`);
             $(this).css('height', `calc(${this.offsetHeight}px * var(--pdf-scale))`);
         });
+        restoreZoomAnchor(scroller, zoomAnchor);
     });
 }
 
