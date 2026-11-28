@@ -476,6 +476,7 @@ class Utils {
             case 'discussion_forum':
             case 'office_hours_queue':
             case 'polls_index':
+            case 'polls_student_index':
                 return $prefix . $page;
             case 'chatrooms':
                 if (!isset($params['all_chatrooms']) && isset($params['chatroom_id'])) {
