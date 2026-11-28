@@ -2005,3 +2005,83 @@ gradeables:
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
+
+  - g_id: peer_grading_participation
+    g_title: Peer Grading Participation
+    gradeable_config: upload_only
+    g_grader_assignment_method: 1
+    eg_peer_grading: true
+    eg_peer_blind: 3
+    eg_limited_access_blind: 2
+    eg_max_individual_submissions: 1
+    peer_assignments:
+      - grader_id: schusa
+        user_id: pfeffr
+        review:
+          overall_comment: The solution is correct. Add an example to explain your reasoning.
+          marks:
+            Correctness: Full Credit
+            Clarity: Explanation needs more detail
+      - grader_id: schusa
+        user_id: conrob
+        review:
+          overall_comment: The explanation is clear. Include the missing edge case in your solution.
+          marks:
+            Correctness: Missing a required detail
+            Clarity: Full Credit
+      - grader_id: pfeffr
+        user_id: schusa
+      - grader_id: barteh
+        user_id: boehmd
+        review:
+          overall_comment: The main idea works. Cover the missing edge case.
+          marks:
+            Correctness: Missing a required detail
+            Clarity: Full Credit
+      - grader_id: barteh
+        user_id: binsl
+      - grader_id: boehmd
+        user_id: binsl
+        review:
+          overall_comment: The solution is correct. Explain why each step is needed.
+          marks:
+            Correctness: Full Credit
+            Clarity: Explanation needs more detail
+      - grader_id: binsl
+        user_id: dares
+        review:
+          overall_comment: The solution handles the required cases and explains the reasoning clearly.
+          marks:
+            Correctness: Full Credit
+            Clarity: Full Credit
+      - grader_id: dares
+        user_id: barteh
+    components:
+      - gc_title: Correctness
+        gc_is_peer: true
+        gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Missing a required detail
+            gcm_points: -2
+      - gc_title: Clarity
+        gc_is_peer: true
+        gc_lower_clamp: 0
+        gc_default: 3
+        gc_max_value: 3
+        gc_upper_clamp: 3
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Explanation needs more detail
+            gcm_points: -1
+    g_ta_view_start_date: 1970-01-01 23:59:59
+    eg_submission_open_date: 1971-01-01 23:59:59
+    eg_submission_due_date: 1972-01-01 23:59:59
+    g_grade_start_date: 1973-01-01 23:59:59
+    g_grade_due_date: 1974-01-01 23:59:59
+    g_grade_released_date: 1974-01-01 23:59:59
