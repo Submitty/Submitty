@@ -8520,7 +8520,7 @@ AND gc_id IN (
     }
 
 
-    public function openQueue(string $queue_code, $token, $regex_pattern, $require_contact_info) {
+    public function openQueue(string $queue_code, $token, $regex_pattern, $require_contact_info, $color) {
         $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", [$queue_code]);
 
         //cannot have more than one queue with the same code
@@ -8528,7 +8528,7 @@ AND gc_id IN (
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern, contact_information) VALUES (TRUE, TRIM(?), TRIM(?), ?, ?)", [$queue_code,$token,$regex_pattern,$require_contact_info]);
+        $this->course_db->query("INSERT INTO queue_settings (open,code,token,regex_pattern, contact_information, color) VALUES (TRUE, TRIM(?), TRIM(?), ?, ?, ?)", [$queue_code,$token,$regex_pattern,$require_contact_info,$color]);
         return true;
     }
 
@@ -8865,6 +8865,10 @@ WHERE current_state IN
 
     public function changeQueueRegex($regex_pattern, $queue_code) {
         $this->course_db->query("UPDATE queue_settings SET regex_pattern = ? WHERE code = ?", [$regex_pattern, $queue_code]);
+    }
+
+    public function changeQueueColor($color, $queue_code) {
+        $this->course_db->query("UPDATE queue_settings SET color = ? WHERE code = ?", [$color, $queue_code]);
     }
 
     public function changeQueueContactInformation(bool $contact_information, string $queue_code) {
