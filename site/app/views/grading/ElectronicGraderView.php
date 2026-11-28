@@ -2021,31 +2021,59 @@ HTML;
     public function renderPeerParticipationPanel(GradedGradeable $graded_gradeable, bool $anonymize = false): string {
         $submitter = $graded_gradeable->getSubmitter();
         $entries = [];
+        $ungraded = [];
+        $assigned_count = 0;
+        $graded_count = 0;
         if (!$submitter->isTeam()) {
             $gradeable_id = $graded_gradeable->getGradeable()->getId();
             $participation = $this->core->getQueries()->getPeerParticipationForGrader(
                 $submitter->getId(),
                 $gradeable_id
             );
-            if ($participation !== []) {
+            // Students this student was assigned to peer grade but has not graded anything for
+            $graded_ids = array_map('strval', array_keys($participation));
+            $assigned_ids = array_values(array_unique($this->core->getQueries()->getPeerAssignment($gradeable_id, $submitter->getId())));
+            $ungraded_ids = array_values(array_diff($assigned_ids, $graded_ids));
+            sort($ungraded_ids);
+            $assigned_count = count($assigned_ids);
+            $graded_count = $assigned_count - count($ungraded_ids);
+
+            $user_ids = array_merge($graded_ids, $ungraded_ids);
+            if ($user_ids !== []) {
                 // One batched query for both modes
-                $anon_ids = $this->core->getQueries()->getAnonId(array_keys($participation), $gradeable_id);
+                $anon_ids = $this->core->getQueries()->getAnonId($user_ids, $gradeable_id);
                 $grade_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade']);
-                foreach ($participation as $user_id => $data) {
+                $student_link = static function (string $user_id) use ($anon_ids, $anonymize, $grade_url): array {
                     $anon_id = $anon_ids[$user_id] ?? null;
-                    $data['display_id'] = $anonymize ? ($anon_id ?? 'Unknown') : $user_id;
-                    $data['grade_url'] = $anon_id !== null
-                        ? $grade_url . '?' . http_build_query(['who_id' => $anon_id])
-                        : null;
-                    $entries[] = $data;
+                    return [
+                        'display_id' => $anonymize ? ($anon_id ?? 'Unknown') : $user_id,
+                        'grade_url' => $anon_id !== null
+                            ? $grade_url . '?' . http_build_query(['who_id' => $anon_id])
+                            : null,
+                    ];
+                };
+                foreach ($participation as $user_id => $data) {
+                    $graded_id = (string) $user_id;
+                    // A student can have graded someone who was later unassigned from them
+                    $entries[] = array_merge($data, $student_link($graded_id), [
+                        'assigned' => in_array($graded_id, $assigned_ids, true),
+                    ]);
+                }
+                foreach ($ungraded_ids as $user_id) {
+                    $ungraded[] = $student_link($user_id);
                 }
                 if ($anonymize) {
-                    usort($entries, static fn (array $a, array $b): int => strcmp($a['display_id'], $b['display_id']));
+                    $by_display_id = static fn (array $a, array $b): int => strcmp($a['display_id'], $b['display_id']);
+                    usort($entries, $by_display_id);
+                    usort($ungraded, $by_display_id);
                 }
             }
         }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerParticipationPanel.twig", [
-            'participation' => $entries
+            'participation' => $entries,
+            'ungraded' => $ungraded,
+            'assigned_count' => $assigned_count,
+            'graded_count' => $graded_count
         ]);
     }
 
