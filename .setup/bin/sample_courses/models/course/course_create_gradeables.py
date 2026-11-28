@@ -59,7 +59,48 @@ class Course_create_gradeables:
         # Anything that needs to be initialized goes here
         pass
 
+    def add_sample_peer_reviews(self, gradeable, user_id, gd_id, active_version) -> None:
+        grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
+        for assignment in gradeable.peer_assignments:
+            review = assignment.get("review")
+            if assignment["user_id"] != user_id or review is None:
+                continue
 
+            grader_id = assignment["grader_id"]
+            self.conn.execute(
+                insert(self.gradeable_data_overall_comment).values(
+                    g_id=gradeable.id,
+                    goc_user_id=user_id,
+                    goc_grader_id=grader_id,
+                    goc_overall_comment=review["overall_comment"],
+                )
+            )
+
+            for component in gradeable.components:
+                if not component.is_peer_component:
+                    continue
+
+                marks_by_note = {mark.note: mark.key for mark in component.marks}
+                mark_id = marks_by_note[review["marks"][component.title]]
+                self.conn.execute(
+                    insert(self.gradeable_component_data).values(
+                        gc_id=component.key,
+                        gd_id=gd_id,
+                        gcd_score=0,
+                        gcd_component_comment="",
+                        gcd_grader_id=grader_id,
+                        gcd_grade_time=grade_time,
+                        gcd_graded_version=active_version,
+                    )
+                )
+                self.conn.execute(
+                    insert(self.gradeable_component_mark_data).values(
+                        gc_id=component.key,
+                        gd_id=gd_id,
+                        gcm_id=mark_id,
+                        gcd_grader_id=grader_id,
+                    )
+                )
     def add_gradeables(self) -> None:
         anon_ids = {}
         # pre gradeable creation random state
@@ -117,12 +158,20 @@ class Course_create_gradeables:
             submission_count = 0
             max_submissions = gradeable.max_random_submissions
             max_individual_submissions = gradeable.max_individual_submissions
+            has_explicit_peer_assignments = gradeable.peer_assignments is not None
+            peer_submission_users = {
+                assignment[key]
+                for assignment in gradeable.peer_assignments or []
+                for key in ("grader_id", "user_id")
+            }
             # makes a section be ungraded if the gradeable is not electronic
             ungraded_section = random.randint(1, max(1, self.registration_sections if gradeable.grade_by_registration else self.rotating_sections))
             # This for loop adds submissions/annotations for users and teams(if applicable)
             if not NO_SUBMISSIONS:
                 only_submit_plagiarized_users = gradeable.lichen_sample_path is not None and len(gradeable.plagiarized_user) > 0
                 for user in self.users:
+                    if has_explicit_peer_assignments and user.id not in peer_submission_users:
+                        continue
                     if only_submit_plagiarized_users and user.id not in gradeable.plagiarized_user:
                         continue
 
@@ -168,10 +217,17 @@ class Course_create_gradeables:
                         else:
                             versions_to_submit = generate_versions_to_submit(max_individual_submissions, max_individual_submissions)
 
-                        if ((gradeable.gradeable_config is not None
-                           and (gradeable.has_due_date is True and (gradeable.submission_due_date < NOW or random.random() < 0.5))
-                           and (random.random() < 0.9) and (max_submissions is None or submission_count < max_submissions))
-                           or (gradeable.gradeable_config is not None and user.id in gradeable.plagiarized_user)):
+                        if (
+                            has_explicit_peer_assignments
+                            or (
+                                gradeable.gradeable_config is not None
+                                and gradeable.has_due_date is True
+                                and (gradeable.submission_due_date < NOW or random.random() < 0.5)
+                                and random.random() < 0.9
+                                and (max_submissions is None or submission_count < max_submissions)
+                            )
+                            or (gradeable.gradeable_config is not None and user.id in gradeable.plagiarized_user)
+                        ):
                             # only create these directories if we're actually going to put something in them
                             if not os.path.exists(gradeable_path):
                                 os.makedirs(gradeable_path)
@@ -199,7 +255,7 @@ class Course_create_gradeables:
                                 version_population.append((version, 3))
 
                             # disallow cancelled submission if this is a manually-specified user
-                            if user.id not in gradeable.plagiarized_user:
+                            if not has_explicit_peer_assignments and user.id not in gradeable.plagiarized_user:
                                 version_population = [(0, 1)] + version_population
                             version_population = [ver for ver, freq in version_population for i in range(freq)]
 
@@ -360,9 +416,11 @@ class Course_create_gradeables:
                                 values['gd_user_viewed_date'] = NOW.strftime('%Y-%m-%d %H:%M:%S%z')
                             ins = insert(self.gradeable_data).values(**values)
                             res = self.conn.execute(ins)
-                            self.conn.commit()
                             gd_id = res.inserted_primary_key[0]
-                            if gradeable.type != 0 or gradeable.use_ta_grading:
+                            if has_explicit_peer_assignments:
+                                self.add_sample_peer_reviews(gradeable, user.id, gd_id, active_version)
+                            self.conn.commit()
+                            if not has_explicit_peer_assignments and (gradeable.type != 0 or gradeable.use_ta_grading):
                                 skip_grading = random.random()
                                 if skip_grading > 0.3 and random.random() > 0.01:
                                     ins = insert(self.gradeable_data_overall_comment).values(**overall_comment_values)

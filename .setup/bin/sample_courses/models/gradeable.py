@@ -44,6 +44,7 @@ class Gradeable(object):
         self.instructions_url = ""
         self.overall_ta_instructions = ""
         self.peer_grading = False
+        self.peer_assignments = gradeable.get("peer_assignments")
         self.grade_by_registration = True
         self.grader_assignment_method = 1
         self.is_repository = False
@@ -205,6 +206,8 @@ class Gradeable(object):
                 self.vcs_partial_path = gradeable["eg_vcs_partial_path"]
             if "eg_peer_grading" in gradeable:
                 self.peer_grading = gradeable["eg_peer_grading"]
+            self.peer_blind = gradeable.get("eg_peer_blind", 3)
+            self.limited_access_blind = gradeable.get("eg_limited_access_blind", 1)
             if "eg_use_ta_grading" in gradeable:
                 self.use_ta_grading = gradeable["eg_use_ta_grading"] is True
             if "eg_student_view" in gradeable:
@@ -352,22 +355,28 @@ class Gradeable(object):
         conn.commit()
 
         if self.peer_grading is True:
-            with (
-                open(os.path.join(SETUP_DATA_PATH, "random", "graders.txt")) as graders,
-                open(os.path.join(SETUP_DATA_PATH, "random", "students.txt")) as students,
-            ):
-                graders = graders.read().strip().split()
-                students = students.read().strip().split()
-                length = len(graders)
-                for i in range(length):
-                    conn.execute(
-                        insert(peer_assign).values(
-                            g_id=self.id,
-                            grader_id=graders[i],
-                            user_id=students[i],
-                        )
+            peer_assignments = self.peer_assignments
+            if peer_assignments is None:
+                with (
+                    open(os.path.join(SETUP_DATA_PATH, "random", "graders.txt")) as graders_file,
+                    open(os.path.join(SETUP_DATA_PATH, "random", "students.txt")) as students_file,
+                ):
+                    graders = graders_file.read().split()
+                    students = students_file.read().split()
+                peer_assignments = [
+                    {"grader_id": grader_id, "user_id": students[index]}
+                    for index, grader_id in enumerate(graders)
+                ]
+
+            for assignment in peer_assignments:
+                conn.execute(
+                    insert(peer_assign).values(
+                        g_id=self.id,
+                        grader_id=assignment["grader_id"],
+                        user_id=assignment["user_id"],
                     )
-                conn.commit()
+                )
+            conn.commit()
         if self.type == 0:
             conn.execute(
                 insert(electronic_table).values(
@@ -382,6 +391,8 @@ class Gradeable(object):
                     eg_max_team_size=self.max_team_size,
                     eg_team_lock_date=self.team_lock_date,
                     eg_use_ta_grading=self.use_ta_grading,
+                    eg_peer_blind=self.peer_blind,
+                    eg_limited_access_blind=self.limited_access_blind,
                     eg_student_view=self.student_view,
                     eg_student_view_after_grades=self.student_view_after_grades,
                     eg_student_download=self.student_download,
