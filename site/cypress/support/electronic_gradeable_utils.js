@@ -80,8 +80,9 @@ function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, ful
     expect(expectedScores.length).to.eq(fullScores.length);
     // after 20 submissions we start having penalties
     expect(versionNumber).to.be.lessThan(20);
-    // wait for autograding results for two minutes
-    cy.get('[data-testid="autograding-total-no-hidden"]', { timeout: 120000 });
+    // wait for autograding results for four minutes; with a single grader in CI,
+    // one docker network submission has taken over two minutes to grade in the past
+    cy.get('[data-testid="autograding-total-no-hidden"]', { timeout: 240000 });
 
     // we should only check total if we do not have a non-deterministic score
     if (!fullScores.includes('?')) {
