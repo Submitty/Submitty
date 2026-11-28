@@ -88,7 +88,7 @@
 
                         <select aria-label="Category Color Picker" class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
                             {% for color_name, color_code in category_colors %}
-                                <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
+                                <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_name == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
                             {% endfor %}
                         </select>
                         &nbsp;
@@ -204,9 +204,9 @@
             const item = getItem(this);
             const category_id = item.data('category_id');
             const category_desc = item.data('category_desc');
-            const category_color = $(this).val();
+            const category_color = $(this).find("option:selected").text();
             editCategory(category_id, category_desc, category_color, null, 'color', '{{ csrf_token }}');
-            refresh_color_select($(this));
+            refresh_color_select($(this)); 
         });
         $(".category-color-picker").each(function(){
             refresh_color_select($(this));
