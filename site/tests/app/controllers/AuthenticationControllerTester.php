@@ -5,6 +5,8 @@ namespace tests\app\controllers;
 use app\authentication\AbstractAuthentication;
 use app\controllers\AuthenticationController;
 use app\entities\VcsAuthToken;
+use app\libraries\response\DownloadResponse;
+use app\models\CalendarFeed;
 use app\models\Team;
 use app\models\User;
 use app\models\gradeable\Gradeable;
@@ -345,5 +347,42 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $controller = new AuthenticationController($core);
         $response = $controller->checkLogin()->json_response->json;
         $this->assertEquals(['status' => 'fail', 'message' => "Could not login using that user id or password"], $response);
+    }
+
+    private function getCalendarFeedCore(?string $api_key) {
+        $core = $this->createMockCore(['base_url' => 'http://example.com/'], [], [
+            'getSubmittyUserApiKey' => $api_key,
+            'getCourseForUserId' => [],
+        ]);
+        $core->getConfig()->method('getSecretSession')->willReturn(str_repeat('s', 64));
+        return $core;
+    }
+
+    public function testCalendarFeed() {
+        $core = $this->getCalendarFeedCore('api-key');
+        $core->expects($this->once())->method('loadUser')->with('student');
+        $controller = new AuthenticationController($core);
+        $response = $controller->calendarFeed('student', CalendarFeed::getSignature($core, 'student'), 'f26.sample', '0');
+        $this->assertInstanceOf(DownloadResponse::class, $response);
+        $this->assertSame('text/calendar; charset=utf-8', $response->file_type);
+        $this->assertStringStartsWith("BEGIN:VCALENDAR\r\n", $response->contents);
+    }
+
+    public function testCalendarFeedWrongSignature() {
+        $core = $this->getCalendarFeedCore('api-key');
+        $core->expects($this->never())->method('loadUser');
+        $controller = new AuthenticationController($core);
+        $response = $controller->calendarFeed('student', CalendarFeed::getSignature($core, 'other_student'));
+        $this->assertSame(['status' => 'fail', 'message' => 'Calendar feed not found.'], $response->json);
+        $this->assertSame(404, http_response_code());
+    }
+
+    public function testCalendarFeedUnknownUser() {
+        $core = $this->getCalendarFeedCore(null);
+        $core->expects($this->never())->method('loadUser');
+        $controller = new AuthenticationController($core);
+        $response = $controller->calendarFeed('nobody', str_repeat('0', 64));
+        $this->assertSame(['status' => 'fail', 'message' => 'Calendar feed not found.'], $response->json);
+        $this->assertSame(404, http_response_code());
     }
 }

@@ -7,6 +7,7 @@ use app\entities\VcsAuthToken;
 use app\entities\UnverifiedUserEntity;
 use app\controllers\UnverifiedUserController;
 use app\libraries\Core;
+use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
@@ -15,6 +16,7 @@ use app\libraries\Utils;
 use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
 use app\views\AuthenticationView;
+use app\models\CalendarFeed;
 use app\models\User;
 use app\models\Email;
 use app\repositories\VcsAuthTokenRepository;
@@ -524,5 +526,31 @@ EMAIL;
         $this->core->addErrorMessage($message);
         $_SESSION['create_account_form_values'] = $form_values;
         return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
+    }
+
+    /**
+     * Serves a user's calendar feed. The route is in this controller because it must work for
+     * logged-out requests: the signature in the link takes the place of a session.
+     */
+    #[Route("/calendar/feed/{user_id}/{signature}.ics", methods: ["GET"])]
+    public function calendarFeed(string $user_id, string $signature, ?string $courses = null, string $gradeables = '1', string $items = '1'): ResponseInterface {
+        $expected = CalendarFeed::getSignature($this->core, $user_id);
+        if ($expected === null || !hash_equals($expected, $signature)) {
+            http_response_code(404);
+            return JsonResponse::getFailResponse('Calendar feed not found.');
+        }
+        // The feed belongs to the link's owner, even if the request carries someone else's session.
+        $this->core->loadUser($user_id);
+        return DownloadResponse::getDownloadResponse(
+            CalendarFeed::build(
+                $this->core,
+                $user_id,
+                $courses === null ? null : explode(',', $courses),
+                $gradeables !== '0',
+                $items !== '0'
+            ),
+            'submitty.ics',
+            'text/calendar; charset=utf-8'
+        );
     }
 }
