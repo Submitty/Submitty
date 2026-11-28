@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
+import { computed } from 'vue';
+import { getStudentNavigationFilter, gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import PanelSelectorModal from '@/components/ta_grading/PanelSelectorModal.vue';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
@@ -19,6 +20,13 @@ const emit = defineEmits<{
     'select-layout': [layout: { panels: number; isLeftTaller: boolean; twoInRight: boolean }];
     'toggle-cluster-mode': [];
 }>();
+const clusterMode = computed(() => Boolean(clusteringEnabled && clustersExist && taGradingClusterMode));
+const clusterNavigation = computed(() => getStudentNavigationFilter(
+    clusterMode.value,
+    window.Cookies.get('inquiry_status'),
+    localStorage.getItem('general-setting-arrow-function'),
+) === 'cluster');
+
 const toggleClusteringMode = () => {
     if (!clustersExist) {
         return; // Disabled if no clusters
@@ -48,20 +56,20 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
   />
 
   <NavigationButton
-    :on-click="gotoPrevStudent"
+    :on-click="() => gotoPrevStudent(clusterMode)"
     visible-icon="fa-caret-left"
     button-id="prev-student"
-    title="Previous Student"
+    :title="clusterNavigation ? 'Previous cluster' : 'Previous student'"
     :optional-href="prevStudentUrl"
     optional-test-id="prev-student-navlink"
     optional-spanid="prev-student-navlink"
   />
 
   <NavigationButton
-    :on-click="gotoNextStudent"
+    :on-click="() => gotoNextStudent(clusterMode)"
     visible-icon="fa-caret-right"
     button-id="next-student"
-    title="Next Student"
+    :title="clusterNavigation ? 'Next cluster' : 'Next student'"
     :optional-href="nextStudentUrl"
     optional-test-id="next-student-navlink"
     optional-spanid="next-student-navlink"
@@ -101,6 +109,7 @@ function selectLayout(layout: { panels: number; isLeftTaller: boolean; twoInRigh
     <button
       id="toggle-cluster-mode"
       data-testid="toggle-cluster-mode"
+      :data-cluster-mode="clusterMode"
       class="invisible-btn cluster-mode-btn"
       :title="taGradingClusterMode ? 'Cluster Grading: ON (Click to disable)' : 'Cluster Grading: OFF (Click to enable)'"
       @click="toggleClusteringMode"
