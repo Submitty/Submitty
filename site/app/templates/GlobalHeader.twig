@@ -272,6 +272,12 @@
         <div id="wrapper">
             {% if not content_only and sidebar_buttons|length > 0 %}
                 <aside data-testid="sidebar" class="{{collapse_sidebar?'collapsed':''}}">
+                    {% if core.getUser().getInstructorCourses()|length > 0 %}
+                        {% include 'Vue.twig' with {
+                            'type': 'component',
+                            'name': 'sidebar/StudentSearch'
+                        } %}
+                    {% endif %}
                     {% include 'Vue.twig' with {
                         'type': 'component',
                         'name': 'sidebar/Button',

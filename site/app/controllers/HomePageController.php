@@ -116,6 +116,26 @@ class HomePageController extends AbstractController {
         );
     }
 
+    /**
+     * Search students in the courses where the current user is an instructor.
+     */
+    #[Route("/home/students/search", methods: ["GET"])]
+    public function searchStudents(string $q = ''): JsonResponse {
+        $user = $this->core->getUser();
+        if (is_null($user) || !$user->accessFaculty()) {
+            return JsonResponse::getFailResponse("You don't have access to this endpoint.");
+        }
+
+        $q = trim($q);
+        if (mb_strlen($q) < 2) {
+            return JsonResponse::getSuccessResponse([]);
+        }
+
+        return JsonResponse::getSuccessResponse(
+            $this->core->getQueries()->searchStudentsForInstructor($user->getId(), $q)
+        );
+    }
+
     #[Route("/home/go_to_course_notifications", methods: ["POST"])]
     public function goToCourseNotifications(): void {
         $courses = $this->courses;

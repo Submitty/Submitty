@@ -87,6 +87,10 @@ aside {
         margin: 0 15px;
     }
 
+    aside.collapsed .student-search {
+        display: none;
+    }
+
     /* stylelint-disable-next-line no-descending-specificity */
     aside.collapsed .icon-title {
         width: 0;

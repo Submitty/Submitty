@@ -5197,6 +5197,53 @@ SQL;
     }
 
     /**
+     * Search students in courses where the given user is an instructor.
+     * Only courses the instructor has instructor-level access to are searched,
+     * so students and courses from other instructors never appear in the result.
+     *
+     * @param string $instructor_id
+     * @param string $query Raw search text (matched as a substring)
+     * @param int $limit Max number of students returned
+     * @return array<int, array{user_id: string, given_name: string, family_name: string, courses: array<int, array{term: string, course: string}>}>
+     */
+    public function searchStudentsForInstructor(string $instructor_id, string $query, int $limit = 25): array {
+        $like = '%' . addcslashes($query, '\\%_') . '%';
+        $this->submitty_db->query(
+            "
+            SELECT u.user_id, u.user_givenname, u.user_preferred_givenname,
+                   u.user_familyname, u.user_preferred_familyname,
+                   stu.term, stu.course
+            FROM courses_users inst
+            INNER JOIN courses_users stu
+                ON stu.term = inst.term AND stu.course = inst.course AND stu.user_group = 4
+            INNER JOIN users u ON u.user_id = stu.user_id
+            WHERE inst.user_id = ? AND inst.user_group = 1
+              AND stu.registration_section IS NOT NULL
+              AND (u.user_id ILIKE ? OR u.user_givenname ILIKE ? OR u.user_familyname ILIKE ?
+                   OR u.user_preferred_givenname ILIKE ? OR u.user_preferred_familyname ILIKE ?)
+            ORDER BY u.user_familyname, u.user_givenname, stu.term DESC, stu.course
+            ",
+            [$instructor_id, $like, $like, $like, $like, $like]
+        );
+
+        $students = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $id = $row['user_id'];
+            if (!isset($students[$id])) {
+                $students[$id] = [
+                    'user_id' => $id,
+                    'given_name' => $row['user_preferred_givenname'] ?? $row['user_givenname'],
+                    'family_name' => $row['user_preferred_familyname'] ?? $row['user_familyname'],
+                    'courses' => [],
+                ];
+            }
+            $students[$id]['courses'][] = ['term' => $row['term'], 'course' => $row['course']];
+        }
+
+        return array_slice(array_values($students), 0, $limit);
+    }
+
+    /**
      * @return array<Course>
      */
     public function getSelfRegistrationCourses(string $user_id): array {
