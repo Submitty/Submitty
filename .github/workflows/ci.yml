@@ -21,7 +21,7 @@ env:
   VENV_PATH: /usr/local/submitty/venv
   POSTGRES_HOST: localhost
   PHP_VER: 8.2
-  NODE_VERSION: 20
+  NODE_VERSION: 26
   PYTHON_VERSION: "3.10"
 
 concurrency:

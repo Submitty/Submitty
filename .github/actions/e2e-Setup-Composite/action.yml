@@ -46,6 +46,19 @@ runs:
         echo "VIRTUAL_ENV=${VENV_PATH}" >> "$GITHUB_ENV"
       shell: bash
 
+    - uses: actions/setup-node@v7
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Make setup-node's Node.js available to login shells
+      run: |
+        # install_site.sh builds the site through `su -`, which resets PATH and
+        # would otherwise use the Node.js preinstalled in /usr/local/bin.
+        for tool in node npm npx; do
+          sudo ln -sf "$(command -v "${tool}")" "/usr/local/bin/${tool}"
+        done
+      shell: bash
+
     - name: Disable php8.1-fpm before setup
       run: |
         sudo systemctl stop php8.1-fpm
